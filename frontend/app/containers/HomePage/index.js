@@ -19,6 +19,7 @@ import {
   makeSelectLoading,
   makeSelectError,
 } from 'containers/App/selectors';
+import { getAuditMethods } from 'containers/App/methods';
 import H2 from 'components/H2';
 import ReposList from 'components/ReposList';
 import AtPrefix from './AtPrefix';
@@ -39,6 +40,7 @@ export class HomePage extends React.PureComponent {
    * when initial state username is not null, submit the form to load repos
    */
   componentDidMount() {
+    console.log(makeSelectUsername)
     if (this.props.username && this.props.username.trim().length > 0) {
       this.props.onSubmitForm();
     }
@@ -121,6 +123,7 @@ const mapStateToProps = createStructuredSelector({
   username: makeSelectUsername(),
   loading: makeSelectLoading(),
   error: makeSelectError(),
+  auditMethods: getAuditMethods(),
 });
 
 const withConnect = connect(
