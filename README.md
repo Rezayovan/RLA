@@ -11,3 +11,13 @@
 - Implement a modern, usable demo of each election method to communicate the intuition behind RLAs and the differences between the various methods
 - Proactively consume OpenElection data and compute initial samples for the audit methods above.
 - Implement a way to select ballots to be audited in Bernoulli audits (more on this to follow).
+
+
+## Frontend --> Backend
+
+### BPA (BRAVO)
+- n = number of candidates
+- V[] = votes for each candidate
+- v = total ballots cast
+- w = number of winners
+- alpha = risk limit
