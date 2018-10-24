@@ -1,5 +1,0 @@
-RLA.egg-info/PKG-INFO
-RLA.egg-info/SOURCES.txt
-RLA.egg-info/dependency_links.txt
-RLA.egg-info/requires.txt
-RLA.egg-info/top_level.txt
