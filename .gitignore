@@ -189,3 +189,5 @@ typings/
 
 # FuseBox cache
 .fusebox/
+
+.vscode/*
