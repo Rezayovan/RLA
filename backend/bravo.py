@@ -1,52 +1,68 @@
 import numpy as np
 
-# Inputs from frontend
-# n = number of candidates
-# V[] = votes for each candidate
+'''
+Inputs from frontend
+ - n = number of candidates
+ - V[] = votes for each candidate
+ - v = total ballots cast
+ - w = number of winners
+ - alpha = risk limit
+ - M = max number of ballots to audit
+'''
+
+##### DUMMY DATA ######
 V = [10,30,40,2,5,100]
 n = size(V)
-# v = total ballots cast
 v = sum(V)
-# w = number of winners
 w = 2
-# a = risk limit
-a = .10
+alpha = .10
+M = n/2
+######################
 
-# Similarly define l as number of losers
+# l := number of losers
 l = n-w
 
 T = np.ones( [w, l] )
 s = np.zero( [w, l] )
 
-# Determine winners and losers
-W = []
-#sort(V, reverse=True)
-W = []
-L = []
-
 # Winners are indices of the 'w' candidates with most votes
-W = set(t[0] for t in sorted(enumerate(V), reverse=True)[:w])
+W = set( t[0] for t in sorted(enumerate(V), reverse=True)[:w] )
 # Losers are all the rest
-L = set(t[0] for t in sorted(enumerate(V), reverse=True)[w:])
+L = set( t[0] for t in sorted(enumerate(V), reverse=True)[w:] )
 
 # Set s values
 for winner in range(w):
     for loser in range(l):
-        s[winner][loser] = (V[winner] / (V[winner] + V[loser]))
+        s[winner][loser] = ( V[winner] / (V[winner] + V[loser]) )
 
 # Audit ballots
-while():
-    #Step 2
-    b = randint(0, v) # Pick random ballot
+m = 0
+reject_count = 0
+num_null_hypotheses = w*l
+while true: # Step 6
+    # Step 2: TODO - use seed
+    b = randint(0, v) # Pick random ballot ## DUMMY DATA
     # Send 'b' to frontend - TODO API call
     # Recieve list of 'votes' (at most size w) where each element is in [0,n) - TODO API call
     votes = [] # size in [0, w)
-    for (vote in votes):
-        vote = randint(0, n) # TODO: remove this
-        if (vote in W): #Step 3
-            for (loser in L):
+    for i in range(w): # TODO: remove this once API calls in place
+        vote = randint(0, n) 
+    for vote in votes:
+        if vote in W: # Step 3
+            for loser in L:
                 T[vote][loser] *= s[vote][loser]/.5
-        if (vote in L): #Step 4
-            for (winner in W):
+                if T[vote][loser] >= 1/alpha: # Step 5
+                    T[vote][loser] = 0 # Mark T's corresp. null hyp. as rejected
+                    reject_count += 1
+        if vote in L: # Step 4
+            for winner in W:
                 T[winner][vote] *= (1-s[winner][vote])/.5
-    
+                if T[winner][vote] >= 1/alpha: # Step 5
+                    T[winner][vote] = 0 # Mark T's corresp. null hyp. as rejected
+                    reject_count += 1
+    # Step 6
+    if reject_count >= num_hypotheses:
+        print("Audit completed: the results stand.")
+        break
+    elif m >= M:
+        print("Too many ballots were drawn. Perform a full hand-recount.")
