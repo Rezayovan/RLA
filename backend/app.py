@@ -4,8 +4,8 @@ app = Flask(__name__)
 @app.route('/send_data', methods=['POST'])
 def send_data():
     # Determine type of audit
-    
     # Determine input type (e.g. CSV vs form input)
+    return "Hello world!"
 
 
 if __name__ == '__main__':
