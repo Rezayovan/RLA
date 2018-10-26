@@ -11,12 +11,12 @@ Inputs from frontend
 '''
 
 ##### DUMMY DATA ######
-V = [10,30,40,2,5,100]
-n = size(V)
+V = [0, 0, 0, 0, 0, 100]
+n = len(V)
 v = sum(V)
-w = 2
+w = 1
 alpha = .10
-M = n/2
+M = 10
 ######################
 
 
