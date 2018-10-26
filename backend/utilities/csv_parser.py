@@ -3,7 +3,7 @@ import csv
 # Returns two things:
 # (1) candidate -> num_votes dictionary
 # (2) num_total_votes for each office
-def parse_csv(filename, office_to_return):
+def parse_election_data_csv(filename, office_to_return):
     # Need dict of office -> candidate (name_raw) -> votes
     data = {}
     offices = set()
@@ -42,4 +42,4 @@ def parse_csv(filename, office_to_return):
     return data[office_to_return], total_votes_per_office
 
 if __name__ == "__main__":
-    parse_csv("open_election_test_data.csv", "State House")
+    parse_election_data_csv("open_election_test_data.csv", "State House")

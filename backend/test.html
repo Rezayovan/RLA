@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Test</title>
+    <meta name="description" content="Test">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+    <script defer src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+    <script defer src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+
+    <script defer src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <form enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="input-election-data">Upload OpenElection data</label>
+                <input type="file" class="form-control-file" id="input-election-data" accept=".xlsx, .xls, .csv">
+                <small id="fileHelp" class="form-text text-muted">Uploaded data is never stored on our servers.</small>
+            </div>
+            <button type="button" class="btn btn-primary" id="upload-election-data">Upload</button>
+        </form>
+    </div>
+
+    <script>
+        const API_ROOT = "http://127.0.0.1:5000"
+
+        document.getElementById("upload-election-data").addEventListener("click", () => {
+            const API_ENDPOINT = API_ROOT + '/send_data'
+            let formData = new FormData();
+            let spreadsheet = document.getElementById("input-election-data");
+            formData.append("election-data-spreadsheet", spreadsheet.files[0]);
+            axios.post(API_ENDPOINT, formData, {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    }
+                })
+                .then((response) => {
+                    return console.log(response);
+                })
+                .catch((error) => {
+                    return console.error(error);
+                });
+        });
+    </script>
+</body>
+
+</html>
