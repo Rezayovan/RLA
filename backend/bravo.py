@@ -25,10 +25,8 @@ def bravo():
     # l := number of losers
     l = n-w
 
-    T = np.ones( [w, l] )
-    s = np.zeros( [w, l] )
-    print(T)
-    print(s)
+    T = np.ones([n, n])
+    s = np.zeros([n, n])
 
     # Winners are indices of the 'w' candidates with most votes
     sortedCandidates = sorted(enumerate(V), key=lambda t:t[1], reverse=True)
@@ -38,9 +36,9 @@ def bravo():
     print(W, L)
 
     # Set s values
-    for winner in range(w):
-        for loser in range(l):
-            s[winner][loser] = ( V[winner] / (V[winner] + V[loser]) )
+    for winner in W:
+        for loser in L:
+            s[winner][loser] = (V[winner] / (V[winner] + V[loser]))
 
     # Audit ballots
     m = 0 # number of ballots tested
