@@ -67,6 +67,8 @@ def bravo():
                         # Mark this T's corresp. null hyp. as rejected
                         T[winner][vote] = 0
                         reject_count += 1
+        ballots_tested += 1
+
         # Step 6
         if reject_count >= num_null_hypotheses:
             print("Audit completed: the results stand.")
