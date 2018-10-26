@@ -29,11 +29,10 @@ def bravo():
     s = np.zeros([n, n])
 
     # Winners are indices of the 'w' candidates with most votes
-    sortedCandidates = sorted(enumerate(V), key=lambda t:t[1], reverse=True)
-    W = set(t[0] for t in sortedCandidates[:w])
+    sorted_candidates = sorted(enumerate(V), key=lambda t: t[1], reverse=True)
+    W = set(t[0] for t in sorted_candidates[:w])
     # Losers are all the rest
-    L = set(t[0] for t in sortedCandidates[w:])
-    print(W, L)
+    L = set(t[0] for t in sorted_candidates[w:])
 
     # Set s values
     for winner in W:
@@ -41,34 +40,32 @@ def bravo():
             s[winner][loser] = (V[winner] / (V[winner] + V[loser]))
 
     # Audit ballots
-    m = 0 # number of ballots tested
+    ballots_tested = 0 # number of ballots tested
     reject_count = 0
     num_null_hypotheses = w*l
-    while m < M: # Step 6
+    while ballots_tested < M: # Step 6
         # Step 2: TODO - use seed
-        # b = randrange(0, v) # Pick random ballot ## DUMMY DATA
+        # b = randrange(0, v) # Pick random ballot
         # Send 'b' to frontend - TODO API call
-        # Recieve list of 'votes' (at most size w) where each element is in [0,n) - TODO API call
+        # Receive list of 'votes' (at most size w) where each element is in [0,n) - TODO API call
         votes = [] # size in [0, w)
-        for _ in range(w): # TODO: remove this once API calls in place
-            # votes.append(randrange(0, n))
-            votes.append(1)
+        # TODO: replace below loop with API calls
+        for _ in range(w):
+            votes.append(5)
         for vote in votes:
             if vote in W: # Step 3
                 for loser in L:
-                    print(vote, loser)
-                    # T[vote][loser] *= s[vote][loser]/.5
-                    val = s[vote][loser]/.5
-                    T[vote][loser] *= val
+                    T[vote][loser] *= s[vote][loser]/.5
                     if T[vote][loser] >= 1/alpha: # Step 5
-                        T[vote][loser] = 0 # Mark T's corresp. null hyp. as rejected
+                        # Mark this T's corresp. null hyp. as rejected
+                        T[vote][loser] = 0
                         reject_count += 1
             elif vote in L: # Step 4
                 for winner in W:
-                    val = (1-s[winner][vote])/.5
-                    T[winner][vote] *= val
+                    T[winner][vote] *= (1-s[winner][vote])/.5
                     if T[winner][vote] >= 1/alpha: # Step 5
-                        T[winner][vote] = 0 # Mark T's corresp. null hyp. as rejected
+                        # Mark this T's corresp. null hyp. as rejected
+                        T[winner][vote] = 0
                         reject_count += 1
         # Step 6
         if reject_count >= num_null_hypotheses:
