@@ -26,7 +26,7 @@ def bravo():
     l = n-w
 
     T = np.ones( [w, l] )
-    s = np.zero( [w, l] )
+    s = np.zeros( [w, l] )
 
     # Winners are indices of the 'w' candidates with most votes
     W = set( t[0] for t in sorted(enumerate(V), reverse=True)[:w] )
@@ -44,11 +44,11 @@ def bravo():
     num_null_hypotheses = w*l
     while m < M: # Step 6
         # Step 2: TODO - use seed
-        b = randint(0, v) # Pick random ballot ## DUMMY DATA
+        # b = randint(0, v) # Pick random ballot ## DUMMY DATA
         # Send 'b' to frontend - TODO API call
         # Recieve list of 'votes' (at most size w) where each element is in [0,n) - TODO API call
         votes = [] # size in [0, w)
-        for i in range(w): # TODO: remove this once API calls in place
+        for _ in range(w): # TODO: remove this once API calls in place
             votes.append(randint(0, n))
         for vote in votes:
             if vote in W: # Step 3
