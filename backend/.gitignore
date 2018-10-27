@@ -1,2 +1,2 @@
-open_election_test_data.csv
+*.csv
 tmp_uploads/*
