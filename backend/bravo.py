@@ -56,7 +56,8 @@ def get_ballot(num_winners):
     ballot_votes = [] # size in [0, w)
     # TODO: Delete following loop when API calls are made.
     for _ in range(num_winners):
-        ballot_votes.append(5)
+        vote = int(input("Enter a vote: "))
+        ballot_votes.append(vote)
 
     return ballot_votes
 
@@ -94,7 +95,6 @@ def run_audit(candidates, max_tests, margins, risk_limit):
     num_losers = len(candidates.losers)
     num_candidates = num_winners + num_losers
 
-
     test_statistic = np.ones([num_candidates, num_candidates])
     reject_count = 0
     num_null_hypotheses = num_winners * num_losers
@@ -122,9 +122,16 @@ def bravo(params):
     results to confirm with `risk_limit` confidence that the reported
     `num_winners` winner(s) are indeed the winners.
     """
-    candidates = arrange_candidates(params.votes_array, params.num_winners)
-    margins = get_margins(params.votes_array, candidates, len(params.votes_array))
+    num_candidates = len(params.votes_array)
+    assert(params.num_winners > 0 and params.num_winners <= num_candidates)
+    assert(params.risk_limit > 0. and params.risk_limit <= 1.)
+    if params.max_tests <= 0:
+        params.max_tests = sum(params.votes_array)
+    else:
+        params.max_tests = min(params.max_tests, sum(params.votes_array))
 
+    candidates = arrange_candidates(params.votes_array, params.num_winners)
+    margins = get_margins(params.votes_array, candidates, num_candidates)
     result = run_audit(candidates, params.max_tests, margins, params.risk_limit)
     if result:
         print("Audit completed: the results stand.")
@@ -136,7 +143,7 @@ def bravo(params):
 VOTES = [0, 0, 0, 0, 0, 100]
 NUM_WINNERS = 1
 ALPHA = .10
-MAX_TESTS = 100
+MAX_TESTS = 10
 ######################
 
 
