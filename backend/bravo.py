@@ -10,6 +10,7 @@ from recordclass import recordclass
 
 Candidates = recordclass("Candidates", "winners losers")
 Hypotheses = recordclass("Hypotheses", "test_stat reject_count")
+Bravo_Params = recordclass("BPA_Inputs", "votes_array num_winners risk_limit max_tests")
 
 def arrange_candidates(votes_array, num_winners):
     """
@@ -114,17 +115,17 @@ def run_audit(candidates, max_tests, margins, risk_limit):
     return False
 
 
-def bravo(votes_array, num_winners, risk_limit, max_tests):
+def bravo(params):
     """BRAVO Ballot-Polling Audit Implementation
     Given an array of votes cast, the number of winners, a risk limit, and a
     maximum number of ballots to test, `bravo` runs an audit on the election
     results to confirm with `risk_limit` confidence that the reported
     `num_winners` winner(s) are indeed the winners.
     """
-    candidates = arrange_candidates(votes_array, num_winners)
-    margins = get_margins(votes_array, candidates, len(votes_array))
+    candidates = arrange_candidates(params.votes_array, params.num_winners)
+    margins = get_margins(params.votes_array, candidates, len(params.votes_array))
 
-    result = run_audit(candidates, max_tests, margins, risk_limit)
+    result = run_audit(candidates, params.max_tests, margins, params.risk_limit)
     if result:
         print("Audit completed: the results stand.")
     else:
@@ -133,8 +134,6 @@ def bravo(votes_array, num_winners, risk_limit, max_tests):
 
 ##### DUMMY DATA ######
 VOTES = [0, 0, 0, 0, 0, 100]
-NUM_CANDIDATES = len(VOTES)
-TOTAL_BALLOTS = sum(VOTES)
 NUM_WINNERS = 1
 ALPHA = .10
 MAX_TESTS = 100
@@ -142,4 +141,5 @@ MAX_TESTS = 100
 
 
 if __name__ == "__main__":
-    bravo(VOTES, NUM_WINNERS, ALPHA, MAX_TESTS)
+    PARAMS = Bravo_Params(VOTES, NUM_WINNERS, ALPHA, MAX_TESTS)
+    bravo(PARAMS)
