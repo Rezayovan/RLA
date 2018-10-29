@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+
 """ Ballot-polling audit in Python
 A Python implementation of the BRAVO algorithm described in "BRAVO:
 Ballot-polling Risk-limiting Audits to Verify Outcomes" (Lindeman,
