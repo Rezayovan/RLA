@@ -23,6 +23,7 @@ def arrange_candidates(votes_array, num_winners):
     sorted_candidates = sorted(enumerate(votes_array), key=lambda t: t[1], reverse=True)
     winners = set(t[0] for t in sorted_candidates[:num_winners])
     losers = set(t[0] for t in sorted_candidates[num_winners:])
+
     return Candidates(winners, losers)
 
 
@@ -60,15 +61,15 @@ def get_ballot(num_winners):
     return ballot_votes
 
 
-def check_reject_hypothesis(test_statistic, reject_count, risk_limit):
+def update_hypothesis(hypotheses, winner, loser, risk_limit):
     """ Step 5 of the BRAVO algorithm.
     Rejects the null hypothesis corresponding to the test statistic of
     the `winner` and `loser` pair. Increments the null hypothesis
     rejection count.
     """
-    if test_statistic >= (1/risk_limit):
-        test_statistic = 0
-        reject_count += 1
+    if hypotheses.test_stat[winner][loser] >= 1/risk_limit:
+        hypotheses.test_stat[winner][loser] = 0
+        hypotheses.reject_count += 1
 
 def update_audit_stats(vote, candidates, hypotheses, margins, risk_limit):
     """ Steps 3-5 from the BRAVO algorithm.
@@ -77,16 +78,12 @@ def update_audit_stats(vote, candidates, hypotheses, margins, risk_limit):
     """
     if vote in candidates.winners: # Step 3
         for loser in candidates.losers:
-            hypotheses.test_stat[vote][loser] *= (2*margins[vote][loser])
-            check_reject_hypothesis(
-                hypotheses.test_stat[vote][loser],
-                hypotheses.reject_count, risk_limit)
+            hypotheses.test_stat[vote][loser] *= 2*margins[vote][loser]
+            update_hypothesis(hypotheses, vote, loser, risk_limit)
     elif vote in candidates.losers: # Step 4
         for winner in candidates.winners:
-            hypotheses.test_stat[winner][vote] *= (2*(1-margins[winner][vote]))
-            check_reject_hypothesis(
-                hypotheses.test_stat[winner][vote],
-                hypotheses.reject_count, risk_limit)
+            hypotheses.test_stat[winner][vote] *= 2*(1-margins[winner][vote])
+            update_hypothesis(hypotheses, winner, vote, risk_limit)
 
 
 def run_audit(candidates, max_tests, margins, risk_limit):
