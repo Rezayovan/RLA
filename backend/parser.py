@@ -7,6 +7,8 @@ import json
 from utilities.csv_parser import parse_election_data_csv
 from utilities.helpers import delete_file, all_keys_present_in_dict
 
+from BravoClass import Bravo
+
 '''Returns audit object.'''
 
 class Audit:
@@ -31,4 +33,5 @@ def parse(request):
     num_winners = form['num-winners']
     risk_limit = form['risk-limit']
     # TODO get the MAX_TEST variable from frontend
-    return [[value for key,value in candidate_data.items()], int(num_winners), float(risk_limit) / 100, 10]
+    params = [[value for key,value in candidate_data.items()], int(num_winners), float(risk_limit) / 100, 10]
+    return Bravo(params)

@@ -41,16 +41,15 @@ risk-limit: int
 '''
 
 @app.route('/perform_audit', methods=['POST'])
-def perform_audit():
+def parse_and_run():
     """Will determine audit method and call run on that method."""
-    params = parse(request)
-    run_bravo(params)
-    return status
-
+    method = parse(request)
+    method.run()
+    
 @app.route('/vote_pick', methods=['POST'])
 def vote_picked():
     """Sends picked vote to bravo app."""
-    
+
 
 @app.route('/upload_open_election_data', methods=['POST'])
 def upload_open_election_data():
