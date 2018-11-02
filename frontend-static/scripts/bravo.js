@@ -23,10 +23,10 @@ function addCandidate() {
     // eslint-disable-next-line
     newCandidate.innerHTML = `\
     <div class="col-md-4 mb-3">\
-    <label for="candidate${numBravoCandidates}">Candidate ${numBravoCandidates} name</label>\
-    <input type="text" class="form-control" id="candidate${numBravoCandidates}" placeholder="Name">\
+        <label for="candidate${numBravoCandidates}">Candidate ${numBravoCandidates} name</label>\
+        <input type="text" class="form-control" id="candidate${numBravoCandidates}" placeholder="Name">\
     </div>\
-    <div class="col-md-4 mb-3">\
+    <div class="col-md-3 mb-3">\
         <label for="candidate${numBravoCandidates}-votes">Candidate ${numBravoCandidates} votes</label>\
         <input type="number" class="form-control" id="candidate${numBravoCandidates}-votes" placeholder="0" min="0">\
     </div>`;
@@ -43,29 +43,29 @@ function removeCandidate() {
 
 function submitBravoAudit() {
     // Obtain data from form
-    const candidateNameNodes = document.querySelectorAll('#candidates-container input[type="text"]');
     const candidateVoteNodes = document.querySelectorAll('#candidates-container input[type="number"]');
-    const candidateNameVoteDict = {};
+    const candidateVotes = [];
 
     // TODO: do some sort of validation to check if candidate name or votes are invalid. done on backend?
-    for (let node = 0; node < candidateNameNodes.length; ++node) {
-        const name = candidateNameNodes[node].value;
-        const vote = candidateVoteNodes[node].value;
-        candidateNameVoteDict[name] = vote;
+    for (const node of candidateVoteNodes) {
+        candidateVotes.push(node.value);
     }
 
     const numBallotsCost = document.getElementById('total-ballots-cast').value;
     const numWinners = document.getElementById('num-winners').value;
     const riskLimit = document.getElementById('risk-limit').value;
 
-    // Make API call
+    // Setup API call
     const API_ENDPOINT = `${API_ROOT}/perform_audit`
     const formData = new FormData();
-    formData.append('candidate-name-vote-dict', JSON.stringify(candidateNameVoteDict));
+
+    formData.append('audit-type', 'bravo');
+    formData.append('candidate-votes', JSON.stringify(candidateVotes));
     formData.append('num-ballots-cast', numBallotsCost);
     formData.append('num-winners', numWinners);
     formData.append('risk-limit', riskLimit);
-    formData.append('audit-type', 'bravo');
+
+    // Make API call
     axios.post(API_ENDPOINT, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
