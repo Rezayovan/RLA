@@ -10,6 +10,7 @@ Stark, and Yates 2012). The full paper can be found on usenix.org
 
 import numpy as np
 from recordclass import recordclass
+from threading import Thread
 
 Candidates = recordclass("Candidates", "winners losers")
 Hypotheses = recordclass("Hypotheses", "test_stat reject_count")
@@ -60,7 +61,6 @@ def get_ballot(num_winners):
         ballot_votes.append(vote)
 
     return ballot_votes
-
 
 def update_hypothesis(hypotheses, winner, loser, risk_limit):
     """ Step 5 of the BRAVO algorithm.
@@ -146,6 +146,9 @@ ALPHA = .10
 MAX_TESTS = 10
 ######################
 
+def run_bravo(params):
+    PARAMS = Bravo_Params(*params)
+    bravo(PARAMS)
 
 if __name__ == "__main__":
     PARAMS = Bravo_Params(VOTES, NUM_WINNERS, ALPHA, MAX_TESTS)

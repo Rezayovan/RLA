@@ -7,6 +7,10 @@ import json
 from utilities.csv_parser import parse_election_data_csv
 from utilities.helpers import delete_file, all_keys_present_in_dict
 
+from parser import parse
+
+from bravo import run_bravo
+
 app = Flask(__name__)
 
 # Stretch goal: add support for XLS files
@@ -35,29 +39,18 @@ num-ballots-cast: int
 num-winners: int
 risk-limit: int
 '''
+
 @app.route('/perform_audit', methods=['POST'])
 def perform_audit():
-    form_data = request.form
-    if 'audit-type' not in form_data:
-        return "Audit type not specified.", 500
+    """Will determine audit method and call run on that method."""
+    params = parse(request)
+    run_bravo(params)
+    return status
 
-    audit_type = form_data['audit-type']
-
-    # Perform BRAVO audit
-    if audit_type == 'bravo':
-        form_params = ['candidate-name-vote-dict', 'num-ballots-cast', 'num-winners', 'risk-limit']
-        if not all_keys_present_in_dict(form_params, form_data):
-            return "Not all required BRAVO parameters were provided.", 500
-
-        # Parse candidate name and vote JSON data
-        candidate_data = json.loads(form_data['candidate-name-vote-dict'])
-        num_ballots_cast = form_data['num-ballots-cast']
-        num_winners = form_data['num-winners']
-        risk_limit = form_data['risk-limit']
-
-        # CALL BRAVO FUNCTION IN AUDITS FOLDER
-
-    return 'audit request!'
+@app.route('/vote_pick', methods=['POST'])
+def vote_picked():
+    """Sends picked vote to bravo app."""
+    
 
 @app.route('/upload_open_election_data', methods=['POST'])
 def upload_open_election_data():
