@@ -1,15 +1,16 @@
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+
+""" Ballot-polling audit in Python
+A Python implementation of the BRAVO algorithm described in "BRAVO:
+Ballot-polling Risk-limiting Audits to Verify Outcomes" (Lindeman,
+Stark, and Yates 2012). The full paper can be found on usenix.org
+<https://www.usenix.org/system/files/conference/evtwote12/evtwote12-final27.pdf>
+"""
+
 import numpy as np
 from random import randrange
 
-'''
-Inputs from frontend
- - n = number of candidates
- - V[] = votes for each candidate
- - v = total ballots cast
- - w = number of winners
- - alpha = risk limit
- - M = max number of ballots to audit
-'''
 
 ##### DUMMY DATA ######
 V = [10,30,40,2,5,100]

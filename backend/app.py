@@ -8,7 +8,8 @@ from utilities.helpers import delete_file
 
 app = Flask(__name__)
 
-ALLOWED_EXTENSIONS = set(['.xlsx', '.xls', '.csv'])
+# Stretch goal: add support for XLS files
+# ALLOWED_EXTENSIONS = set(['.xlsx', '.xls', '.csv'])
 
 app.config.update(
     ENV='development',
@@ -52,15 +53,12 @@ def send_data():
             delete_file(data_path)
             return jsonify(res)
         else:
-            allowed = ', '.join(ALLOWED_EXTENSIONS)
-            print(Path(file.filename).suffix.lower())
-            return f'Invalid file uploaded. Please upload a spreadsheet ending in one of the following extensions: {allowed}'
+            return f'Invalid file uploaded. Please upload a spreadsheet in CSV format.'
 
     return 'Hello world!'
 
 def allowed_file(filename):
-    return '.' in filename and Path(filename).suffix.lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and Path(filename).suffix.lower() == 'csv'
 
 if __name__ == '__main__':
-    print(Path.cwd())
     app.run()
