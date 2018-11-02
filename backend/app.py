@@ -39,16 +39,29 @@ num-ballots-cast: int
 num-winners: int
 risk-limit: int
 '''
-
 @app.route('/perform_audit', methods=['POST'])
-def parse_and_run():
-    """Will determine audit method and call run on that method."""
-    method = parse(request)
-    method.run()
-    
-@app.route('/vote_pick', methods=['POST'])
-def vote_picked():
-    """Sends picked vote to bravo app."""
+def perform_audit():
+    form_data = request.form
+    if 'audit-type' not in form_data:
+        return 'Audit type not specified.', 500
+
+    audit_type = form_data['audit-type']
+
+    # Perform BRAVO audit
+    if audit_type == 'bravo':
+        form_params = ['candidate-votes', 'num-ballots-cast', 'num-winners', 'risk-limit']
+        if not all_keys_present_in_dict(form_params, form_data):
+            return 'Not all required BRAVO parameters were provided.', 500
+
+        # Parse candidate name and vote JSON data
+        candidate_data = json.loads(form_data['candidate-votes'])
+        num_ballots_cast = form_data['num-ballots-cast']
+        num_winners = form_data['num-winners']
+        risk_limit = form_data['risk-limit']
+
+        return jsonify([candidate_data, num_ballots_cast, num_winners, risk_limit])
+
+        # CALL BRAVO FUNCTION IN AUDITS FOLDER
 
 
 @app.route('/upload_open_election_data', methods=['POST'])
