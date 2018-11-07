@@ -10,10 +10,35 @@ Stark, and Yates 2012). The full paper can be found on usenix.org
 
 import numpy as np
 from recordclass import recordclass
+import threading
 
 Candidates = recordclass("Candidates", "winners losers")
 Hypotheses = recordclass("Hypotheses", "test_stat reject_count")
 Bravo_Params = recordclass("BPA_Inputs", "votes_array num_winners risk_limit max_tests")
+
+_BUFFER = []
+_LOCK = threading.Lock()
+_CV = threading.Condition(_LOCK)
+
+def append_buffer(vote):
+    _CV.acquire()
+    global _BUFFER
+    _BUFFER.append(vote)
+    print(_BUFFER)
+    _CV.notify()
+    _CV.release()
+
+def get_vote():
+    print("getting vote")
+    _CV.acquire()
+    global _BUFFER
+    while not _BUFFER:
+        print("wait condiitno")
+        _CV.wait()
+    vote = _BUFFER.pop(0)
+    _CV.release()
+    return vote
+
 
 def arrange_candidates(votes_array, num_winners):
     """
@@ -56,8 +81,10 @@ def get_ballot(num_winners):
     ballot_votes = [] # size in [0, w)
     # TODO: Delete following loop when API calls are made.
     for _ in range(num_winners):
-        vote = int(input("Enter a vote: "))
-        ballot_votes.append(vote)
+        # vote = int(input("Enter a vote: "))
+        # ballot_votes.append(vote)
+        print("getting vote:")
+        ballot_votes.append(get_vote())
 
     return ballot_votes
 
@@ -107,6 +134,7 @@ def run_audit(candidates, max_tests, margins, risk_limit):
         for vote in ballot_votes:
             update_audit_stats(vote, candidates, hypotheses, margins, risk_limit)
         ballots_tested += 1
+        print(ballots_tested)
 
         # Step 6
         if hypotheses.reject_count >= num_null_hypotheses:
@@ -140,12 +168,19 @@ def bravo(params):
 
 
 ##### DUMMY DATA ######
-VOTES = [0, 0, 0, 0, 0, 100]
+VOTES = [20, 30, 40, 50, 60, 100]
 NUM_WINNERS = 1
 ALPHA = .10
-MAX_TESTS = 10
+MAX_TESTS = 20
 ######################
 
+def run_bravo(params):
+    PARAMS = Bravo_Params(*params)
+    bravo(PARAMS)
+
+def run_bravo_hardcode():
+    PARAMS = Bravo_Params(VOTES, NUM_WINNERS, ALPHA, MAX_TESTS)
+    bravo(PARAMS)
 
 if __name__ == "__main__":
     PARAMS = Bravo_Params(VOTES, NUM_WINNERS, ALPHA, MAX_TESTS)

@@ -7,6 +7,12 @@ import json
 from utilities.csv_parser import parse_election_data_csv
 from utilities.helpers import delete_file, all_keys_present_in_dict
 
+from bravo import run_bravo
+from bravo import run_bravo_hardcode
+from bravo import append_buffer
+
+from threading import Thread
+
 app = Flask(__name__)
 
 # Stretch goal: add support for XLS files
@@ -37,6 +43,8 @@ risk-limit: int
 '''
 @app.route('/perform_audit', methods=['POST'])
 def perform_audit():
+    thread = Thread(target=run_bravo_hardcode)
+    thread.start()
     form_data = request.form
     if 'audit-type' not in form_data:
         return 'Audit type not specified.', 500
@@ -54,6 +62,8 @@ def perform_audit():
         num_ballots_cast = form_data['num-ballots-cast']
         num_winners = form_data['num-winners']
         risk_limit = form_data['risk-limit']
+
+        #run_bravo([candidate_data, num_winners, num_ballots_cast, risk_limit])
 
         return jsonify([candidate_data, num_ballots_cast, num_winners, risk_limit])
 
@@ -91,8 +101,15 @@ def upload_open_election_data():
 
     return 'Hello world!'
 
+@app.route("/receive_ballot", methods=['POST'])
+def receive_ballot():
+    form = request.form
+    append_buffer(int(form["vote"]))
+    return "received ballot"
+
 def allowed_file(filename):
     return '.' in filename and Path(filename).suffix.lower() == 'csv'
 
 if __name__ == '__main__':
     app.run()
+
