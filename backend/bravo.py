@@ -11,10 +11,11 @@ Stark, and Yates 2012). The full paper can be found on usenix.org
 import numpy as np
 from recordclass import recordclass
 import threading
+import random
 
 Candidates = recordclass("Candidates", "winners losers")
 Hypotheses = recordclass("Hypotheses", "test_stat reject_count")
-Bravo_Params = recordclass("BPA_Inputs", "votes_array num_winners risk_limit max_tests")
+Bravo_Params = recordclass("BPA_Inputs", "votes_array num_ballots num_winners risk_limit seed max_tests")
 
 _BUFFER = []
 _LOCK = threading.Lock()
@@ -28,7 +29,12 @@ def append_buffer(vote):
     _CV.notify()
     _CV.release()
 
-def get_vote():
+def get_votes():
+    # TODO: Send selected ballot to frontend for the user to input
+    #       the ballot's actual votes.
+    # TODO: Receive and return list of 'votes' (at most size
+    #       `num_winners`) via API call where each `vote`,
+    #       0 ≤ `vote` ≤ `num_candidates`.
     print("getting vote")
     _CV.acquire()
     global _BUFFER
@@ -37,7 +43,7 @@ def get_vote():
         _CV.wait()
     vote = _BUFFER.pop(0)
     _CV.release()
-    return vote
+    return vote # TODO: make this a list of votes
 
 
 def arrange_candidates(votes_array, num_winners):
@@ -66,25 +72,16 @@ def get_margins(votes_array, candidates, num_candidates):
     return margins
 
 
-def get_ballot(num_winners):
+def get_ballot(num_winners, num_ballots):
     """ Step 2 of the BRAVO algorithm.
     Randomly picks a ballot to test and returns a list of its votes.
     The ballot picked is returned to the frontend for the user to input
     actual votes on the ballot. The ballot should be selected using a
     random function seeded by a user-generated seed.
+    Note: 'random' should be seeded before this function is called.
     """
-    # TODO: Use the seed to pick a ballot at random.
-    # TODO: Send selected ballot to frontend for the user to input
-    #       the ballot's actual votes.
-    # TODO: Receive list of 'votes' (at most size `num_winners`) via API call
-    #       where each `vote`, 0 ≤ `vote` ≤ `num_candidates`.
-    ballot_votes = [] # size in [0, w)
-    # TODO: Delete following loop when API calls are made.
-    for _ in range(num_winners):
-        # vote = int(input("Enter a vote: "))
-        # ballot_votes.append(vote)
-        print("getting vote:")
-        ballot_votes.append(get_vote())
+    ballot_to_draw = random.randint(1, num_ballots)
+    ballot_votes = get_votes(ballot_to_draw)
 
     if len(ballot_votes) <= num_winners:
         return []
@@ -116,7 +113,7 @@ def update_audit_stats(vote, candidates, hypotheses, margins, risk_limit):
             update_hypothesis(hypotheses, winner, vote, risk_limit)
 
 
-def run_audit(candidates, max_tests, margins, risk_limit):
+def run_audit(candidates, num_ballots, max_tests, margins, seed, risk_limit):
     """
     Runs the algorithm given in "BRAVO" (2012) §7.
     """
@@ -132,7 +129,7 @@ def run_audit(candidates, max_tests, margins, risk_limit):
     ballots_tested = 0
 
     while ballots_tested < max_tests: # Step 6
-        ballot_votes = get_ballot(num_winners)
+        ballot_votes = get_ballot(num_winners, num_ballots)
         assert all(0 <= vote < num_candidates for vote in ballot_votes)
         for vote in ballot_votes:
             update_audit_stats(vote, candidates, hypotheses, margins, risk_limit)
@@ -164,9 +161,10 @@ def bravo(params):
     else:
         params.max_tests = min(params.max_tests, sum(params.votes_array))
 
+    random.seed(params.seed)
     candidates = arrange_candidates(params.votes_array, params.num_winners)
     margins = get_margins(params.votes_array, candidates, num_candidates)
-    result = run_audit(candidates, params.max_tests, margins, params.risk_limit)
+    result = run_audit(candidates, params.num_ballots, params.max_tests, margins, params.risk_limit)
     if result:
         print("Audit completed: the results stand.")
     else:
@@ -174,10 +172,12 @@ def bravo(params):
 
 
 ##### DUMMY DATA ######
-VOTES = [20, 30, 40, 50, 60, 100]
+VOTES_ARR = [20, 30, 40, 50, 60, 100]
+TOTAL_VOTES = sum(VOTES_ARR)
 NUM_WINNERS = 1
 ALPHA = .10
 MAX_TESTS = 20
+SEED = 1234567890
 ######################
 
 def run_bravo(params):
@@ -185,9 +185,9 @@ def run_bravo(params):
     bravo(PARAMS)
 
 def run_bravo_hardcode():
-    PARAMS = Bravo_Params(VOTES, NUM_WINNERS, ALPHA, MAX_TESTS)
+    PARAMS = Bravo_Params(VOTES_ARR, TOTAL_VOTES, NUM_WINNERS, ALPHA, SEED, MAX_TESTS)
     bravo(PARAMS)
 
 if __name__ == "__main__":
-    PARAMS = Bravo_Params(VOTES, NUM_WINNERS, ALPHA, MAX_TESTS)
+    PARAMS = Bravo_Params(VOTES_ARR, TOTAL_VOTES, NUM_WINNERS, ALPHA, SEED, MAX_TESTS)
     bravo(PARAMS)
