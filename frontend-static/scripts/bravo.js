@@ -56,18 +56,48 @@ function getCandidateVotes() {
     const candidateVotes = [];
     // TODO: do some sort of validation to check if candidate name or votes are invalid. done on backend?
     for (const node of candidateVoteNodes) {
-        candidateVotes.push(node.value);
+        candidateVotes.push(parseInt(node.value, 10));
     }
     return candidateVotes;
 }
 
 function beginBravoAudit() {
+    // Remove error div if it exists
+    const validationErrors = document.querySelectorAll('.validation-error');
+    if (validationErrors.length > 0) {
+        for (const errorNode of validationErrors) {
+            errorNode.parentNode.removeChild(errorNode);
+        }
+    }
+
     // Obtain data from form
     const candidateVotes = getCandidateVotes();
 
-    const numBallotsCost = document.getElementById('total-ballots-cast').value;
+    const numBallotsCast = document.getElementById('total-ballots-cast').value;
     const numWinners = document.getElementById('num-winners').value;
     const riskLimit = document.getElementById('risk-limit').value;
+    const randomSeed = document.getElementById('random-seed').value;
+
+    const totalVotesCast = candidateVotes.reduce((a, b) => a + b, 0);
+    if (totalVotesCast > numBallotsCast) {
+        const errorDiv = document.createElement('div');
+        errorDiv.classList.add('alert', 'alert-danger', 'validation-error', 'mt-3');
+        errorDiv.role = 'alert';
+        errorDiv.innerHTML = 'Candidate votes are greater than the total number of votes. Please correct this and try again.';
+
+        document.getElementById('audit-info').appendChild(errorDiv);
+        return;
+    }
+
+    if (randomSeed.length < 20) {
+        const errorDiv = document.createElement('div');
+        errorDiv.classList.add('alert', 'alert-danger', 'validation-error', 'mt-3');
+        errorDiv.role = 'alert';
+        errorDiv.innerHTML = 'Random seed does not meet minimum length requirements. Please input a random seed of length 20 or greater.';
+
+        document.getElementById('audit-info').appendChild(errorDiv);
+        return;
+    }
 
     // Setup API call
     const API_ENDPOINT = `${API_ROOT}/perform_audit`
@@ -75,9 +105,10 @@ function beginBravoAudit() {
 
     formData.append('audit-type', 'bravo');
     formData.append('candidate-votes', JSON.stringify(candidateVotes));
-    formData.append('num-ballots-cast', numBallotsCost);
+    formData.append('num-ballots-cast', numBallotsCast);
     formData.append('num-winners', numWinners);
     formData.append('risk-limit', riskLimit);
+    formData.append('random-seed', randomSeed);
 
     // Make API call
     axios.post(API_ENDPOINT, formData, {
@@ -155,10 +186,14 @@ function getNextBallotToAudit() {
         if (latestVoteCheckBoxes[i].checked) {
             votes.push(i);
         }
-        latestVoteCheckBoxes[i].setAttribute('disabled', '');
     }
 
     console.log("Vote data:", votes);
+
+    // Remove checkbox container to load new one
+    const ballotToRecordRow = document.getElementById('ballot-to-record');
+    ballotToRecordRow.parentNode.removeChild(ballotToRecordRow);
+
     continueAudit(Math.floor((Math.random() * 1000) + 1)); // load next ballot into DOM
     document.getElementById('continue-bravo').removeAttribute('disabled');
 
@@ -195,6 +230,7 @@ function continueAudit(ballotNumToAudit) {
     const sequenceNum = ballotSequenceNumber++;
     const newBallot = document.createElement('div');
     newBallot.className = 'form-row';
+    newBallot.id = 'ballot-to-record';
 
     const newRow = document.createElement('div');
     newRow.classList.add('col-md-auto', 'mb-3');

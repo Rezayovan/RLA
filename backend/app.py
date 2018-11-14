@@ -45,7 +45,7 @@ def perform_audit():
 
     # Perform BRAVO audit
     if audit_type == 'bravo':
-        form_params = ['candidate-votes', 'num-ballots-cast', 'num-winners', 'risk-limit']
+        form_params = ['candidate-votes', 'num-ballots-cast', 'num-winners', 'risk-limit', 'random-seed']
         if not all_keys_present_in_dict(form_params, form_data):
             return 'Not all required BRAVO parameters were provided.', 500
 
@@ -54,6 +54,7 @@ def perform_audit():
         num_ballots_cast = form_data['num-ballots-cast']
         num_winners = form_data['num-winners']
         risk_limit = form_data['risk-limit']
+        random_seed = form_data['random_seed']
 
         return jsonify([candidate_data, num_ballots_cast, num_winners, risk_limit])
 
