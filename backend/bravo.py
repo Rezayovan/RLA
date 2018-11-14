@@ -86,6 +86,8 @@ def get_ballot(num_winners):
         print("getting vote:")
         ballot_votes.append(get_vote())
 
+    if len(ballot_votes) <= num_winners:
+        return []
     return ballot_votes
 
 
@@ -131,6 +133,7 @@ def run_audit(candidates, max_tests, margins, risk_limit):
 
     while ballots_tested < max_tests: # Step 6
         ballot_votes = get_ballot(num_winners)
+        assert all(0 <= vote < num_candidates for vote in ballot_votes)
         for vote in ballot_votes:
             update_audit_stats(vote, candidates, hypotheses, margins, risk_limit)
         ballots_tested += 1
@@ -151,8 +154,11 @@ def bravo(params):
     `num_winners` winner(s) are indeed the winners.
     """
     num_candidates = len(params.votes_array)
-    assert(params.num_winners > 0 and params.num_winners <= num_candidates)
-    assert(params.risk_limit > 0. and params.risk_limit <= 1.)
+
+    # Ensure parameters make sense
+    assert 0 < params.num_winners <= num_candidates
+    assert 0. < params.risk_limit <= 1.
+    assert all(votes >= 0 for votes in params.votes_array)
     if params.max_tests <= 0:
         params.max_tests = sum(params.votes_array)
     else:
