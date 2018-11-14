@@ -1,4 +1,5 @@
 let numBravoCandidates = 2; // default to 2 candidates
+let ballotSequenceNumber = 1;
 
 document.getElementById('add-candidate').addEventListener('click', () => {
     numBravoCandidates++;
@@ -13,8 +14,8 @@ document.getElementById('remove-candidate').addEventListener('click', () => {
     removeCandidate();
 });
 
-document.getElementById('submit-bravo').addEventListener('click', () => {
-    submitBravoAudit();
+document.getElementById('begin-bravo').addEventListener('click', () => {
+    beginBravoAudit();
 });
 
 function addCandidate() {
@@ -41,15 +42,28 @@ function removeCandidate() {
     }
 }
 
-function submitBravoAudit() {
-    // Obtain data from form
+function getCandidateNames() {
+    const candidateNameNodes = document.querySelectorAll('#candidates-container input[type="text"]');
+    const candidateNames = [];
+    for (const node of candidateNameNodes) {
+        candidateNames.push(node.value);
+    }
+    return candidateNames;
+}
+
+function getCandidateVotes() {
     const candidateVoteNodes = document.querySelectorAll('#candidates-container input[type="number"]');
     const candidateVotes = [];
-
     // TODO: do some sort of validation to check if candidate name or votes are invalid. done on backend?
     for (const node of candidateVoteNodes) {
         candidateVotes.push(node.value);
     }
+    return candidateVotes;
+}
+
+function beginBravoAudit() {
+    // Obtain data from form
+    const candidateVotes = getCandidateVotes();
 
     const numBallotsCost = document.getElementById('total-ballots-cast').value;
     const numWinners = document.getElementById('num-winners').value;
@@ -72,11 +86,133 @@ function submitBravoAudit() {
             }
         })
         .then((response) => {
+            // On success clean up the UI and transition it to in-progress audit state
+            transitionInterfaceToInProgress();
+            // on response, give back the selected ballot from the back-end
+            // TODO: pass in the ballot # to record
+            continueAudit(Math.floor((Math.random() * 1000) + 1));
             return console.log(response);
         })
         .catch((error) => {
             return console.error(error);
         });
+}
+
+// Clean up UI to remove certain buttons and disable input boxes to not mess with audit
+function transitionInterfaceToInProgress() {
+    // Disable text inputs
+    const auditInputs = document.querySelectorAll("#audit-info input");
+    for (const input of auditInputs) {
+        input.setAttribute('disabled', '');
+    }
+
+    // Disable add/remove candidate buttons
+    const addCandidateButton = document.getElementById('add-candidate');
+    addCandidateButton.setAttribute('disabled', '');
+    const removeCandidateButton = document.getElementById('remove-candidate');
+    removeCandidateButton.setAttribute('disabled', '');
+
+    // Remove begin button
+    const beginButton = document.getElementById('begin-bravo');
+    beginButton.setAttribute('disabled', '');
+
+    // Show section title
+    const sectionTitle = document.createElement('h3');
+    sectionTitle.classList.add('mt-3');
+    sectionTitle.innerHTML = 'Audit';
+    document.getElementById("ballot-container").appendChild(sectionTitle);
+
+    // Add continue button
+    const continueButton = document.createElement('button');
+    continueButton.type = 'button';
+    continueButton.classList.add('btn', 'btn-success');
+    continueButton.id = 'continue-bravo';
+    continueButton.innerHTML = 'Continue audit';
+    document.getElementById('form-container').appendChild(continueButton);
+
+    // Add event listener to continue button
+    document.getElementById('continue-bravo').addEventListener('click', () => {
+        getNextBallotToAudit(); // make request
+        // continueAudit(Math.floor((Math.random() * 1000) + 1)); // load next ballot into DOM
+    });
+}
+
+function getNextBallotToAudit() {
+    // Cannot continue until next ballot to audit is returned from the back-end API
+    document.getElementById('continue-bravo').setAttribute('disabled', '');
+
+    // const API_ENDPOINT = `${API_ROOT}/perform_audit`
+    // const formData = new FormData();
+
+    const voteNodes = document.querySelectorAll('#ballot-container .form-row');
+    if (voteNodes.length == 0) {
+        return console.error("voteNodes is empty in the Audit section. I am sad.");
+    }
+    const latestVoteCheckBoxes = voteNodes[voteNodes.length - 1].getElementsByTagName('input');
+
+    const votes = [];
+    for (let i = 0; i < latestVoteCheckBoxes.length; ++i) {
+        if (latestVoteCheckBoxes[i].checked) {
+            votes.push(i);
+        }
+        latestVoteCheckBoxes[i].setAttribute('disabled', '');
+    }
+
+    console.log("Vote data:", votes);
+    continueAudit(Math.floor((Math.random() * 1000) + 1)); // load next ballot into DOM
+    document.getElementById('continue-bravo').removeAttribute('disabled');
+
+
+    // formData.append('latest-ballot-votes', JSON.stringify(votes));
+    // // formData.append('session', __SOME__KEY__);
+
+    // // Make API call
+    // axios.post(API_ENDPOINT, formData, {
+    //     headers: {
+    //         'Content-Type': 'multipart/form-data',
+    //     }
+    // })
+    // .then((response) => {
+    //     continueAudit(Math.floor((Math.random() * 1000) + 1)); // load next ballot into DOM
+    //     // Re-enable the button
+    //     document.getElementById('continue-bravo').removeAttribute('disabled');
+
+    //     // TODO: use response to extract the next ballot to audit and pass it into continueAudit function below
+    //     return console.log(response);
+    // })
+    // .catch((error) => {
+    //     return console.error(error);
+    // });
+}
+
+// Tell the user which ballot to cast and record.
+function continueAudit(ballotNumToAudit) {
+    // once audit is begun, we should change status to "Continue" and move button below
+    // also we gotta disable input boxes above so data cannot be changed
+    // also, remove add and remove candidate buttons
+
+    const candidateNames = getCandidateNames();
+    const sequenceNum = ballotSequenceNumber++;
+    const newBallot = document.createElement('div');
+    newBallot.className = 'form-row';
+
+    const newRow = document.createElement('div');
+    newRow.classList.add('col-md-auto', 'mb-3');
+    newBallot.appendChild(newRow);
+
+    // eslint-disable-next-line
+    let rowContent = `<h6>Draw ballot <b>${ballotNumToAudit}</b> and record ballot selections</h6>`;
+
+    for (let i = 0; i < candidateNames.length; ++i) {
+        rowContent += `\
+        <div class="form-check form-check-inline">\
+            <input class="form-check-input" type="checkbox" name="ballotSequence${sequenceNum}" id="ballotSeqInlineRadio${sequenceNum}-${i}" value="${candidateNames[i]}">\
+            <label class="form-check-label" for="ballotSeqInlineRadio${sequenceNum}-${i}">${candidateNames[i]}</label>\
+        </div>`;
+    }
+
+    newRow.innerHTML = rowContent;
+    document.getElementById("ballot-container").appendChild(newBallot);
 }
 
 // =========================
