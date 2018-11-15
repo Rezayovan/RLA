@@ -121,6 +121,7 @@ function beginBravoAudit() {
             transitionInterfaceToInProgress();
             // on response, give back the selected ballot from the back-end
             // TODO: pass in the ballot # to record
+
             continueAudit(Math.floor((Math.random() * 1000) + 1));
             return console.log(response);
         })
@@ -152,6 +153,15 @@ function transitionInterfaceToInProgress() {
     sectionTitle.classList.add('mt-3');
     sectionTitle.innerHTML = 'Audit';
     document.getElementById("ballot-container").appendChild(sectionTitle);
+
+    // Get estimates sample size
+    // TODO: get this from the API
+    const sampleSize = Math.floor((Math.random() * 100) + 1);
+    const sampleSizeElement = document.createElement('div');
+    sampleSizeElement.classList.add('alert', 'alert-info', 'd-inline-block');
+    sampleSizeElement.role = 'alert';
+    sampleSizeElement.innerHTML = `Estimated number of ballots to audit: <b>${sampleSize}</b>`;
+    document.getElementById("ballot-container").appendChild(sampleSizeElement);
 
     // Add continue button
     const continueButton = document.createElement('button');
@@ -237,7 +247,7 @@ function continueAudit(ballotNumToAudit) {
     newBallot.appendChild(newRow);
 
     // eslint-disable-next-line
-    let rowContent = `<h6>Draw ballot <b>${ballotNumToAudit}</b> and record ballot selections</h6>`;
+    let rowContent = `<h6>Draw ballot <b>#${ballotNumToAudit}</b> and record ballot selections</h6>`;
 
     for (let i = 0; i < candidateNames.length; ++i) {
         rowContent += `\
@@ -280,6 +290,7 @@ function fillTestData() {
     document.getElementById('candidate2-votes').value = candidateVote2;
 
     document.getElementById('risk-limit').value = testRiskLimit;
+    document.getElementById('random-seed').value = Math.floor(Math.random() * 1000000000000000000000);
 }
 
 // FOR TESTING PURPOSES ONLY

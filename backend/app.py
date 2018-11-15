@@ -54,9 +54,9 @@ def perform_audit():
         num_ballots_cast = form_data['num-ballots-cast']
         num_winners = form_data['num-winners']
         risk_limit = form_data['risk-limit']
-        random_seed = form_data['random_seed']
+        random_seed = form_data['random-seed']
 
-        return jsonify([candidate_data, num_ballots_cast, num_winners, risk_limit])
+        return jsonify([candidate_data, num_ballots_cast, num_winners, risk_limit, random_seed])
 
         # CALL BRAVO FUNCTION IN AUDITS FOLDER
 
