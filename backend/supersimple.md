@@ -23,13 +23,12 @@ Notes
 Version 1 of Super Simple Audit
 1. Pick simultaneous risk limit, α, which is the largest chance that an incorrect outcome will not be corrected by the audit
 2. Pick an error inflation rate, γ >= 100%, γ controls a tradeoff between initial sample size and the amount of additional counting required when the sample finds too many overstatements. 
-    1. The larger γ is, the larger the initial sample size is, but the less additional counting will be required if too many overstatements are found. 
-    2. Default is γ = 110%
+    #. The larger γ is, the larger the initial sample size is, but the less additional counting will be required if too many overstatements are found. 
+    #. Default is γ = 110%
 3. Pick a tolerance,  λ < 100%, for one-vote maximum overstatements as a percentage of the diluted margin, μ. 
-    1. If the percentage of ballots in the sample with one-vote maximum overstatements is no more than λμ and there are no two-vote overstatements, the audit can stop.
-    2. The larger λ is, the larger initial sample size will have to be to give high confidence that even though the error rate in the sample is a large fraction of the diluted margin, the error rate for the contest as a whole (which we have only audited a subset of) is less than the diluted margin
-4. Calculate the sample size multiplier, ρ. All values α, γ, λ can all be decided before the start of the audit process
-	ρ = (-log(α))/( (1/(2γ)) + λlog( 1 - (1/(2γ)) ) )
+    #. If the percentage of ballots in the sample with one-vote maximum overstatements is no more than λμ and there are no two-vote overstatements, the audit can stop.
+    #. The larger λ is, the larger initial sample size will have to be to give high confidence that even though the error rate in the sample is a large fraction of the diluted margin, the error rate for the contest as a whole (which we have only audited a subset of) is less than the diluted margin
+4. Calculate the sample size multiplier, ρ. All values α, γ, λ can all be decided before the start of the audit process $$ρ = (-log(α))/( (1/(2γ)) + λlog( 1 - (1/(2γ)) ) )$$
 5. Find the diluted margin, μ - user should give results and we should calculate.
 6. Draw at least ρ/μ at random and audit them - output which random ballots that should be audited.
     1. If the percentage of ballots in the sample with one-vote maximum overstatements is not more than λμ and no ballot has a two-vote overstatement, the audit can stop.
