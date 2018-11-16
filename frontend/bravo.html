@@ -1,0 +1,156 @@
+<!--
+    Serve the static web pages with this command:
+    python3 -m http.server 8000 --bind 127.0.0.1
+-->
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Bravo RLA Method</title>
+    <meta name="description" content="Test">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+    <script defer src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+    <script defer src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+
+    <script defer src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script defer src="scripts/shared_logic.js"></script>
+    <!-- <script defer src="scripts/upload_csv.js"></script> -->
+    <script defer src="scripts/bravo.js"></script>
+
+    <link rel="stylesheet" href="assets/styles/index.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
+
+    <link rel="icon" href="assets/img/favicon.png">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="index.html">
+            <img src="/assets/img/michigan.svg" height="30" class="d-inline-block align-center" alt="Michigan logo">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html">What is RLA?</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">BRAVO</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Super-Simple</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">CAST</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">NEGEXP</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Bernoulli</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <form enctype="multipart/form-data">
+            <div class="form-group" id="form-container">
+
+                <div id="audit-info">
+                    <!-- <h3 class="mt-3">Upload OpenElection Data</h3>
+                <div class="form-group">
+                    <label for="input-election-data">Upload OpenElection data (CSV format required)</label>
+                    <input type="file" class="form-control-file" id="input-election-data" accept=".csv">
+                    <small id="fileHelp" class="form-text text-muted">Uploaded data is never stored on our servers.</small>
+                </div>
+                <button type="button" class="btn btn-outline-primary" id="upload-election-data">Upload</button> -->
+
+                    <h3 class="mt-3">Contest Information</h3>
+                    <div class="form-row">
+                        <div class="col-md-4 mb-3">
+                            <label for="total-ballots-cast">Total number of ballots cast</label>
+                            <input type="number" class="form-control" id="total-ballots-cast" placeholder="0" min="0">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="num-winners">Number of winners</label>
+                            <input type="number" class="form-control" id="num-winners" placeholder="0" min="0">
+                        </div>
+                    </div>
+
+                    <h3 class="mt-3">Reported Votes</h3>
+                    <div id="candidates-container">
+                        <div class="form-row">
+                            <div class="col-md-4 mb-3">
+                                <label for="candidate1">Candidate 1 name</label>
+                                <input type="text" class="form-control" id="candidate1" placeholder="Name">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="candidate1-votes">Candidate 1 votes</label>
+                                <input type="number" class="form-control" id="candidate1-votes" placeholder="0" min="0">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-4 mb-3">
+                                <label for="candidate2">Candidate 2 name</label>
+                                <input type="text" class="form-control" id="candidate2" placeholder="Name">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="candidate2-votes">Candidate 2 votes</label>
+                                <input type="number" class="form-control" id="candidate2-votes" placeholder="0" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" id="add-candidate">Add candidate</button>
+                    <button type="button" class="btn btn-danger" id="remove-candidate">Remove candidate</button>
+
+                    <h3 class="mt-3">Audit parameters</h3>
+                    <div class="form-row">
+                        <div class="col-md-2 mb-3">
+                            <label for="risk-limit">Risk limit</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="risk-limit" value="5" min="0" max="100">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                                <!-- TODO: Add help info to explain what a risk limit is. -->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6 mb-3">
+                            <label for="risk-limit">Random seed</label>
+                            <input type="number" class="form-control" id="random-seed" min="0">
+                            <small class="form-text text-muted">
+                                We recommend using <a href="https://en.wikipedia.org/wiki/Pentagonal_trapezohedron#10-sided_dice" target="_blank" rel="noopener noreferrer">10-sided dice</a> to generate a random seed of 20 digits or more.
+                                <!-- TODO: fill in this help link URL -->
+                                <br>
+                                <a href="#">How do I securely and properly generate a random seed?</a>
+                            </small>
+                            <!-- TODO: Add help info to explain what a random seed is and how to generate it. -->
+                            <!-- TODO: Warn people to not use an online die roller. -->
+                        </div>
+                    </div>
+                    <button type="button" class="btn btn-primary" id="begin-bravo">Begin audit</button>
+                </div>
+
+                <div id="ballot-container">
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>
