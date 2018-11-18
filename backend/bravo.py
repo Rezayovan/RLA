@@ -177,6 +177,54 @@ def bravo(params):
     else:
         print("Too many ballots tested. Perform a full hand-recount of the ballots.")
 
+
+import socket
+import threading
+import sys
+host = '127.0.0.1'
+port = 60000
+
+class client(threading.Thread):
+    def __init__(self, conn):
+        super(client, self).__init__()
+        self.conn = conn
+        self.data = ""
+
+    def run(self):
+        while True:
+            self.data = self.data + self.conn.recv(1024)
+            if self.data.endswith(u"\r\n"):
+                print(self.data)
+                self.data = ""
+
+    def send_msg(self,msg):
+        self.conn.send(msg)
+
+    def close(self):
+        self.conn.close()
+
+class connectionThread(threading.Thread):
+    def __init__(self, host, port):
+        super(connectionThread, self).__init__()
+        try:
+            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.s.bind((host,port))
+            self.s.listen(5)
+        except socket.error:
+            print('Failed to create socket')
+            sys.exit()
+        self.clients = []
+
+    def run(self):
+        print("runninng")
+        conn, address = self.s.accept()
+        print("acceptedd")
+        c = client(conn)
+        c.start()
+        c.send_msg(u"dank memes\r\n")
+        self.clients.append(c)
+        print('[+] Client connected: {0}'.format(address[0]))
+
 ##### DUMMY DATA ######
 VOTES_ARR = [20, 30, 40, 50, 60, 100]
 TOTAL_VOTES = sum(VOTES_ARR)
@@ -187,6 +235,8 @@ SEED = 1234567890
 ######################
 
 def run_bravo(params):
+    conn = connectionThread(host, port)
+    conn.start()
     PARAMS = Bravo_Params(*params)
     bravo(PARAMS)
 
