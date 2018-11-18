@@ -181,8 +181,8 @@ def bravo(params):
 import socket
 import threading
 import sys
-host = '127.0.0.1'
-port = 60000
+host = 'localhost'
+port = 6000
 
 class client(threading.Thread):
     def __init__(self, conn):
@@ -206,13 +206,15 @@ class client(threading.Thread):
 class connectionThread(threading.Thread):
     def __init__(self, host, port):
         super(connectionThread, self).__init__()
-        try:
-            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.s.bind((host,port))
-            self.s.listen(5)
-        except socket.error:
-            print('Failed to create socket')
-            sys.exit()
+        # try:
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.s.bind((host,port))
+        self.s.listen(5)
+        print("listening on", (host, port))
+        # except socket.error:
+            # print('Failed to create socket')
+            # sys.exit()
         self.clients = []
 
     def run(self):
@@ -235,8 +237,6 @@ SEED = 1234567890
 ######################
 
 def run_bravo(params):
-    conn = connectionThread(host, port)
-    conn.start()
     PARAMS = Bravo_Params(*params)
     bravo(PARAMS)
 

@@ -14,6 +14,8 @@ from bravo import get_sequence_number
 
 from threading import Thread
 
+import bravo
+
 app = Flask(__name__)
 
 # Stretch goal: add support for XLS files
@@ -46,6 +48,11 @@ risk-limit: int
 def perform_audit():
     # thread = Thread(target=run_bravo_hardcode)
     # thread.start()
+    host = 'localhost'
+    port = 8080
+    conn = bravo.connectionThread(host, port)
+    conn.start()
+
     form_data = request.form
     if 'audit-type' not in form_data:
         return 'Audit type not specified.', 500
