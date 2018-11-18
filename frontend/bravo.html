@@ -8,7 +8,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Bravo RLA Method</title>
+    <title>BRAVO RLA Method</title>
     <meta name="description" content="Test">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -22,9 +22,10 @@
         crossorigin="anonymous"></script>
 
     <script defer src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script defer src="scripts/shared_logic.js"></script>
+    <script defer src="scripts/navbar_helpers.js" type="module"></script>
+    <script defer src="scripts/shared_logic.js" type="module"></script>
     <!-- <script defer src="scripts/upload_csv.js"></script> -->
-    <script defer src="scripts/bravo.js"></script>
+    <script defer src="scripts/bravo.js" type="module"></script>
 
     <link rel="stylesheet" href="assets/styles/index.css">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
@@ -50,7 +51,7 @@
                     <a class="nav-link" href="#">BRAVO</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Super-Simple</a>
+                    <a class="nav-link" href="super_simple.html">Super-Simple</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">CAST</a>
@@ -66,6 +67,8 @@
     </nav>
 
     <div class="container">
+        <h2><b>BRAVO Audit</b></h2>
+
         <form enctype="multipart/form-data">
             <div class="form-group" id="form-container">
 
