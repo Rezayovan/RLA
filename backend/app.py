@@ -61,15 +61,16 @@ def perform_audit():
         # Parse candidate name and vote JSON data
 
         candidate_data = json.loads(form_data['candidate-votes'])
-        num_ballots_cast = form_data['num-ballots-cast']
+        num_ballots_cast = int(form_data['num-ballots-cast'])
         num_winners = form_data['num-winners']
         risk_limit = float(form_data['risk-limit']) / 100
         seed = 12345
         candidate_data = [int(data) for data in candidate_data]
         params_list = [candidate_data,  int(num_ballots_cast), int(num_winners), risk_limit, seed, 20]
-        run_bravo(params_list)
-
-        return jsonify([candidate_data, num_ballots_cast, num_winners, risk_limit, seed, 20])
+        bravo_thread = Thread(target=run_bravo, args=[params_list])
+        bravo_thread.start()
+        num = get_sequence_number(num_ballots_cast)
+        return jsonify(num)
 
         # CALL BRAVO FUNCTION IN AUDITS FOLDER
 
@@ -87,7 +88,7 @@ def get_seq_number():
 def receive_ballot():
     form = request.form
     append_buffer(int(form["vote"]))
-    return "received ballot"
+    return str(get_seq_number());
 
 @app.route('/upload_open_election_data', methods=['POST'])
 def upload_open_election_data():

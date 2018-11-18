@@ -171,11 +171,11 @@ def bravo(params):
     candidates = arrange_candidates(params.votes_array, params.num_winners)
     margins = get_margins(params.votes_array, candidates, num_candidates)
     result = run_audit(candidates, params.num_ballots, params.max_tests, margins, params.seed, params.risk_limit)
+
     if result:
         print("Audit completed: the results stand.")
     else:
         print("Too many ballots tested. Perform a full hand-recount of the ballots.")
-
 
 ##### DUMMY DATA ######
 VOTES_ARR = [20, 30, 40, 50, 60, 100]
