@@ -10,6 +10,7 @@ from utilities.helpers import delete_file, all_keys_present_in_dict
 from bravo import run_bravo
 from bravo import run_bravo_hardcode
 from bravo import append_buffer
+from bravo import get_sequence_number
 
 from threading import Thread
 
@@ -43,8 +44,8 @@ risk-limit: int
 '''
 @app.route('/perform_audit', methods=['POST'])
 def perform_audit():
-    thread = Thread(target=run_bravo_hardcode)
-    thread.start()
+    # thread = Thread(target=run_bravo_hardcode)
+    # thread.start()
     form_data = request.form
     if 'audit-type' not in form_data:
         return 'Audit type not specified.', 500
@@ -58,18 +59,35 @@ def perform_audit():
             return 'Not all required BRAVO parameters were provided.', 500
 
         # Parse candidate name and vote JSON data
+
         candidate_data = json.loads(form_data['candidate-votes'])
         num_ballots_cast = form_data['num-ballots-cast']
         num_winners = form_data['num-winners']
-        risk_limit = form_data['risk-limit']
+        risk_limit = float(form_data['risk-limit']) / 100
+        seed = 12345
+        candidate_data = [int(data) for data in candidate_data]
+        params_list = [candidate_data,  int(num_ballots_cast), int(num_winners), risk_limit, seed, 20]
+        run_bravo(params_list)
 
-        #run_bravo([candidate_data, num_winners, num_ballots_cast, risk_limit])
-
-        return jsonify([candidate_data, num_ballots_cast, num_winners, risk_limit])
+        return jsonify([candidate_data, num_ballots_cast, num_winners, risk_limit, seed, 20])
 
         # CALL BRAVO FUNCTION IN AUDITS FOLDER
 
     return 'audit request!'
+
+@app.route('/get_sequence_number', methods=['POST'])
+def get_seq_number():
+    form_data = request.form
+    num_ballots = int(form_data['num-ballots-cast'])
+    num = get_sequence_number(num_ballots)
+    return str(num)
+
+
+@app.route("/receive_ballot", methods=['POST'])
+def receive_ballot():
+    form = request.form
+    append_buffer(int(form["vote"]))
+    return "received ballot"
 
 @app.route('/upload_open_election_data', methods=['POST'])
 def upload_open_election_data():
@@ -101,15 +119,8 @@ def upload_open_election_data():
 
     return 'Hello world!'
 
-@app.route("/receive_ballot", methods=['POST'])
-def receive_ballot():
-    form = request.form
-    append_buffer(int(form["vote"]))
-    return "received ballot"
-
 def allowed_file(filename):
     return '.' in filename and Path(filename).suffix.lower() == 'csv'
 
 if __name__ == '__main__':
     app.run()
-

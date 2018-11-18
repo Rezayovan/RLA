@@ -39,11 +39,11 @@ def get_votes():
     _CV.acquire()
     global _BUFFER
     while not _BUFFER:
-        print("wait condiitno")
+        print("wait condition")
         _CV.wait()
-    vote = _BUFFER.pop(0)
+    votes = _BUFFER.pop(0)
     _CV.release()
-    return vote # TODO: make this a list of votes
+    return [votes] # TODO: make this a list of votes
 
 
 def arrange_candidates(votes_array, num_winners):
@@ -72,6 +72,11 @@ def get_margins(votes_array, candidates, num_candidates):
     return margins
 
 
+def get_sequence_number(num_ballots):
+    """Returns random sequence number to draw ballot from."""
+    ballot_to_draw = random.randint(1, num_ballots)
+    return ballot_to_draw
+
 def get_ballot(num_winners, num_ballots):
     """ Step 2 of the BRAVO algorithm.
     Randomly picks a ballot to test and returns a list of its votes.
@@ -80,8 +85,7 @@ def get_ballot(num_winners, num_ballots):
     random function seeded by a user-generated seed.
     Note: 'random' should be seeded before this function is called.
     """
-    ballot_to_draw = random.randint(1, num_ballots)
-    ballot_votes = get_votes(ballot_to_draw)
+    ballot_votes = get_votes()
 
     if len(ballot_votes) <= num_winners:
         return []
@@ -150,6 +154,8 @@ def bravo(params):
     results to confirm with `risk_limit` confidence that the reported
     `num_winners` winner(s) are indeed the winners.
     """
+    print("params for bravo")
+    print(params)
     num_candidates = len(params.votes_array)
 
     # Ensure parameters make sense
@@ -164,7 +170,7 @@ def bravo(params):
     random.seed(params.seed)
     candidates = arrange_candidates(params.votes_array, params.num_winners)
     margins = get_margins(params.votes_array, candidates, num_candidates)
-    result = run_audit(candidates, params.num_ballots, params.max_tests, margins, params.risk_limit)
+    result = run_audit(candidates, params.num_ballots, params.max_tests, margins, params.seed, params.risk_limit)
     if result:
         print("Audit completed: the results stand.")
     else:
