@@ -72,6 +72,27 @@ function submitBravoAudit() {
             }
         })
         .then((response) => {
+            // Create WebSocket connection.
+            const socket = new WebSocket('ws://127.0.0.1:8080');
+
+            // Connection opened
+            socket.addEventListener('open', function (event) {
+                socket.send('Hello Server!');
+            });
+
+            socket.addEventListener('open', function (event) {
+                console.log("ERROR!");
+            });
+
+            socket.addEventListener('close', function (event) {
+                console.log('Closing!');
+            });
+
+            // Listen for messages
+            socket.addEventListener('message', function (event) {
+                console.log('Message from server ', event.data);
+            });
+
             return console.log(response);
         })
         .catch((error) => {

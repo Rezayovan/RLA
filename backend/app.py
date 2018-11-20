@@ -44,14 +44,16 @@ num-ballots-cast: int
 num-winners: int
 risk-limit: int
 '''
+socketConnection = None
 @app.route('/perform_audit', methods=['POST'])
 def perform_audit():
     # thread = Thread(target=run_bravo_hardcode)
     # thread.start()
     host = 'localhost'
     port = 8080
-    conn = bravo.connectionThread(host, port)
-    conn.start()
+    socketConnection = bravo.ConnectionThread()
+    socketConnection.start()
+    print("socket connection opened")
 
     form_data = request.form
     if 'audit-type' not in form_data:
@@ -85,6 +87,9 @@ def perform_audit():
 
 @app.route('/get_sequence_number', methods=['POST'])
 def get_seq_number():
+    if socketConnection is not None:
+        socketConnection.close()
+        print("socket connection closed")
     form_data = request.form
     num_ballots = int(form_data['num-ballots-cast'])
     num = get_sequence_number(num_ballots)
@@ -95,7 +100,7 @@ def get_seq_number():
 def receive_ballot():
     form = request.form
     append_buffer(int(form["vote"]))
-    return str(get_seq_number());
+    return str(get_seq_number())
 
 @app.route('/upload_open_election_data', methods=['POST'])
 def upload_open_election_data():

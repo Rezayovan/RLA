@@ -177,55 +177,33 @@ def bravo(params):
     else:
         print("Too many ballots tested. Perform a full hand-recount of the ballots.")
 
-
 import socket
 import threading
 import sys
-host = 'localhost'
-port = 6000
 
-class client(threading.Thread):
-    def __init__(self, conn):
-        super(client, self).__init__()
-        self.conn = conn
-        self.data = ""
-
-    def run(self):
-        while True:
-            self.data = self.data + self.conn.recv(1024)
-            if self.data.endswith(u"\r\n"):
-                print(self.data)
-                self.data = ""
-
-    def send_msg(self,msg):
-        self.conn.send(msg)
-
-    def close(self):
-        self.conn.close()
-
-class connectionThread(threading.Thread):
-    def __init__(self, host, port):
-        super(connectionThread, self).__init__()
-        # try:
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.s.bind((host,port))
-        self.s.listen(5)
-        print("listening on", (host, port))
-        # except socket.error:
-            # print('Failed to create socket')
-            # sys.exit()
+class ConnectionThread(threading.Thread):
+    def __init__(self):
+        super(ConnectionThread, self).__init__()
+        try:
+            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            # self.s.bind((host,port))
+            self.s.bind(('localhost',0))
+            self.s.listen(5)
+            print("listening on port", self.s.getsockname())
+        except socket.error:
+            print('Failed to create socket')
+            sys.exit(1)
         self.clients = []
 
     def run(self):
-        print("runninng")
+        print("starting socket run() func")
         conn, address = self.s.accept()
-        print("acceptedd")
-        c = client(conn)
-        c.start()
-        c.send_msg(u"dank memes\r\n")
-        self.clients.append(c)
-        print('[+] Client connected: {0}'.format(address[0]))
+        print("accepted connection")
+        print(f'[+] Client connected: {address[0]}:{address[1]}')
+
+    def close(self):
+        self.s.close()
 
 ##### DUMMY DATA ######
 VOTES_ARR = [20, 30, 40, 50, 60, 100]
