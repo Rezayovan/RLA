@@ -17,6 +17,9 @@ Candidates = recordclass("Candidates", "winners losers")
 Hypotheses = recordclass("Hypotheses", "test_stat reject_count")
 Bravo_Params = recordclass("BPA_Inputs", "votes_array num_ballots num_winners risk_limit seed max_tests")
 
+IS_DONE = False
+IS_DONE_MESSAGE = ""
+
 _BUFFER = []
 _LOCK = threading.Lock()
 _CV = threading.Condition(_LOCK)
@@ -173,37 +176,13 @@ def bravo(params):
     result = run_audit(candidates, params.num_ballots, params.max_tests, margins, params.seed, params.risk_limit)
 
     if result:
-        print("Audit completed: the results stand.")
+        # print("Audit completed: the results stand.")
+        IS_DONE = True
+        IS_DONE_MESSAGE = "Audit completed: the results stand."
     else:
-        print("Too many ballots tested. Perform a full hand-recount of the ballots.")
-
-import socket
-import threading
-import sys
-
-class ConnectionThread(threading.Thread):
-    def __init__(self):
-        super(ConnectionThread, self).__init__()
-        try:
-            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            # self.s.bind((host,port))
-            self.s.bind(('localhost',0))
-            self.s.listen(5)
-            print("listening on port", self.s.getsockname())
-        except socket.error:
-            print('Failed to create socket')
-            sys.exit(1)
-        self.clients = []
-
-    def run(self):
-        print("starting socket run() func")
-        conn, address = self.s.accept()
-        print("accepted connection")
-        print(f'[+] Client connected: {address[0]}:{address[1]}')
-
-    def close(self):
-        self.s.close()
+        # print("Too many ballots tested. Perform a full hand-recount of the ballots.")
+        IS_DONE = True
+        IS_DONE_MESSAGE = "Too many ballots tested. Perform a full hand-recount of the ballots."
 
 ##### DUMMY DATA ######
 VOTES_ARR = [20, 30, 40, 50, 60, 100]

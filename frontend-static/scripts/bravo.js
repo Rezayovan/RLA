@@ -72,26 +72,26 @@ function submitBravoAudit() {
             }
         })
         .then((response) => {
-            // Create WebSocket connection.
-            const socket = new WebSocket('ws://127.0.0.1:8080');
+            // // Create WebSocket connection.
+            // const socket = new WebSocket('ws://127.0.0.1:8080');
 
-            // Connection opened
-            socket.addEventListener('open', function (event) {
-                socket.send('Hello Server!');
-            });
+            // // Connection opened
+            // socket.addEventListener('open', function (event) {
+            //     socket.send('Hello Server!');
+            // });
 
-            socket.addEventListener('open', function (event) {
-                console.log("ERROR!");
-            });
+            // socket.addEventListener('open', function (event) {
+            //     console.log("ERROR!");
+            // });
 
-            socket.addEventListener('close', function (event) {
-                console.log('Closing!');
-            });
+            // socket.addEventListener('close', function (event) {
+            //     console.log('Closing!');
+            // });
 
-            // Listen for messages
-            socket.addEventListener('message', function (event) {
-                console.log('Message from server ', event.data);
-            });
+            // // Listen for messages
+            // socket.addEventListener('message', function (event) {
+            //     console.log('Message from server ', event.data);
+            // });
 
             return console.log(response);
         })
@@ -99,6 +99,18 @@ function submitBravoAudit() {
             return console.error(error);
         });
 }
+
+// Check status every 5 seconds
+setInterval(() => {
+    const API_ENDPOINT = `${API_ROOT}/check_status`
+    axios.get(API_ENDPOINT)
+        .then((response) => {
+            return console.log(response);
+        })
+        .catch((error) => {
+            return console.error(error);
+        });
+}, 5000);
 
 // =========================
 // FOR TESTING PURPOSES ONLY
