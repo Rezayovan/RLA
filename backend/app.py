@@ -61,8 +61,7 @@ def perform_audit():
         num_winners = int(form_data['num-winners'])
         risk_limit = float(form_data['risk-limit']) / 100
         random_seed = int(form_data['random-seed'])
-        # max_tests = int(form_data['max-tests'])
-        max_tests = 20
+        max_tests = int(form_data['max-tests'])
 
         # votes_array num_ballots num_winners risk_limit seed max_tests
         params_list = [candidate_data, num_ballots_cast, num_winners, risk_limit, random_seed, max_tests]

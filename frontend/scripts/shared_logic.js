@@ -103,6 +103,7 @@ export function fillTestData() {
 
     document.getElementById('risk-limit').value = testRiskLimit;
     document.getElementById('random-seed').value = Math.floor(Math.random() * 1000000000000000000000);
+    document.getElementById('max-tests').value = 20;
 }
 
 // FOR TESTING PURPOSES ONLY

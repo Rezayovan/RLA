@@ -59,6 +59,7 @@ function beginBravoAudit() {
     const numWinners = document.getElementById('num-winners').value;
     const riskLimit = document.getElementById('risk-limit').value;
     const randomSeed = document.getElementById('random-seed').value;
+    const maxTests = document.getElementById('max-tests').value;
 
     const reportedCandidateVotesSum = reportedCandidateVotes.reduce((a, b) => a + b, 0);
     if (reportedCandidateVotesSum > totalNumBallotsCast) {
@@ -83,6 +84,7 @@ function beginBravoAudit() {
     formData.append('num-winners', numWinners);
     formData.append('risk-limit', riskLimit);
     formData.append('random-seed', randomSeed);
+    formData.append('max-tests', maxTests);
 
     // Make API call
     axios.post(API_ENDPOINT, formData, {

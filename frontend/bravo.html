@@ -133,8 +133,8 @@
                         </div>
                     </div>
                     <div class="form-row">
-                        <div class="col-md-6 mb-3">
-                            <label for="risk-limit">Random seed</label>
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <label for="random-seed">Random seed</label>
                             <input type="number" class="form-control" id="random-seed" min="0">
                             <small class="form-text text-muted">
                                 We recommend using <a href="https://en.wikipedia.org/wiki/Pentagonal_trapezohedron#10-sided_dice" target="_blank" rel="noopener noreferrer">10-sided dice</a> to generate a random seed of 20 digits or more.
@@ -146,7 +146,12 @@
                             <!-- TODO: Warn people to not use an online die roller. -->
                         </div>
                     </div>
-                    <!-- TODO: Add MAX_TESTS input -->
+                    <div class="form-row">
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            <label for="max-tests">Max number of tests to run</label>
+                            <input type="number" class="form-control" id="max-tests" min="0">
+                        </div>
+                    </div>
                     <button type="button" class="btn btn-primary" id="begin-bravo">Begin audit</button>
                 </div>
 
