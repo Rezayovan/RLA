@@ -60,6 +60,21 @@ export function generateErrorAlert(idToAppendTo, errorMessage) {
     document.getElementById(idToAppendTo).appendChild(errorDiv);
 }
 
+export function transitionToAuditComplete(message) {
+    const auditCompleteDiv = document.createElement('div');
+    auditCompleteDiv.classList.add('alert', 'alert-success', 'mt-3');
+    auditCompleteDiv.role = 'alert';
+    auditCompleteDiv.innerHTML = message;
+
+    const idToDelete = ['sample-size-alert', 'ballot-to-record', 'continue-audit'];
+    for (const id of idToDelete) {
+        const element = document.getElementById(id);
+        element.parentNode.removeChild(element);
+    }
+
+    document.getElementById('ballot-container').appendChild(auditCompleteDiv);
+}
+
 // =========================
 // FOR TESTING PURPOSES ONLY
 

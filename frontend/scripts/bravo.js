@@ -1,7 +1,8 @@
-import { API_ROOT, addCandidate, removeCandidate, getCandidateNames, getCandidateVotes, clearValidationErrors, fillTestData, generateErrorAlert } from './shared_logic.js';
+import { API_ROOT, addCandidate, removeCandidate, getCandidateNames, getCandidateVotes, clearValidationErrors, fillTestData, generateErrorAlert, transitionToAuditComplete } from './shared_logic.js';
 
 let numBravoCandidates = 2; // default to 2 candidates
 let ballotSequenceNumber = 1; // 1-index the ballot sequence number
+let auditStatusCheckIntervalBegun = false;
 
 document.getElementById('add-candidate').addEventListener('click', () => {
     addCandidate(++numBravoCandidates);
@@ -18,6 +19,34 @@ document.getElementById('remove-candidate').addEventListener('click', () => {
 document.getElementById('begin-bravo').addEventListener('click', () => {
     beginBravoAudit();
 });
+
+function activateAuditStatusCheckInterval(interval) {
+    // Only start this interval once.
+    if (auditStatusCheckIntervalBegun) {
+        return;
+    }
+
+    auditStatusCheckIntervalBegun = true;
+
+    // Check for audit completion status every {interval} seconds
+    const auditStatusCheckInterval = setInterval(() => {
+        const API_ENDPOINT = `${API_ROOT}/get_audit_status`
+        axios.get(API_ENDPOINT)
+            .then((response) => {
+                // audit is complete
+                const payload = response.data;
+                if (payload.audit_complete) {
+                    transitionToAuditComplete(payload.completion_message);
+                    clearInterval(auditStatusCheckInterval);
+                    console.log('Audit completed successfully.');
+                }
+                return console.log(response);
+            })
+            .catch((error) => {
+                return console.error(error);
+            });
+    }, interval);
+}
 
 function beginBravoAudit() {
     // Remove error div if it exists
@@ -67,7 +96,9 @@ function beginBravoAudit() {
             // on response, give back the selected ballot from the back-end
             // TODO: pass in the ballot # to record
 
-            continueAudit(Math.floor((Math.random() * 1000) + 1));
+            const first_sequence = response.data.sequence_number_to_draw;
+
+            continueAudit(first_sequence);
             return console.log(response);
         })
         .catch((error) => {
@@ -104,6 +135,7 @@ function transitionInterfaceToInProgress() {
     const sampleSize = Math.floor((Math.random() * 100) + 1);
     const sampleSizeElement = document.createElement('div');
     sampleSizeElement.classList.add('alert', 'alert-info', 'd-inline-block');
+    sampleSizeElement.id = 'sample-size-alert';
     sampleSizeElement.role = 'alert';
     sampleSizeElement.innerHTML = `Estimated number of ballots to audit: <b>${sampleSize}</b>`;
     document.getElementById('ballot-container').appendChild(sampleSizeElement);
@@ -127,9 +159,6 @@ function getNextBallotToAudit() {
     // Cannot continue until next ballot to audit is returned from the back-end API
     document.getElementById('continue-audit').setAttribute('disabled', '');
 
-    // const API_ENDPOINT = `${API_ROOT}/perform_audit`
-    // const formData = new FormData();
-
     const voteNodes = document.querySelectorAll('#ballot-container .form-row');
     if (voteNodes.length == 0) {
         return console.error('voteNodes is empty in the Audit section. I am sad.');
@@ -149,31 +178,48 @@ function getNextBallotToAudit() {
     const ballotToRecordRow = document.getElementById('ballot-to-record');
     ballotToRecordRow.parentNode.removeChild(ballotToRecordRow);
 
+    const API_ENDPOINT = `${API_ROOT}/send_ballot_votes`
+    const formData = new FormData();
 
-    // formData.append('latest-ballot-votes', JSON.stringify(votes));
-    // // formData.append('session', __SOME__KEY__);
+    const totalNumBallotsCast = document.getElementById('total-ballots-cast').value;
 
-    // // Make API call
-    // axios.post(API_ENDPOINT, formData, {
-    //     headers: {
-    //         'Content-Type': 'multipart/form-data',
-    //     }
-    // })
-    // .then((response) => {
-    //     continueAudit(Math.floor((Math.random() * 1000) + 1)); // load next ballot into DOM
-    //     // Re-enable the button
-    //     document.getElementById('continue-audit').removeAttribute('disabled');
+    formData.append('audit-type', 'bravo');
+    formData.append('latest-ballot-votes', JSON.stringify(votes));
+    formData.append('num-ballots-cast', totalNumBallotsCast);
+    // formData.append('session', __SOME__KEY__);
 
-    //     // TODO: use response to extract the next ballot to audit and pass it into continueAudit function below
-    //     return console.log(response);
-    // })
-    // .catch((error) => {
-    //     return console.error(error);
-    // });
+    // Make API call
+    axios.post(API_ENDPOINT, formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        }
+    })
+    .then((response) => {
+        // Begin status checker to poll for the completion status every 5 seconds
+        activateAuditStatusCheckInterval(5000);
+
+        if (response.status === 204) {
+            // Let timer interval handle UI change.
+            console.log("Audit complete.");
+            return;
+        }
+
+        const next_sequence = response.data.sequence_number_to_draw;
+        continueAudit(next_sequence); // load next ballot into DOM
+
+        // Re-enable the button
+        document.getElementById('continue-audit').removeAttribute('disabled');
+
+        // TODO: use response to extract the next ballot to audit and pass it into continueAudit function below
+        return console.log(response);
+    })
+    .catch((error) => {
+        return console.error(error);
+    });
 
     // NOTE: remove these two lines once above API call is implemented
-    continueAudit(Math.floor((Math.random() * 1000) + 1)); // load next ballot into DOM
-    document.getElementById('continue-audit').removeAttribute('disabled');
+    // continueAudit(Math.floor((Math.random() * 1000) + 1)); // load next ballot into DOM
+    // document.getElementById('continue-audit').removeAttribute('disabled');
 }
 
 // Tell the user which ballot to cast and record.
