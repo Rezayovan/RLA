@@ -4,6 +4,8 @@ from pathlib import Path
 from werkzeug.utils import secure_filename
 from threading import Thread
 import json
+import time
+import random
 
 from utilities.csv_parser import parse_election_data_csv
 from utilities.helpers import delete_file, all_keys_present_in_dict
@@ -42,6 +44,8 @@ risk-limit: int
 '''
 
 AUDITS = {}
+RANDOM = random.Random()
+RANDOM.seed(int(round(time.time() * 1000)))
 
 # TODO: NEED TO RESET DATA BETEWEEN CALLS TO THIS FUNCTION
 @app.route('/perform_audit', methods=['POST'])
@@ -72,23 +76,30 @@ def perform_audit():
         bravo_object = BravoClass(*params_list)
         bravo_thread = Thread(target=bravo_object.bravo)
         bravo_thread.start()
+        global RANDOM
         global AUDITS
-        AUDITS[0] = bravo_object
+        key = RANDOM.randint(0, 9999999999999999)
+        AUDITS[key] = bravo_object
         first_sequence = bravo.get_sequence_number(num_ballots_cast)
-        return jsonify({"sequence_number_to_draw": first_sequence})
+        return jsonify({"sequence_number_to_draw": first_sequence, "session_id": key})
 
     return 'perform_audit() encountered an error!', 500
+
+def get_session_id():
+    pass
+
 
 @app.route("/send_ballot_votes", methods=['POST'])
 def send_ballot_votes():
     form_data = request.form
+    key = form_data['session_id']
     if 'audit-type' not in form_data:
         return 'Audit type not specified.', 500
 
     audit_type = form_data['audit-type']
-
+    
     if audit_type == 'bravo':
-        bravo = AUDITS[0]
+        bravo = AUDITS[key]
         if bravo.IS_DONE:
             # return status code 204
             return "BRAVO audit complete!", 204
@@ -111,7 +122,10 @@ def send_ballot_votes():
 def check_audit_status():
     # TODO: add this to support multiple users
     # session_id = request.form["session_id"]
-    bravo = AUDITS[0]
+    form = request.form
+    key = form['session_id']
+
+    bravo = AUDITS[key]
     res = {
         "audit_complete": bravo.IS_DONE,
         "completion_message": bravo.IS_DONE_MESSAGE
