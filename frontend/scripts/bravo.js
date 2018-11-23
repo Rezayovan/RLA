@@ -51,13 +51,13 @@ function beginBravoAudit() {
     const API_ENDPOINT = `${API_ROOT}/perform_audit`
     const formData = new FormData();
 
-    formData.append('audit-type', 'bravo');
-    formData.append('candidate-votes', JSON.stringify(reportedCandidateVotes));
-    formData.append('num-ballots-cast', totalNumBallotsCast);
-    formData.append('num-winners', numWinners);
-    formData.append('risk-limit', riskLimit);
-    formData.append('random-seed', randomSeed);
-    formData.append('max-tests', maxTests);
+    formData.append('audit_type', 'bravo');
+    formData.append('candidate_votes', JSON.stringify(reportedCandidateVotes));
+    formData.append('num_ballots_cast', totalNumBallotsCast);
+    formData.append('num_winners', numWinners);
+    formData.append('risk_limit', riskLimit);
+    formData.append('random_seed', randomSeed);
+    formData.append('max_tests', maxTests);
 
     // Make API call
     axios.post(API_ENDPOINT, formData, {
@@ -73,6 +73,7 @@ function beginBravoAudit() {
 
             const first_sequence = response.data.sequence_number_to_draw;
             session_id = response.data.session_id;
+            console.log("my session id:", session_id);
 
             continueAudit(first_sequence);
             return console.log(response);
@@ -196,9 +197,9 @@ function getNextBallotToAudit() {
 
     const totalNumBallotsCast = document.getElementById('total-ballots-cast').value;
 
-    formData.append('audit-type', 'bravo');
-    formData.append('latest-ballot-votes', JSON.stringify(votes));
-    formData.append('num-ballots-cast', totalNumBallotsCast);
+    formData.append('audit_type', 'bravo');
+    formData.append('latest_ballot_votes', JSON.stringify(votes));
+    formData.append('num_ballots_cast', totalNumBallotsCast);
     formData.append('session_id', session_id);
 
     // Make API call

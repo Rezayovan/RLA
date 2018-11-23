@@ -8,18 +8,18 @@ Candidates = recordclass("Candidates", "winners losers")
 Hypotheses = recordclass("Hypotheses", "test_stat reject_count")
 Bravo_Params = recordclass("BPA_Inputs", "votes_array num_ballots num_winners risk_limit seed max_tests")
 
-class BravoClass:
+class Bravo:
     def __init__(self, votes_array, num_ballots, num_winners,
                 risk_limit, seed, max_tests):
 
                 # global vars
-                self._BUFFER = queue.Queue()
+                self._VOTES_BUFFER = queue.Queue()
                 self._LOCK = threading.Lock()
                 self._CV = threading.Condition(self._LOCK)
 
                 # status vars
                 self.IS_DONE = False
-                self.IS_DONE_MESSAGE = "SHOULD NOT BE THIS"
+                self.IS_DONE_MESSAGE = ""
 
                 # audit variables
                 self.votes_array = votes_array
@@ -50,9 +50,9 @@ class BravoClass:
                 self.margins = None
                 self.audit_result = None
 
-    def append_buffer(self, vote):
+    def append_votes_buffer(self, vote):
         cv = self._CV
-        buffer = self._BUFFER
+        buffer = self._VOTES_BUFFER
 
         cv.acquire()
         buffer.put(vote)
@@ -62,7 +62,7 @@ class BravoClass:
 
     def get_votes(self):
         cv = self._CV
-        buffer = self._BUFFER
+        buffer = self._VOTES_BUFFER
 
         cv.acquire()
         print("getting vote")
@@ -122,20 +122,19 @@ class BravoClass:
         Note: 'random' should be seeded before this function is called.
         """
         num_winners = self.num_winners
-        num_ballots = self.num_ballots
         ballot_votes = self.get_votes()
 
         if len(ballot_votes) <= num_winners:
             return []
         return ballot_votes
 
-    def update_hypothesis(self):
+    def update_hypothesis(self, winner, loser):
         """ Step 5 of the BRAVO algorithm.
         Rejects the null hypothesis corresponding to the test statistic of
         the `winner` and `loser` pair. Increments the null hypothesis
         rejection count.
         """
-        hypotheses = self.hypothesis
+        hypotheses = self.hypotheses
         risk_limit = self.risk_limit
         if hypotheses.test_stat[winner][loser] >= 1/risk_limit:
             hypotheses.test_stat[winner][loser] = 0
@@ -148,14 +147,16 @@ class BravoClass:
         """
         candidates = self.candidates
         risk_limit = self.risk_limit
+        hypotheses = self.hypotheses
+        margins = self.margins
         if vote in candidates.winners: # Step 3
             for loser in candidates.losers:
                 hypotheses.test_stat[vote][loser] *= 2*margins[vote][loser]
-                update_hypothesis(hypotheses, vote, loser, risk_limit)
+                self.update_hypothesis(vote, loser)
         elif vote in candidates.losers: # Step 4
             for winner in candidates.winners:
                 hypotheses.test_stat[winner][vote] *= 2*(1-margins[winner][vote])
-                update_hypothesis(hypotheses, winner, vote, risk_limit)
+                self.update_hypothesis(winner, vote)
 
     def run_audit(self):
         """
@@ -184,7 +185,7 @@ class BravoClass:
             ballot_votes = self.get_ballot()
             assert all(0 <= vote < num_candidates for vote in ballot_votes)
             for vote in ballot_votes:
-                update_audit_stats(vote, candidates, hypotheses, margins, risk_limit)
+                self.update_audit_stats(vote)
             ballots_tested += 1
             print(ballots_tested)
 
