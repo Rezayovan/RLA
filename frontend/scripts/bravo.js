@@ -108,7 +108,7 @@ function activateAuditStatusCheckInterval(interval) {
                     clearInterval(auditStatusCheckInterval);
                     console.log('Audit completed successfully.');
                 }
-                return console.log(response);
+                // return console.log(response);
             })
             .catch((error) => {
                 return console.error(error);
@@ -204,8 +204,8 @@ function getNextBallotToAudit() {
         }
     })
     .then((response) => {
-        // Begin status checker to poll for the completion status every 5 seconds
-        activateAuditStatusCheckInterval(5000);
+        // Begin status checker to poll for the completion status every 3 seconds
+        activateAuditStatusCheckInterval(3000);
 
         if (response.status === 204) {
             // Let timer interval handle UI change.
