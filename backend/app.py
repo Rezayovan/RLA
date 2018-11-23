@@ -80,14 +80,10 @@ def perform_audit():
         global AUDITS
         key = RANDOM.randint(0, 9999999999999999)
         AUDITS[key] = bravo_object
-        first_sequence = bravo.get_sequence_number(num_ballots_cast)
+        first_sequence = bravo_object.get_sequence_number()
         return jsonify({"sequence_number_to_draw": first_sequence, "session_id": key})
 
     return 'perform_audit() encountered an error!', 500
-
-def get_session_id():
-    pass
-
 
 @app.route("/send_ballot_votes", methods=['POST'])
 def send_ballot_votes():
