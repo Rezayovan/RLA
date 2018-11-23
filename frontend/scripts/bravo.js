@@ -3,6 +3,7 @@ import {API_ROOT, addCandidate, removeCandidate, getCandidateNames, getCandidate
 let numBravoCandidates = 2; // default to 2 candidates
 let ballotSequenceNumber = 1; // 1-index the ballot sequence number
 let auditStatusCheckIntervalBegun = false;
+let session_id = "";
 
 document.getElementById('add-candidate').addEventListener('click', () => {
     addCandidate(++numBravoCandidates);
@@ -19,34 +20,6 @@ document.getElementById('remove-candidate').addEventListener('click', () => {
 document.getElementById('begin-bravo').addEventListener('click', () => {
     beginBravoAudit();
 });
-
-function activateAuditStatusCheckInterval(interval) {
-    // Only start this interval once.
-    if (auditStatusCheckIntervalBegun) {
-        return;
-    }
-
-    auditStatusCheckIntervalBegun = true;
-
-    // Check for audit completion status every {interval} seconds
-    const auditStatusCheckInterval = setInterval(() => {
-        const API_ENDPOINT = `${API_ROOT}/get_audit_status`
-        axios.get(API_ENDPOINT)
-            .then((response) => {
-                // audit is complete
-                const payload = response.data;
-                if (payload.audit_complete) {
-                    transitionToAuditComplete(payload.completion_message);
-                    clearInterval(auditStatusCheckInterval);
-                    console.log('Audit completed successfully.');
-                }
-                return console.log(response);
-            })
-            .catch((error) => {
-                return console.error(error);
-            });
-    }, interval);
-}
 
 function beginBravoAudit() {
     // Remove error div if it exists
@@ -99,6 +72,7 @@ function beginBravoAudit() {
             // TODO: pass in the ballot # to record
 
             const first_sequence = response.data.sequence_number_to_draw;
+            session_id = response.data.session_id;
 
             continueAudit(first_sequence);
             return console.log(response);
@@ -106,6 +80,43 @@ function beginBravoAudit() {
         .catch((error) => {
             return console.error(error);
         });
+}
+
+function activateAuditStatusCheckInterval(interval) {
+    // Only start this interval once.
+    if (auditStatusCheckIntervalBegun) {
+        return;
+    }
+
+    auditStatusCheckIntervalBegun = true;
+
+    // Check for audit completion status every {interval} seconds
+    const auditStatusCheckInterval = setInterval(() => {
+        const API_ENDPOINT = `${API_ROOT}/check_audit_status`
+        const formData = new FormData();
+
+        formData.append('session_id', session_id);
+
+        // Make API call
+        axios.post(API_ENDPOINT, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                }
+            })
+            .then((response) => {
+                // audit is complete
+                const payload = response.data;
+                if (payload.audit_complete) {
+                    transitionToAuditComplete(payload.completion_message);
+                    clearInterval(auditStatusCheckInterval);
+                    console.log('Audit completed successfully.');
+                }
+                return console.log(response);
+            })
+            .catch((error) => {
+                return console.error(error);
+            });
+    }, interval);
 }
 
 // Clean up UI to remove certain buttons and disable input boxes to not mess with audit
@@ -188,7 +199,7 @@ function getNextBallotToAudit() {
     formData.append('audit-type', 'bravo');
     formData.append('latest-ballot-votes', JSON.stringify(votes));
     formData.append('num-ballots-cast', totalNumBallotsCast);
-    // formData.append('session', __SOME__KEY__);
+    formData.append('session_id', session_id);
 
     // Make API call
     axios.post(API_ENDPOINT, formData, {

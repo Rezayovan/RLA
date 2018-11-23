@@ -8,7 +8,7 @@ import json
 from utilities.csv_parser import parse_election_data_csv
 from utilities.helpers import delete_file, all_keys_present_in_dict
 
-from audits import bravo
+# from audits import bravo
 
 from audits.Bravo_OOP import BravoClass
 
@@ -101,15 +101,14 @@ def send_ballot_votes():
         ballot_votes_list = [int(vote) for vote in ballot_votes_json]
         bravo.append_buffer(ballot_votes_list)
 
-        num_ballots = int(form_data['num-ballots-cast'])
         sequence = bravo.get_sequence_number()
         print("got sequence number")
         return jsonify({"sequence_number_to_draw": sequence})
 
     return 'send_ballot_votes() encountered an error!', 500
 
-@app.route("/get_audit_status", methods=['GET'])
-def get_audit_status():
+@app.route("/check_audit_status", methods=['POST'])
+def check_audit_status():
     # TODO: add this to support multiple users
     # session_id = request.form["session_id"]
     bravo = AUDITS[0]
