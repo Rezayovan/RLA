@@ -68,12 +68,10 @@ function beginBravoAudit() {
         .then((response) => {
             // On success clean up the UI and transition it to in-progress audit state
             transitionInterfaceToInProgress();
-            // on response, give back the selected ballot from the back-end
-            // TODO: pass in the ballot # to record
 
             const first_sequence = response.data.sequence_number_to_draw;
             session_id = response.data.session_id;
-            console.log("my session id:", session_id);
+            console.log("Session ID:", session_id);
 
             continueAudit(first_sequence);
             return console.log(response);
@@ -85,9 +83,7 @@ function beginBravoAudit() {
 
 function activateAuditStatusCheckInterval(interval) {
     // Only start this interval once.
-    if (auditStatusCheckIntervalBegun) {
-        return;
-    }
+    if (auditStatusCheckIntervalBegun) return;
 
     auditStatusCheckIntervalBegun = true;
 
@@ -164,8 +160,7 @@ function transitionInterfaceToInProgress() {
 
     // Add event listener to continue button
     document.getElementById('continue-audit').addEventListener('click', () => {
-        getNextBallotToAudit(); // make request
-        // continueAudit(Math.floor((Math.random() * 1000) + 1)); // load next ballot into DOM
+        getNextBallotToAudit();
     });
 }
 
@@ -230,10 +225,6 @@ function getNextBallotToAudit() {
     .catch((error) => {
         return console.error(error);
     });
-
-    // NOTE: remove these two lines once above API call is implemented
-    // continueAudit(Math.floor((Math.random() * 1000) + 1)); // load next ballot into DOM
-    // document.getElementById('continue-audit').removeAttribute('disabled');
 }
 
 // Tell the user which ballot to cast and record.

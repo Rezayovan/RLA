@@ -1,12 +1,17 @@
 import numpy as np
-from recordclass import recordclass
 import threading
 import random
 import queue
 
-Candidates = recordclass("Candidates", "winners losers")
-Hypotheses = recordclass("Hypotheses", "test_stat reject_count")
-Bravo_Params = recordclass("BPA_Inputs", "votes_array num_ballots num_winners risk_limit seed max_tests")
+class Candidates:
+    def __init__(self, winners_in, losers_in):
+        self.winners = winners_in
+        self.losers = losers_in
+
+class Hypotheses:
+    def __init__(self, test_stat_in, reject_count_in):
+        self.test_stat = test_stat_in
+        self.reject_count = reject_count_in
 
 class Bravo:
     def __init__(self, votes_array, num_ballots, num_winners,
@@ -56,7 +61,6 @@ class Bravo:
 
         cv.acquire()
         buffer.put(vote)
-        print(buffer)
         cv.notify()
         cv.release()
 
@@ -110,7 +114,7 @@ class Bravo:
     def get_sequence_number(self):
         """Returns random sequence number to draw ballot from."""
         num_ballots = self.num_ballots
-        ballot_to_draw = random.randint(1, num_ballots)
+        ballot_to_draw = self.random_gen.randint(1, num_ballots)
         return ballot_to_draw
 
     def get_ballot(self):
@@ -146,7 +150,6 @@ class Bravo:
         hypothesis when appropriate.
         """
         candidates = self.candidates
-        risk_limit = self.risk_limit
         hypotheses = self.hypotheses
         margins = self.margins
         if vote in candidates.winners: # Step 3
@@ -165,14 +168,8 @@ class Bravo:
         candidates = self.candidates
         num_winners = len(candidates.winners)
         num_losers = len(candidates.losers)
-        num_candidates = self.num_candidates
-
-        candidates = self.candidates
-        num_ballots = self.num_ballots
+        num_candidates = num_winners + num_losers
         max_tests = self.max_tests
-        margins = self.margins
-        seed = self.seed
-        risk_limit = self.risk_limit
 
         test_statistic = np.ones([num_candidates, num_candidates])
         reject_count = 0
