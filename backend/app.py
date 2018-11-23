@@ -10,6 +10,8 @@ from utilities.helpers import delete_file, all_keys_present_in_dict
 
 from audits import bravo
 
+from audits.Bravo_OOP import BravoClass
+
 app = Flask(__name__)
 
 # Stretch goal: add support for XLS files
@@ -39,6 +41,8 @@ num-winners: int
 risk-limit: int
 '''
 
+AUDITS = {}
+
 # TODO: NEED TO RESET DATA BETEWEEN CALLS TO THIS FUNCTION
 @app.route('/perform_audit', methods=['POST'])
 def perform_audit():
@@ -65,8 +69,11 @@ def perform_audit():
 
         # votes_array num_ballots num_winners risk_limit seed max_tests
         params_list = [candidate_data, num_ballots_cast, num_winners, risk_limit, random_seed, max_tests]
-        bravo_thread = Thread(target=bravo.run_bravo, args=[params_list])
+        bravo_object = BravoClass(*params_list)
+        bravo_thread = Thread(target=bravo_object.bravo)
         bravo_thread.start()
+        global AUDITS
+        AUDITS[0] = bravo_object
         first_sequence = bravo.get_sequence_number(num_ballots_cast)
         return jsonify({"sequence_number_to_draw": first_sequence})
 
@@ -81,6 +88,7 @@ def send_ballot_votes():
     audit_type = form_data['audit-type']
 
     if audit_type == 'bravo':
+        bravo = AUDITS[0]
         if bravo.IS_DONE:
             # return status code 204
             return "BRAVO audit complete!", 204
@@ -94,7 +102,8 @@ def send_ballot_votes():
         bravo.append_buffer(ballot_votes_list)
 
         num_ballots = int(form_data['num-ballots-cast'])
-        sequence = bravo.get_sequence_number(num_ballots)
+        sequence = bravo.get_sequence_number()
+        print("got sequence number")
         return jsonify({"sequence_number_to_draw": sequence})
 
     return 'send_ballot_votes() encountered an error!', 500
@@ -103,6 +112,7 @@ def send_ballot_votes():
 def get_audit_status():
     # TODO: add this to support multiple users
     # session_id = request.form["session_id"]
+    bravo = AUDITS[0]
     res = {
         "audit_complete": bravo.IS_DONE,
         "completion_message": bravo.IS_DONE_MESSAGE
