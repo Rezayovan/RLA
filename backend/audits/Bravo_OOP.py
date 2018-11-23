@@ -168,7 +168,7 @@ class Bravo:
         candidates = self.candidates
         num_winners = len(candidates.winners)
         num_losers = len(candidates.losers)
-        num_candidates = num_winners + num_losers
+        num_candidates = self.num_candidates
         max_tests = self.max_tests
 
         test_statistic = np.ones([num_candidates, num_candidates])
