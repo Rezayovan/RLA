@@ -1,4 +1,4 @@
-import { API_ROOT, addCandidate, removeCandidate, getCandidateNames, getCandidateVotes, clearValidationErrors, fillTestData, generateErrorAlert, transitionToAuditComplete } from './shared_logic.js';
+import {API_ROOT, addCandidate, removeCandidate, getCandidateNames, getCandidateVotes, clearValidationErrors, fillTestData, generateErrorAlert, transitionToAuditComplete } from './shared_logic.js';
 
 let numBravoCandidates = 2; // default to 2 candidates
 let ballotSequenceNumber = 1; // 1-index the ballot sequence number

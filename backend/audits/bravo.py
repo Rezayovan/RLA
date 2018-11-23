@@ -27,6 +27,7 @@ _CV = threading.Condition(_LOCK)
 # TODO: destroy any other running threads running an audit
 # TODO: call this in app.py in the /perform_audit route
 def reset_audit():
+    global IS_DONE, IS_DONE_MESSAGE
     _BUFFER = []
     IS_DONE = False
     IS_DONE_MESSAGE = ""
@@ -184,6 +185,8 @@ def bravo(params):
     margins = get_margins(params.votes_array, candidates, num_candidates)
     result = run_audit(candidates, params.num_ballots, params.max_tests, margins, params.seed, params.risk_limit)
 
+    print(result)
+    global IS_DONE, IS_DONE_MESSAGE
     if result:
         # print("Audit completed: the results stand.")
         IS_DONE = True
@@ -194,6 +197,7 @@ def bravo(params):
         IS_DONE_MESSAGE = "Too many ballots tested. Perform a full hand-recount of the ballots."
 
 def run_bravo(params):
+    reset_audit()
     PARAMS = Bravo_Params(*params)
     bravo(PARAMS)
 

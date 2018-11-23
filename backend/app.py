@@ -107,6 +107,7 @@ def get_audit_status():
         "audit_complete": bravo.IS_DONE,
         "completion_message": bravo.IS_DONE_MESSAGE
     }
+    print(bravo.IS_DONE, bravo.IS_DONE_MESSAGE)
     return jsonify(res)
 
 @app.route('/upload_open_election_data', methods=['POST'])
