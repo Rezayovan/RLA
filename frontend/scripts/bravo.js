@@ -34,6 +34,19 @@ function beginBravoAudit() {
     const randomSeed = document.getElementById('random-seed').value;
     const maxTests = document.getElementById('max-tests').value;
 
+    // Too few candidates
+    if (reportedCandidateVotes.length < 2) {
+        const errorMsg = `Not enough candidates to begin audit. Please enter at least 2 candidates to proceed.`;
+        return generateErrorAlert('audit-info', errorMsg);
+    }
+
+    // Too many winners
+    // TODO: is num_winners == number of candidates OK?
+    if (numWinners > reportedCandidateVotes.length) {
+        const errorMsg = `Too many winners inputted. Please lower the number of winners to proceed.`;
+        return generateErrorAlert('audit-info', errorMsg);
+    }
+
     const reportedCandidateVotesSum = reportedCandidateVotes.reduce((a, b) => a + b, 0);
     if (reportedCandidateVotesSum > totalNumBallotsCast) {
         const errorMsg = `Reported candidate votes (${reportedCandidateVotesSum}) are greater than the total number of votes (${totalNumBallotsCast}). Please correct this and try again.`;
@@ -66,8 +79,10 @@ function beginBravoAudit() {
             }
         })
         .then((response) => {
+            const estSampleSize = response.data.estimated_sample_size
+
             // On success clean up the UI and transition it to in-progress audit state
-            transitionInterfaceToInProgress();
+            transitionInterfaceToInProgress(estSampleSize);
 
             const first_sequence = response.data.sequence_number_to_draw;
             session_id = response.data.session_id;
@@ -117,7 +132,7 @@ function activateAuditStatusCheckInterval(interval) {
 }
 
 // Clean up UI to remove certain buttons and disable input boxes to not mess with audit
-function transitionInterfaceToInProgress() {
+function transitionInterfaceToInProgress(sampleSize) {
     // Disable text inputs
     const auditInputs = document.querySelectorAll('#audit-info input');
     for (const input of auditInputs) {
@@ -140,9 +155,7 @@ function transitionInterfaceToInProgress() {
     sectionTitle.innerHTML = 'Audit';
     document.getElementById('ballot-container').appendChild(sectionTitle);
 
-    // Get estimates sample size
-    // TODO: get this from the API
-    const sampleSize = Math.floor((Math.random() * 100) + 1);
+    // Display estimated sample size
     const sampleSizeElement = document.createElement('div');
     sampleSizeElement.classList.add('alert', 'alert-info', 'd-inline-block');
     sampleSizeElement.id = 'sample-size-alert';

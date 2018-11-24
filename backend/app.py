@@ -51,7 +51,6 @@ def perform_audit():
     if audit_type == 'bravo':
         form_params = ['candidate_votes', 'num_ballots_cast', 'num_winners', 'risk_limit', 'random_seed']
         if not all_keys_present_in_dict(form_params, form_data):
-            print('Not all required BRAVO parameters were provided.')
             return 'Not all required BRAVO parameters were provided.', 500
 
         # Parse candidate name and vote JSON data
@@ -69,6 +68,10 @@ def perform_audit():
         bravo_thread = Thread(target=bravo_object.bravo)
         bravo_thread.start()
 
+        # get sample size
+
+        estimated_sample_size = bravo_object.get_sample_size()
+
         # Save object to retrieve audit status for a particular user
         # in subsequent requests
         session_id = token_urlsafe(32)
@@ -78,11 +81,11 @@ def perform_audit():
         first_sequence = bravo_object.get_sequence_number()
         res = {
             'sequence_number_to_draw': first_sequence,
+            'estimated_sample_size': estimated_sample_size,
             'session_id': session_id
         }
         return jsonify(res)
 
-    print('perform_audit() encountered an error!')
     return 'perform_audit() encountered an error!', 500
 
 @app.route('/send_ballot_votes', methods=['POST'])

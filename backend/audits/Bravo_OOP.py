@@ -2,6 +2,7 @@ import numpy as np
 import threading
 import random
 import queue
+import math
 
 class Candidates:
     def __init__(self, winners_in, losers_in):
@@ -50,10 +51,9 @@ class Bravo:
                 else:
                     self.max_tests = min(self.max_tests, sum(self.votes_array))
 
-                self.candidates = None
+                self.candidates = self.arrange_candidates()
+                self.margins = self.get_margins()
                 self.hypotheses = None
-                self.margins = None
-                self.audit_result = None
 
     def append_votes_buffer(self, vote):
         cv = self._CV
@@ -63,6 +63,28 @@ class Bravo:
         buffer.put(vote)
         cv.notify()
         cv.release()
+
+    def get_sample_size(self):
+        votes_array = self.votes_array
+        winners = self.candidates.winners
+        losers = self.candidates.losers
+        risk_limit = self.risk_limit
+
+        # find the smallest margin of victory min(winner_votes) - max(loser_votes)
+        smallest_winner = min(winners, key=lambda winner_idx:votes_array[winner_idx])
+        largest_loser = max(losers, key=lambda winner_idx:votes_array[winner_idx])
+
+        p_w = votes_array[smallest_winner]
+        p_l = votes_array[largest_loser]
+
+        s_w = p_w / (p_w + p_l)
+
+        z_w = math.log(2 * s_w)
+        z_l = math.log(2 - (2 * s_w))
+
+        asn = (math.log(1 / risk_limit) + (z_w / 2)) / ((p_w * z_w) + (p_l * z_l))
+
+        return asn
 
     def get_votes(self):
         cv = self._CV
@@ -87,7 +109,10 @@ class Bravo:
         num_winners = self.num_winners
 
         sorted_candidates = sorted(enumerate(votes_array), key=lambda t: t[1], reverse=True)
+
+        # Indices of winners in the votes array
         winners = set(t[0] for t in sorted_candidates[:num_winners])
+        # Indices of losers in the votes array
         losers = set(t[0] for t in sorted_candidates[num_winners:])
 
         return Candidates(winners, losers)
@@ -101,8 +126,7 @@ class Bravo:
         candidates = self.candidates
         votes_array = self.votes_array
         num_candidates = self.num_candidates
-        self.margins = np.zeros([num_candidates, num_candidates])
-        margins = self.margins
+        margins = np.zeros([num_candidates, num_candidates])
 
         for winner in candidates.winners:
             for loser in candidates.losers:
@@ -199,13 +223,11 @@ class Bravo:
         results to confirm with `risk_limit` confidence that the reported
         `num_winners` winner(s) are indeed the winners.
         """
-        self.candidates = self.arrange_candidates()
-        self.margins = self.get_margins()
-        self.audit_result = self.run_audit()
+        audit_result = self.run_audit()
         self.IS_DONE = True
 
         print("audit has been finished")
-        if self.audit_result:
+        if audit_result:
             self.IS_DONE_MESSAGE = "Audit completed: the results stand."
         else:
             self.IS_DONE_MESSAGE = "Too many ballots tested. Perform a full hand-recount of the ballots."
