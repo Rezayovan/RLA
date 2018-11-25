@@ -69,7 +69,9 @@ export function transitionToAuditComplete(message) {
     const idToDelete = ['sample-size-alert', 'ballot-to-record', 'continue-audit'];
     for (const id of idToDelete) {
         const element = document.getElementById(id);
-        element.parentNode.removeChild(element);
+        if (element) {
+            element.parentNode.removeChild(element);
+        }
     }
 
     document.getElementById('ballot-container').appendChild(auditCompleteDiv);
@@ -103,7 +105,7 @@ export function fillTestData() {
 
     document.getElementById('risk-limit').value = testRiskLimit;
     document.getElementById('random-seed').value = Math.floor(Math.random() * 1000000000000000000000);
-    document.getElementById('max-tests').value = 4;
+    document.getElementById('max-tests').value = 20;
 }
 
 // FOR TESTING PURPOSES ONLY

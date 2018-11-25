@@ -69,20 +69,28 @@ class Bravo:
         winners = self.candidates.winners
         losers = self.candidates.losers
         risk_limit = self.risk_limit
+        num_ballots = self.num_ballots
 
         # find the smallest margin of victory min(winner_votes) - max(loser_votes)
         smallest_winner = min(winners, key=lambda winner_idx:votes_array[winner_idx])
         largest_loser = max(losers, key=lambda winner_idx:votes_array[winner_idx])
 
-        p_w = votes_array[smallest_winner]
-        p_l = votes_array[largest_loser]
+        v_w = votes_array[smallest_winner]
+        v_l = votes_array[largest_loser]
 
-        s_w = p_w / (p_w + p_l)
+        s_w = v_w / (v_w + v_l)
 
-        z_w = math.log(2 * s_w)
-        z_l = math.log(2 - (2 * s_w))
+        z_w = math.log(2.0 * s_w)
+        z_l = math.log(2.0 * (1 - s_w))
 
-        asn = (math.log(1 / risk_limit) + (z_w / 2)) / ((p_w * z_w) + (p_l * z_l))
+        n_wl = v_w + v_l
+
+        p_w = v_w / n_wl
+        p_l = v_l / n_wl
+
+        p = n_wl / num_ballots
+
+        asn = math.ceil((math.log(1.0 / risk_limit) + (z_w / 2.0)) / (p * ((p_w * z_w) + (p_l * z_l))))
 
         return asn
 
