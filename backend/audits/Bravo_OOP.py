@@ -3,6 +3,7 @@ import random
 import queue
 import math
 import numpy as np
+from .BaseAudit import BaseAudit
 
 # TODO: Move Candidates and Hypotheses into own classes
 class Candidates:
@@ -15,7 +16,7 @@ class Hypotheses:
         self.test_stat = test_stat_in
         self.reject_count = 0
 
-class Bravo:
+class Bravo(BaseAudit):
     """ Ballot-polling audit in Python
     A Python implementation of the BRAVO algorithm described in "BRAVO:
     Ballot-polling Risk-limiting Audits to Verify Outcomes" (Lindeman,
@@ -24,16 +25,7 @@ class Bravo:
     """
     def __init__(self, votes_array, num_ballots, num_winners,
                  risk_limit, seed, max_tests):
-
-        # global vars
-        self._VOTES_BUFFER = queue.Queue()
-        self._LOCK = threading.Lock()
-        self._CV = threading.Condition(self._LOCK)
-
-        # status vars
-        self.IS_DONE = False
-        self.IS_DONE_MESSAGE = ""
-
+        super().__init__()
         # Set audit variables equal to parameters and sanity check
         assert all(votes >= 0 for votes in votes_array)
         self.votes_array = votes_array
@@ -59,14 +51,7 @@ class Bravo:
         self.margins = self.get_margins()
         self.hypotheses = None
 
-    def append_votes_buffer(self, vote):
-        cv = self._CV
-        buffer = self._VOTES_BUFFER
 
-        cv.acquire()
-        buffer.put(vote)
-        cv.notify()
-        cv.release()
 
     def get_sample_size(self):
         """
@@ -101,19 +86,6 @@ class Bravo:
 
         return asn
 
-    def get_votes(self):
-        cv = self._CV
-        buffer = self._VOTES_BUFFER
-
-        cv.acquire()
-        print("getting vote")
-        while buffer.empty():
-            print("wait condition")
-            cv.wait()
-        votes = buffer.get()
-        cv.release()
-
-        return votes
 
     def arrange_candidates(self):
         """
@@ -146,11 +118,6 @@ class Bravo:
 
         return margins
 
-    def get_sequence_number(self):
-        """Returns random sequence number to draw ballot from."""
-        num_ballots = self.num_ballots
-        ballot_to_draw = self.random_gen.randint(1, num_ballots)
-        return ballot_to_draw
 
     def get_ballot(self):
         """ Step 2 of the BRAVO algorithm.
@@ -160,10 +127,8 @@ class Bravo:
         random function seeded by a user-generated seed.
         Note: 'random' should be seeded before this function is called.
         """
-        # TODO: use get_sequence_number
         ballot_votes = self.get_votes()
-
-        if len(ballot_votes) <= self.num_winners:
+        if len(ballot_votes) > self.num_winners:
             return []
         return ballot_votes
 
@@ -205,16 +170,13 @@ class Bravo:
         num_null_hypotheses = num_winners * num_losers
         self.hypotheses = Hypotheses(np.ones([num_candidates, num_candidates]))
 
-        print(self.margins)
-
 
         for _ in range(max_tests): # Step 6
             ballot_votes = self.get_ballot()
             assert all(0 <= vote < num_candidates for vote in ballot_votes)
+            assert isinstance(ballot_votes, list)
             for vote in ballot_votes:
                 self.update_audit_stats(vote)
-
-            print(self.hypotheses.test_stat)
             # Step 6
             if self.hypotheses.reject_count >= num_null_hypotheses:
                 return True
@@ -236,3 +198,18 @@ class Bravo:
             self.IS_DONE_MESSAGE = "Audit completed: the results stand."
         else:
             self.IS_DONE_MESSAGE = "Too many ballots tested. Perform a full hand-recount of the ballots."
+
+#     def __init__(self, votes_array, num_ballots, num_winners,
+#                 risk_limit, seed, max_tests):
+
+if __name__ == "__main__":
+    ##### DUMMY DATA ######
+    VOTES_ARR = [0, 100]
+    TOTAL_VOTES = sum(VOTES_ARR)
+    NUM_WINNERS = 1
+    ALPHA = .10
+    MAX_TESTS = 10
+    SEED = 1234567890
+    ######################
+    bravo = Bravo(VOTES_ARR, TOTAL_VOTES, NUM_WINNERS, ALPHA, SEED, MAX_TESTS)
+    bravo.bravo()

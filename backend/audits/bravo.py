@@ -98,7 +98,7 @@ def get_ballot(num_winners, num_ballots):
     random function seeded by a user-generated seed.
     Note: 'random' should be seeded before this function is called.
     """
-    ballot_votes = get_votes()
+    ballot_votes = [1]
 
     if len(ballot_votes) <= num_winners:
         return []
@@ -120,6 +120,8 @@ def update_audit_stats(vote, candidates, hypotheses, margins, risk_limit):
     Updates the `test_statistic` and rejects the corresponding null
     hypothesis when appropriate.
     """
+    print("Test stat first: ", self.hypotheses.test_stat)
+
     if vote in candidates.winners: # Step 3
         for loser in candidates.losers:
             hypotheses.test_stat[vote][loser] *= 2*margins[vote][loser]
@@ -128,6 +130,8 @@ def update_audit_stats(vote, candidates, hypotheses, margins, risk_limit):
         for winner in candidates.winners:
             hypotheses.test_stat[winner][vote] *= 2*(1-margins[winner][vote])
             update_hypothesis(hypotheses, winner, vote, risk_limit)
+
+    print("Test stat first: ", self.hypotheses.test_stat)
 
 
 def run_audit(candidates, num_ballots, max_tests, margins, seed, risk_limit):
@@ -207,11 +211,11 @@ def run_bravo(params):
 
 if __name__ == "__main__":
     ##### DUMMY DATA ######
-    VOTES_ARR = [20, 30, 40, 50, 60, 100]
+    VOTES_ARR = [0, 100]
     TOTAL_VOTES = sum(VOTES_ARR)
     NUM_WINNERS = 1
     ALPHA = .10
-    MAX_TESTS = 20
+    MAX_TESTS = 10
     SEED = 1234567890
     ######################
     PARAMS = Bravo_Params(VOTES_ARR, TOTAL_VOTES, NUM_WINNERS, ALPHA, SEED, MAX_TESTS)
