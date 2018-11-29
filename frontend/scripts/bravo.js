@@ -1,7 +1,6 @@
-import {API_ROOT, addCandidate, removeCandidate, getCandidateNames, getCandidateVotes, clearValidationErrors, fillTestData, generateErrorAlert, transitionToAuditComplete } from './shared_logic.js';
+import {API_ROOT, addCandidate, removeCandidate, getCandidateNames, getCandidateVotes, clearValidationErrors, fillTestData, generateErrorAlert } from './shared_logic.js';
 
 let numBravoCandidates = 2; // default to 2 candidates
-let ballotSequenceNumber = 1; // 1-index the ballot sequence number
 let auditStatusCheckIntervalBegun = false;
 let session_id = "";
 
@@ -81,14 +80,14 @@ function beginBravoAudit() {
         .then((response) => {
             const estSampleSize = response.data.estimated_sample_size
 
-            // On success clean up the UI and transition it to in-progress audit state
-            transitionInterfaceToInProgress(estSampleSize);
-
-            const first_sequence = response.data.sequence_number_to_draw;
+            const firstSequence = response.data.sequence_number_to_draw;
             session_id = response.data.session_id;
             console.log("Session ID:", session_id);
 
-            continueAudit(first_sequence);
+            // On success clean up the UI and transition it to in-progress audit state
+            transitionInterfaceToInProgress(estSampleSize, firstSequence);
+
+            // continueAudit(first_sequence);
             return console.log(response);
         })
         .catch((error) => {
@@ -116,7 +115,6 @@ function activateAuditStatusCheckInterval(interval) {
                 }
             })
             .then((response) => {
-                // audit is complete
                 const payload = response.data;
                 if (payload.audit_complete) {
                     transitionToAuditComplete(payload.completion_message);
@@ -132,7 +130,7 @@ function activateAuditStatusCheckInterval(interval) {
 }
 
 // Clean up UI to remove certain buttons and disable input boxes to not mess with audit
-function transitionInterfaceToInProgress(sampleSize) {
+function transitionInterfaceToInProgress(sampleSize, firstSequence) {
     // Disable text inputs
     const auditInputs = document.querySelectorAll('#audit-info input');
     for (const input of auditInputs) {
@@ -153,7 +151,11 @@ function transitionInterfaceToInProgress(sampleSize) {
     const sectionTitle = document.createElement('h3');
     sectionTitle.classList.add('mt-3');
     sectionTitle.innerHTML = 'Audit';
-    document.getElementById('ballot-container').appendChild(sectionTitle);
+    document.getElementById('audit-container').appendChild(sectionTitle);
+
+    const ballotContainerDiv = document.createElement('div');
+    ballotContainerDiv.id = 'ballot-container';
+    document.getElementById('audit-container').appendChild(ballotContainerDiv);
 
     // Display estimated sample size
     const sampleSizeElement = document.createElement('div');
@@ -161,7 +163,31 @@ function transitionInterfaceToInProgress(sampleSize) {
     sampleSizeElement.id = 'sample-size-alert';
     sampleSizeElement.role = 'alert';
     sampleSizeElement.innerHTML = `Estimated number of ballots to audit: <b>${sampleSize}</b>`;
-    document.getElementById('ballot-container').appendChild(sampleSizeElement);
+    ballotContainerDiv.appendChild(sampleSizeElement);
+
+    // Display checkboxes
+    const candidateNames = getCandidateNames();
+    const newBallot = document.createElement('div');
+    newBallot.className = 'form-row';
+    newBallot.id = 'ballot-to-record';
+
+    const newRow = document.createElement('div');
+    newRow.classList.add('col-md-auto', 'mb-3');
+    newBallot.appendChild(newRow);
+
+    // eslint-disable-next-line
+    let rowContent = `<h6>Draw ballot <b id='ballot-sequence-num'>#${firstSequence}</b> and record ballot selections</h6>`;
+
+    for (let i = 0; i < candidateNames.length; ++i) {
+        rowContent += `\
+        <div class="form-check form-check-inline">\
+            <input class="form-check-input" type="checkbox" name="ballotSeqInlineRadio-${i}" id="ballotSeqInlineRadio-${i}" value="${candidateNames[i]}">\
+            <label class="form-check-label" for="ballotSeqInlineRadio-${i}">${candidateNames[i]}</label>\
+        </div>`;
+    }
+
+    newRow.innerHTML = rowContent;
+    document.getElementById('ballot-container').appendChild(newBallot);
 
     // Add continue button
     const continueButton = document.createElement('button');
@@ -169,12 +195,26 @@ function transitionInterfaceToInProgress(sampleSize) {
     continueButton.classList.add('btn', 'btn-success');
     continueButton.id = 'continue-audit';
     continueButton.innerHTML = 'Continue audit';
-    document.getElementById('form-container').appendChild(continueButton);
+    document.getElementById('ballot-container').appendChild(continueButton);
 
     // Add event listener to continue button
     document.getElementById('continue-audit').addEventListener('click', () => {
         getNextBallotToAudit();
     });
+}
+
+export function transitionToAuditComplete(message) {
+    const auditCompleteDiv = document.createElement('div');
+    auditCompleteDiv.classList.add('alert', 'alert-success', 'mt-3');
+    auditCompleteDiv.role = 'alert';
+    auditCompleteDiv.innerHTML = message;
+
+    const element = document.getElementById('ballot-container');
+    if (element) {
+        element.parentNode.removeChild(element);
+    }
+
+    document.getElementById('audit-container').appendChild(auditCompleteDiv);
 }
 
 function getNextBallotToAudit() {
@@ -197,8 +237,8 @@ function getNextBallotToAudit() {
     console.log('Vote data:', votes);
 
     // Remove checkbox container to load new one
-    const ballotToRecordRow = document.getElementById('ballot-to-record');
-    ballotToRecordRow.parentNode.removeChild(ballotToRecordRow);
+    // const ballotToRecordRow = document.getElementById('ballot-to-record');
+    // ballotToRecordRow.parentNode.removeChild(ballotToRecordRow);
 
     const API_ENDPOINT = `${API_ROOT}/send_ballot_votes`
     const formData = new FormData();
@@ -242,33 +282,19 @@ function getNextBallotToAudit() {
 
 // Tell the user which ballot to cast and record.
 function continueAudit(ballotNumToAudit) {
-    // once audit is begun, we should change status to 'Continue' and move button below
-    // also we gotta disable input boxes above so data cannot be changed
-    // also, remove add and remove candidate buttons
+    const voteNodes = document.querySelectorAll('#ballot-container .form-row');
+    if (voteNodes.length == 0) {
+        return console.error('voteNodes is empty in the Audit section. I am sad.');
+    }
+    const latestVoteCheckBoxes = voteNodes[voteNodes.length - 1].getElementsByTagName('input');
 
-    const candidateNames = getCandidateNames();
-    const sequenceNum = ballotSequenceNumber++;
-    const newBallot = document.createElement('div');
-    newBallot.className = 'form-row';
-    newBallot.id = 'ballot-to-record';
-
-    const newRow = document.createElement('div');
-    newRow.classList.add('col-md-auto', 'mb-3');
-    newBallot.appendChild(newRow);
-
-    // eslint-disable-next-line
-    let rowContent = `<h6>Draw ballot <b>#${ballotNumToAudit}</b> and record ballot selections</h6>`;
-
-    for (let i = 0; i < candidateNames.length; ++i) {
-        rowContent += `\
-        <div class="form-check form-check-inline">\
-            <input class="form-check-input" type="checkbox" name="ballotSequence${sequenceNum}" id="ballotSeqInlineRadio${sequenceNum}-${i}" value="${candidateNames[i]}">\
-            <label class="form-check-label" for="ballotSeqInlineRadio${sequenceNum}-${i}">${candidateNames[i]}</label>\
-        </div>`;
+    for (let i = 0; i < latestVoteCheckBoxes.length; ++i) {
+        if (latestVoteCheckBoxes[i].checked) {
+            latestVoteCheckBoxes[i].checked = false;
+        }
     }
 
-    newRow.innerHTML = rowContent;
-    document.getElementById('ballot-container').appendChild(newBallot);
+    document.getElementById('ballot-sequence-num').innerHTML = ballotNumToAudit;
 }
 
 // =========================

@@ -9,7 +9,7 @@ import json
 from utilities.csv_parser import parse_election_data_csv
 from utilities.helpers import delete_file, all_keys_present_in_dict
 
-from audits.Bravo_OOP import Bravo
+from audits.Bravo import Bravo
 
 app = Flask(__name__)
 
