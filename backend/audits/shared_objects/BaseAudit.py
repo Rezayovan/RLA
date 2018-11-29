@@ -3,6 +3,9 @@ import queue
 
 class BaseAudit:
     def __init__(self):
+        # Initialized in subclass
+        self.num_ballots = None
+
         # global vars
         self._VOTES_BUFFER = queue.Queue()
         self._LOCK = threading.Lock()

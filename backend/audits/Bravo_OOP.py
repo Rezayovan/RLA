@@ -1,20 +1,11 @@
-import threading
+# pylint: disable=E0402
+
 import random
-import queue
 import math
 import numpy as np
-from .BaseAudit import BaseAudit
-
-# TODO: Move Candidates and Hypotheses into own classes
-class Candidates:
-    def __init__(self, winners_in, losers_in):
-        self.winners = winners_in
-        self.losers = losers_in
-
-class Hypotheses:
-    def __init__(self, test_stat_in):
-        self.test_stat = test_stat_in
-        self.reject_count = 0
+from .shared_objects.BaseAudit import BaseAudit
+from .shared_objects.Candidates import Candidates
+from .shared_objects.Hypotheses import Hypotheses
 
 class Bravo(BaseAudit):
     """ Ballot-polling audit in Python
@@ -73,7 +64,7 @@ class Bravo(BaseAudit):
         s_w = v_w / (v_w + v_l)
 
         z_w = math.log(2.0 * s_w)
-        z_l = math.log(2.0 * (1 - s_w))
+        z_l = math.log(2.0 * (1 - s_w)) if 2.0 * (1 - s_w) > 0 else 0
 
         n_wl = v_w + v_l
 

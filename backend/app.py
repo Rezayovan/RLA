@@ -70,7 +70,11 @@ def perform_audit():
 
         # get sample size
 
-        estimated_sample_size = bravo_object.get_sample_size()
+        estimated_sample_size = 0
+        try:
+            estimated_sample_size = bravo_object.get_sample_size()
+        except ValueError as e:
+            print("Sample size could not be calculated due to an error:", e)
 
         # Save object to retrieve audit status for a particular user
         # in subsequent requests
@@ -132,6 +136,8 @@ def check_audit_status():
     session_id = form_data['session_id']
 
     global CURRENT_RUNNING_AUDITS
+    if session_id not in CURRENT_RUNNING_AUDITS:
+        return f'Session ID invalid. No running audit can be found for th session ID: {session_id}.', 500
     current_audit = CURRENT_RUNNING_AUDITS[session_id]
 
     # Remove the current running audit from the CURRENT_RUNNING_AUDITS dict
