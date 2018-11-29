@@ -3,12 +3,13 @@ from flask_cors import CORS
 from pathlib import Path
 from werkzeug.utils import secure_filename
 from threading import Thread
+from secrets import token_urlsafe
 import json
 
 from utilities.csv_parser import parse_election_data_csv
 from utilities.helpers import delete_file, all_keys_present_in_dict
 
-from audits import bravo
+from audits.Bravo import Bravo
 
 app = Flask(__name__)
 
@@ -32,82 +33,121 @@ properly rather than using a workaround. CORS provides nice security perks.
 CORS(app)
 
 '''
-BRAVO form fields:
-candidate-name-vote-dict: JSON
-num-ballots-cast: int
-num-winners: int
-risk-limit: int
+Tracks current running audits
+Key: session_id
+Value: Audit object with a running thread
 '''
+CURRENT_RUNNING_AUDITS = {}
 
-# TODO: NEED TO RESET DATA BETEWEEN CALLS TO THIS FUNCTION
 @app.route('/perform_audit', methods=['POST'])
 def perform_audit():
     form_data = request.form
-    if 'audit-type' not in form_data:
+    if 'audit_type' not in form_data:
         return 'Audit type not specified.', 500
 
-    audit_type = form_data['audit-type']
+    audit_type = form_data['audit_type']
 
     # Perform BRAVO audit
     if audit_type == 'bravo':
-        form_params = ['candidate-votes', 'num-ballots-cast', 'num-winners', 'risk-limit', 'random-seed']
+        form_params = ['candidate_votes', 'num_ballots_cast', 'num_winners', 'risk_limit', 'random_seed']
         if not all_keys_present_in_dict(form_params, form_data):
             return 'Not all required BRAVO parameters were provided.', 500
 
         # Parse candidate name and vote JSON data
-        candidate_data_json = json.loads(form_data['candidate-votes'])
+        candidate_data_json = json.loads(form_data['candidate_votes'])
         candidate_data = [int(val) for val in candidate_data_json]
-        num_ballots_cast = int(form_data['num-ballots-cast'])
-        num_winners = int(form_data['num-winners'])
-        risk_limit = float(form_data['risk-limit']) / 100
-        random_seed = int(form_data['random-seed'])
-        max_tests = int(form_data['max-tests'])
+        num_ballots_cast = int(form_data['num_ballots_cast'])
+        num_winners = int(form_data['num_winners'])
+        risk_limit = float(form_data['risk_limit']) / 100
+        random_seed = int(form_data['random_seed'])
+        max_tests = int(form_data['max_tests'])
 
         # votes_array num_ballots num_winners risk_limit seed max_tests
         params_list = [candidate_data, num_ballots_cast, num_winners, risk_limit, random_seed, max_tests]
-        bravo_thread = Thread(target=bravo.run_bravo, args=[params_list])
+        bravo_object = Bravo(*params_list)
+        bravo_thread = Thread(target=bravo_object.bravo)
         bravo_thread.start()
-        first_sequence = bravo.get_sequence_number(num_ballots_cast)
-        return jsonify({"sequence_number_to_draw": first_sequence})
+
+        # get sample size
+
+        estimated_sample_size = 0
+        try:
+            estimated_sample_size = bravo_object.get_sample_size()
+        except ValueError as e:
+            print("Sample size could not be calculated due to an error:", e)
+
+        # Save object to retrieve audit status for a particular user
+        # in subsequent requests
+        session_id = token_urlsafe(32)
+        global CURRENT_RUNNING_AUDITS
+        CURRENT_RUNNING_AUDITS[session_id] = bravo_object
+
+        first_sequence = bravo_object.get_sequence_number()
+        res = {
+            'sequence_number_to_draw': first_sequence,
+            'estimated_sample_size': estimated_sample_size,
+            'session_id': session_id
+        }
+        return jsonify(res)
 
     return 'perform_audit() encountered an error!', 500
 
-@app.route("/send_ballot_votes", methods=['POST'])
+@app.route('/send_ballot_votes', methods=['POST'])
 def send_ballot_votes():
     form_data = request.form
-    if 'audit-type' not in form_data:
+
+    if 'audit_type' not in form_data:
         return 'Audit type not specified.', 500
 
-    audit_type = form_data['audit-type']
+    if 'session_id' not in form_data:
+        return 'Session ID not specified. Unable to retrieve audit status.', 500
+
+    session_id = form_data['session_id']
+    audit_type = form_data['audit_type']
 
     if audit_type == 'bravo':
+        global CURRENT_RUNNING_AUDITS
+        bravo = CURRENT_RUNNING_AUDITS[session_id]
         if bravo.IS_DONE:
             # return status code 204
-            return "BRAVO audit complete!", 204
+            return 'BRAVO audit complete!', 204
 
-        form_params = ['latest-ballot-votes', 'num-ballots-cast']
+        form_params = ['latest_ballot_votes', 'num_ballots_cast']
         if not all_keys_present_in_dict(form_params, form_data):
             return 'Not all required BRAVO parameters were provided.', 500
 
-        ballot_votes_json = json.loads(form_data['latest-ballot-votes'])
+        ballot_votes_json = json.loads(form_data['latest_ballot_votes'])
         ballot_votes_list = [int(vote) for vote in ballot_votes_json]
-        bravo.append_buffer(ballot_votes_list)
+        bravo.append_votes_buffer(ballot_votes_list)
 
-        num_ballots = int(form_data['num-ballots-cast'])
-        sequence = bravo.get_sequence_number(num_ballots)
-        return jsonify({"sequence_number_to_draw": sequence})
+        sequence = bravo.get_sequence_number()
+        res = {'sequence_number_to_draw': sequence}
+        return jsonify(res)
 
     return 'send_ballot_votes() encountered an error!', 500
 
-@app.route("/get_audit_status", methods=['GET'])
-def get_audit_status():
-    # TODO: add this to support multiple users
-    # session_id = request.form["session_id"]
+@app.route('/check_audit_status', methods=['POST'])
+def check_audit_status():
+    form_data = request.form
+
+    if 'session_id' not in form_data:
+        return 'Session ID not specified. Unable to retrieve audit status.', 500
+
+    session_id = form_data['session_id']
+
+    global CURRENT_RUNNING_AUDITS
+    if session_id not in CURRENT_RUNNING_AUDITS:
+        return f'Session ID invalid. No running audit can be found for th session ID: {session_id}.', 500
+    current_audit = CURRENT_RUNNING_AUDITS[session_id]
+
+    # Remove the current running audit from the CURRENT_RUNNING_AUDITS dict
+    if current_audit.IS_DONE:
+        CURRENT_RUNNING_AUDITS.pop(session_id, None)
+
     res = {
-        "audit_complete": bravo.IS_DONE,
-        "completion_message": bravo.IS_DONE_MESSAGE
+        'audit_complete': current_audit.IS_DONE,
+        'completion_message': current_audit.IS_DONE_MESSAGE
     }
-    print(bravo.IS_DONE, bravo.IS_DONE_MESSAGE)
     return jsonify(res)
 
 @app.route('/upload_open_election_data', methods=['POST'])
