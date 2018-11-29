@@ -141,7 +141,8 @@ def check_audit_status():
 
     res = {
         'audit_complete': current_audit.IS_DONE,
-        'completion_message': current_audit.IS_DONE_MESSAGE
+        'completion_message': current_audit.IS_DONE_MESSAGE,
+        'flag': current_audit.IS_DONE_FLAG
     }
     return jsonify(res)
 

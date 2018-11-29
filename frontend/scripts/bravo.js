@@ -117,7 +117,7 @@ function activateAuditStatusCheckInterval(interval) {
             .then((response) => {
                 const payload = response.data;
                 if (payload.audit_complete) {
-                    transitionToAuditComplete(payload.completion_message);
+                    transitionToAuditComplete(payload.completion_message, payload.flag);
                     clearInterval(auditStatusCheckInterval);
                     console.log('Audit completed successfully.');
                 }
@@ -203,9 +203,9 @@ function transitionInterfaceToInProgress(sampleSize, firstSequence) {
     });
 }
 
-export function transitionToAuditComplete(message) {
+export function transitionToAuditComplete(message, flag) {
     const auditCompleteDiv = document.createElement('div');
-    auditCompleteDiv.classList.add('alert', 'alert-success', 'mt-3');
+    auditCompleteDiv.classList.add('alert', `alert-${flag}`, 'mt-3');
     auditCompleteDiv.role = 'alert';
     auditCompleteDiv.innerHTML = message;
 

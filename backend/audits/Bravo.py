@@ -194,8 +194,10 @@ class Bravo(BaseAudit):
         print("Audit has been finished")
         if audit_result:
             self.IS_DONE_MESSAGE = "Audit completed: the results stand."
+            self.IS_DONE_FLAG = "success"
         else:
             self.IS_DONE_MESSAGE = "Too many ballots tested. Perform a full hand-recount of the ballots."
+            self.IS_DONE_FLAG = "danger"
 
 #     def __init__(self, votes_array, num_ballots, num_winners,
 #                 risk_limit, seed, max_tests):

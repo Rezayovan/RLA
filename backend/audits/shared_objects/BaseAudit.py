@@ -15,6 +15,7 @@ class BaseAudit:
         # status vars
         self.IS_DONE = False
         self.IS_DONE_MESSAGE = ""
+        self.IS_DONE_FLAG = ""
 
     def append_votes_buffer(self, vote):
         cv = self._CV
