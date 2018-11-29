@@ -69,12 +69,7 @@ def perform_audit():
         bravo_thread.start()
 
         # get sample size
-
-        estimated_sample_size = 0
-        try:
-            estimated_sample_size = bravo_object.get_sample_size()
-        except ValueError as e:
-            print("Sample size could not be calculated due to an error:", e)
+        estimated_sample_size = bravo_object.get_sample_size()
 
         # Save object to retrieve audit status for a particular user
         # in subsequent requests
