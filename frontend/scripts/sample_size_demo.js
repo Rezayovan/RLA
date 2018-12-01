@@ -17,8 +17,6 @@ document.getElementById('begin-demo').addEventListener('click', () => {
     const numWinners = 1;
     const riskLimit = Number.parseFloat(document.getElementById('risk-limit').value, 10) / 100;
 
-    console.log("Sample size demo for:", officeSelection);
-
     if (!spreadsheet.files[0]) {
         const errorMsg = `Please upload a CSV of Open Election data to run the demo.`;
         return generateErrorAlert('demo-container', errorMsg);
