@@ -14,19 +14,30 @@ import {
 
 const AUDIT_TYPE = 'bravo';
 
-let numBravoCandidates = 2; // default to 2 candidates
+let numCandidates = 2; // default to 2 candidates
 let auditStatusCheckIntervalBegun = false;
-let session_id = "";
+let session_id = '';
+
+// Revoke session_id and end audit on backend
+window.addEventListener('unload', () => {
+    if (session_id === '') return;
+
+    const API_ENDPOINT = `${API_ROOT}/end_audit`
+    const formData = new FormData();
+    formData.append('session_id', session_id);
+    navigator.sendBeacon(API_ENDPOINT, formData);
+});
 
 document.getElementById('add-candidate').addEventListener('click', () => {
-    addCandidate(++numBravoCandidates);
+    numCandidates++;
+    addCandidate(numCandidates);
 });
 
 document.getElementById('remove-candidate').addEventListener('click', () => {
     const candidates = document.querySelectorAll('#candidates-container .form-row');
     if (!candidates.length) return;
 
-    numBravoCandidates--;
+    numCandidates--;
     removeCandidate();
 });
 
@@ -68,6 +79,11 @@ function beginBravoAudit() {
 
     if (randomSeed.length < 20) {
         const errorMsg = 'Random seed does not meet minimum length requirements. Please input a random seed of length 20 or greater.';
+        return generateErrorAlert('audit-info', errorMsg);
+    }
+
+    if (riskLimit <= 0 || riskLimit > 100) {
+        const errorMsg = 'Risk limit must be between 1% and 100%.';
         return generateErrorAlert('audit-info', errorMsg);
     }
 
@@ -124,7 +140,7 @@ function transitionInterfaceToInProgress(sampleSize, firstSequence) {
     newRow.classList.add('col-md-auto', 'mb-3');
     newBallot.appendChild(newRow);
 
-    let rowContent = `<h6>Draw ballot <b id='ballot-sequence-num'>#${firstSequence}</b> and record ballot selections</h6>`;
+    let rowContent = `<h6>Draw ballot <b id='ballot-sequence-num'>#${firstSequence}</b> and record selections</h6>`;
 
     for (let i = 0; i < candidateNames.length; ++i) {
         rowContent += `\
@@ -155,11 +171,11 @@ function getNextBallotToAudit() {
     // Cannot continue until next ballot to audit is returned from the back-end API
     document.getElementById('continue-audit').setAttribute('disabled', '');
 
-    const voteNodes = document.querySelectorAll('#ballot-container .form-row');
-    if (voteNodes.length == 0) {
-        return console.error('voteNodes is empty in the Audit section. I am sad.');
+    const ballotVoteNodes = document.querySelectorAll('#ballot-container .form-row');
+    if (ballotVoteNodes.length == 0) {
+        return console.error('ballotVoteNodes is empty in the Audit section. I am sad.');
     }
-    const latestVoteCheckBoxes = voteNodes[voteNodes.length - 1].getElementsByTagName('input');
+    const latestVoteCheckBoxes = ballotVoteNodes[ballotVoteNodes.length - 1].getElementsByTagName('input');
 
     const votes = [];
     for (let i = 0; i < latestVoteCheckBoxes.length; ++i) {

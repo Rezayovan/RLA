@@ -42,4 +42,4 @@ def parse_election_data_csv(filename, office_to_return):
     return data[office_to_return], total_votes_per_office
 
 if __name__ == "__main__":
-    parse_election_data_csv("open_election_test_data.csv", "State House")
+    print(parse_election_data_csv("open_election_test_data.csv", "State House")[0])

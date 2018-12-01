@@ -1,4 +1,11 @@
-export const  API_ROOT = 'http://127.0.0.1:5000'
+export const  API_ROOT = 'http://127.0.0.1:5000';
+
+export function removeElement(elementID) {
+    const element = document.getElementById(elementID);
+    if (element) {
+        element.parentNode.removeChild(element);
+    }
+}
 
 export function addCandidate(numCandidates) {
     const newCandidate = document.createElement('div');
