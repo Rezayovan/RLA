@@ -1,4 +1,18 @@
-import {API_ROOT, addCandidate, removeCandidate, getCandidateNames, getCandidateVotes, clearValidationErrors, fillTestData, generateErrorAlert } from './shared_logic.js';
+import {
+    API_ROOT,
+    addCandidate,
+    removeCandidate,
+    getCandidateNames,
+    getCandidateVotes,
+    clearValidationErrors,
+    fillTestData,
+    generateErrorAlert,
+    activateAuditStatusCheckInterval,
+    disableInputsAndButtons,
+    setupNextAudit
+} from './shared_logic.js';
+
+const AUDIT_TYPE = 'bravo';
 
 let numBravoCandidates = 2; // default to 2 candidates
 let auditStatusCheckIntervalBegun = false;
@@ -63,7 +77,7 @@ function beginBravoAudit() {
     const API_ENDPOINT = `${API_ROOT}/perform_audit`
     const formData = new FormData();
 
-    formData.append('audit_type', 'bravo');
+    formData.append('audit_type', AUDIT_TYPE);
     formData.append('candidate_votes', JSON.stringify(reportedCandidateVotes));
     formData.append('num_ballots_cast', totalNumBallotsCast);
     formData.append('num_winners', numWinners);
@@ -95,75 +109,10 @@ function beginBravoAudit() {
         });
 }
 
-function activateAuditStatusCheckInterval(interval) {
-    // Only start this interval once.
-    if (auditStatusCheckIntervalBegun) return;
-
-    auditStatusCheckIntervalBegun = true;
-
-    // Check for audit completion status every {interval} seconds
-    const auditStatusCheckInterval = setInterval(() => {
-        const API_ENDPOINT = `${API_ROOT}/check_audit_status`
-        const formData = new FormData();
-
-        formData.append('session_id', session_id);
-
-        // Make API call
-        axios.post(API_ENDPOINT, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                }
-            })
-            .then((response) => {
-                const payload = response.data;
-                if (payload.audit_complete) {
-                    transitionToAuditComplete(payload.completion_message, payload.flag);
-                    clearInterval(auditStatusCheckInterval);
-                    console.log('Audit completed successfully.');
-                }
-                // return console.log(response);
-            })
-            .catch((error) => {
-                return console.error(error);
-            });
-    }, interval);
-}
-
 // Clean up UI to remove certain buttons and disable input boxes to not mess with audit
 function transitionInterfaceToInProgress(sampleSize, firstSequence) {
-    // Disable text inputs
-    const auditInputs = document.querySelectorAll('#audit-info input');
-    for (const input of auditInputs) {
-        input.setAttribute('disabled', '');
-    }
-
-    // Disable add/remove candidate buttons
-    const addCandidateButton = document.getElementById('add-candidate');
-    addCandidateButton.setAttribute('disabled', '');
-    const removeCandidateButton = document.getElementById('remove-candidate');
-    removeCandidateButton.setAttribute('disabled', '');
-
-    // Remove begin button
-    const beginButton = document.getElementById('begin-bravo');
-    beginButton.setAttribute('disabled', '');
-
-    // Show section title
-    const sectionTitle = document.createElement('h3');
-    sectionTitle.classList.add('mt-3');
-    sectionTitle.innerHTML = 'Audit';
-    document.getElementById('audit-container').appendChild(sectionTitle);
-
-    const ballotContainerDiv = document.createElement('div');
-    ballotContainerDiv.id = 'ballot-container';
-    document.getElementById('audit-container').appendChild(ballotContainerDiv);
-
-    // Display estimated sample size
-    const sampleSizeElement = document.createElement('div');
-    sampleSizeElement.classList.add('alert', 'alert-info', 'd-inline-block');
-    sampleSizeElement.id = 'sample-size-alert';
-    sampleSizeElement.role = 'alert';
-    sampleSizeElement.innerHTML = `Estimated number of ballots to audit: <b>${sampleSize}</b>`;
-    ballotContainerDiv.appendChild(sampleSizeElement);
+    disableInputsAndButtons();
+    setupNextAudit(sampleSize);
 
     // Display checkboxes
     const candidateNames = getCandidateNames();
@@ -175,7 +124,6 @@ function transitionInterfaceToInProgress(sampleSize, firstSequence) {
     newRow.classList.add('col-md-auto', 'mb-3');
     newBallot.appendChild(newRow);
 
-    // eslint-disable-next-line
     let rowContent = `<h6>Draw ballot <b id='ballot-sequence-num'>#${firstSequence}</b> and record ballot selections</h6>`;
 
     for (let i = 0; i < candidateNames.length; ++i) {
@@ -203,20 +151,6 @@ function transitionInterfaceToInProgress(sampleSize, firstSequence) {
     });
 }
 
-export function transitionToAuditComplete(message, flag) {
-    const auditCompleteDiv = document.createElement('div');
-    auditCompleteDiv.classList.add('alert', `alert-${flag}`, 'mt-3');
-    auditCompleteDiv.role = 'alert';
-    auditCompleteDiv.innerHTML = message;
-
-    const element = document.getElementById('ballot-container');
-    if (element) {
-        element.parentNode.removeChild(element);
-    }
-
-    document.getElementById('audit-container').appendChild(auditCompleteDiv);
-}
-
 function getNextBallotToAudit() {
     // Cannot continue until next ballot to audit is returned from the back-end API
     document.getElementById('continue-audit').setAttribute('disabled', '');
@@ -236,16 +170,12 @@ function getNextBallotToAudit() {
 
     console.log('Vote data:', votes);
 
-    // Remove checkbox container to load new one
-    // const ballotToRecordRow = document.getElementById('ballot-to-record');
-    // ballotToRecordRow.parentNode.removeChild(ballotToRecordRow);
-
     const API_ENDPOINT = `${API_ROOT}/send_ballot_votes`
     const formData = new FormData();
 
     const totalNumBallotsCast = document.getElementById('total-ballots-cast').value;
 
-    formData.append('audit_type', 'bravo');
+    formData.append('audit_type', AUDIT_TYPE);
     formData.append('latest_ballot_votes', JSON.stringify(votes));
     formData.append('num_ballots_cast', totalNumBallotsCast);
     formData.append('session_id', session_id);
@@ -258,7 +188,10 @@ function getNextBallotToAudit() {
     })
     .then((response) => {
         // Begin status checker to poll for the completion status every 3 seconds
-        activateAuditStatusCheckInterval(3000);
+        if (!auditStatusCheckIntervalBegun) {
+            auditStatusCheckIntervalBegun = true;
+            activateAuditStatusCheckInterval(3000, session_id);
+        }
 
         if (response.status === 204) {
             // Let timer interval handle UI change.
