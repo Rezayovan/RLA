@@ -76,11 +76,11 @@
                     <div class="form-row">
                         <div class="col-md-4 mb-3">
                             <label for="total-ballots-cast">Total number of ballots cast</label>
-                            <input type="number" class="form-control" id="total-ballots-cast" placeholder="0" min="0">
+                            <input type="number" class="form-control" id="total-ballots-cast" placeholder="0" value="0" min="0">
                         </div>
                         <div class="col-md-4 mb-3">
                             <label for="num-winners">Number of winners</label>
-                            <input type="number" class="form-control" id="num-winners" placeholder="0" min="0">
+                            <input type="number" class="form-control" id="num-winners" placeholder="0" value="0" min="0">
                         </div>
                     </div>
 
@@ -93,7 +93,7 @@
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="candidate1-votes">Candidate 1 votes</label>
-                                <input type="number" class="form-control" id="candidate1-votes" placeholder="0" min="0">
+                                <input type="number" class="form-control" id="candidate1-votes" placeholder="0" value="0" min="0">
                             </div>
                         </div>
                         <div class="form-row">
@@ -103,7 +103,7 @@
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label for="candidate2-votes">Candidate 2 votes</label>
-                                <input type="number" class="form-control" id="candidate2-votes" placeholder="0" min="0">
+                                <input type="number" class="form-control" id="candidate2-votes" placeholder="0" value="0" min="0">
                             </div>
                         </div>
                     </div>
@@ -115,7 +115,7 @@
                         <div class="col-md-2 mb-3">
                             <label for="risk-limit">Risk limit</label>
                             <div class="input-group">
-                                <input type="number" class="form-control" id="risk-limit" value="5" min="0" max="100">
+                                <input type="number" class="form-control" id="risk-limit" placeholder="5" value="5" min="0" max="100">
                                 <div class="input-group-append">
                                     <span class="input-group-text">%</span>
                                 </div>
@@ -125,7 +125,7 @@
                         <div class="col-md-2 mb-3">
                             <label for="inflation-rate">Inflation rate</label>
                             <div class="input-group">
-                                <input type="number" class="form-control" id="inflation-rate" value="110" min="100">
+                                <input type="number" class="form-control" id="inflation-rate" placeholder="110" value="110" min="100">
                                 <div class="input-group-append">
                                     <span class="input-group-text">%</span>
                                 </div>
@@ -135,7 +135,7 @@
                         <div class="col-md-2 mb-3">
                             <label for="tolerance">Tolerance</label>
                             <div class="input-group">
-                                <input type="number" class="form-control" id="tolerance" value="10" min="0" max="100">
+                                <input type="number" class="form-control" id="tolerance" placeholder="50" value="50" min="0" max="100">
                                 <div class="input-group-append">
                                     <span class="input-group-text">%</span>
                                 </div>
@@ -163,7 +163,7 @@
                     <div class="form-row">
                         <div class="col-md-6 col-lg-4 mb-3">
                             <label for="max-tests">Max number of tests to run</label>
-                            <input type="number" class="form-control" id="max-tests" min="0">
+                            <input type="number" class="form-control" id="max-tests" placeholder="20" value="20" min="0">
                         </div>
                     </div>
                     <button type="button" class="btn btn-primary btn-begin-audit" id="begin-super-simple">Begin audit</button>

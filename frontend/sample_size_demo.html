@@ -75,7 +75,8 @@
                 <div class="form-group">
                     <div class="form-row">
                         <div class="col-md-8 mb-3">
-                            <label for="input-election-data">Upload OpenElection data (CSV format required)</label>
+                            <label for="input-election-data">Upload <a href="http://www.openelections.net/" target="_blank"
+                                    rel="noopener noreferrer">Open Election</a> data (CSV format required)</label>
                             <input type="file" class="form-control-file" id="input-election-data" accept=".csv">
                             <small id="fileHelp" class="form-text text-muted">Uploaded data is never stored on our
                                 servers.</small>
@@ -83,24 +84,42 @@
                     </div>
 
                     <div class="form-row">
-                        <div class="col-md-8 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="officeSelector">Select an office to audit</label>
                             <select class="form-control" id="office-selector">
                                 <option>U.S. House</option>
+                                <option>U.S. President</option>
                                 <option>State Senate</option>
                                 <option>State House</option>
                                 <option>State Auditor</option>
+                                <option>Governor</option>
+                                <option>Secretary of State</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="form-row">
-                        <div class="col-md-8 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="risk-limit">Risk limit</label>
                             <input type="range" class="form-control-range" id="risk-limit" min="1" max="100" value="5">
-                            <output name="riskLimitOutputName" id="riskLimitOutput">5</output>
-                            <!-- <small id="rangeHelp" class="form-text text-muted">Once the demo has begun, adjust the risk
-                                limit to see its effect on sample size.</small> -->
+                            <span><output name="riskLimitOutputName" id="riskLimitOutput">5</output>%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="col-md-6 mb-3">
+                            <label for="inflation-rate">Inflation rate</label>
+                            <input type="range" class="form-control-range" id="inflation-rate" min="100" max="199"
+                                value="110">
+                            <span><output name="inflationRateOutputName" id="inflationRateOutput">110</output>%</span>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="col-md-6 mb-3">
+                            <label for="tolerance">Tolerance</label>
+                            <input type="range" class="form-control-range" id="tolerance" min="1" max="100" value="50">
+                            <span><output name="toleranceOutputName" id="toleranceOutput">50</output>%</span>
                         </div>
                     </div>
                 </div>

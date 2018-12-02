@@ -249,7 +249,7 @@ function continueAudit(ballotNumToAudit) {
 // =========================
 // FOR TESTING PURPOSES ONLY
 
-document.onload = fillTestData();
+// document.onload = fillTestData();
 
 // FOR TESTING PURPOSES ONLY
 // =========================

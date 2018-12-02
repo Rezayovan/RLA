@@ -7,7 +7,7 @@ from secrets import token_urlsafe
 import json
 
 from utilities.csv_parser import parse_election_data_csv
-from utilities.bravo_sample_size import get_bravo_vw_and_vl
+from utilities.sample_size_calculation import get_vw_and_vl
 from utilities.helpers import delete_file, all_keys_present_in_dict
 
 from audits.Bravo import Bravo
@@ -242,7 +242,7 @@ def get_sample_sizes():
             for value in parsed_data[0].values():
                 votes_array.append(value)
 
-            v_w, v_l = get_bravo_vw_and_vl(votes_array, num_winners)
+            v_w, v_l = get_vw_and_vl(votes_array, num_winners)
         except Exception as e:
             # Delete saved CSV on error
             delete_file(data_path)

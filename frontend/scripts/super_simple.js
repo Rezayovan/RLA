@@ -89,7 +89,10 @@ function beginSuperSimpleAudit() {
         return generateErrorAlert('audit-info', errorMsg);
     }
 
-    // TODO: implement validation for inflation rate
+    if (inflationRate < 100 || tolerance >= 200) {
+        const errorMsg = 'Tolerance must be between 100% and 199%.';
+        return generateErrorAlert('audit-info', errorMsg);
+    }
 
     if (tolerance <= 0 || tolerance > 100) {
         const errorMsg = 'Tolerance must be between 1% and 100%.';
