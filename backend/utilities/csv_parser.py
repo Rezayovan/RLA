@@ -1,9 +1,10 @@
 import csv
+import random
 
 # Returns two things:
 # (1) candidate -> num_votes dictionary
 # (2) num_total_votes for each office
-def parse_election_data_csv(filename, office_to_return):
+def parse_election_data_csv(filename):
     # Need dict of office -> candidate (name_raw) -> votes
     data = {}
     offices = set()
@@ -14,9 +15,7 @@ def parse_election_data_csv(filename, office_to_return):
         for row in reader:
             offices.add(row["office"])
 
-        if office_to_return not in offices:
-            available_offices = ", ".join(offices)
-            raise RuntimeError("Requested office is not available in the provided CSV. This CSV contains the following offices:", available_offices)
+        office_to_return = random.sample(offices, 1)[0]
 
         data = dict.fromkeys(list(offices))
 
@@ -39,7 +38,7 @@ def parse_election_data_csv(filename, office_to_return):
             for votes in office_dict.values():
                 total_votes_per_office[office] += votes
 
-    return data[office_to_return], total_votes_per_office
+    return data[office_to_return], total_votes_per_office[office_to_return], office_to_return
 
 if __name__ == "__main__":
-    print(parse_election_data_csv("open_election_test_data.csv", "State House")[0])
+    print(parse_election_data_csv("open_election_test_data.csv"))

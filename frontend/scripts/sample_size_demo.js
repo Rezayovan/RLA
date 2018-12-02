@@ -20,7 +20,7 @@ document.getElementById('begin-demo').addEventListener('click', () => {
     const API_ENDPOINT = `${API_ROOT}/get_sample_sizes_for_open_election_data`
 
     const spreadsheet = document.getElementById('input-election-data');
-    const officeSelection = document.getElementById('office-selector').value;
+    // const officeSelection = document.getElementById('office-selector').value;
     const numWinners = 1;
     const riskLimit = Number.parseFloat(document.getElementById('risk-limit').value, 10) / 100;
     const inflationRate = Number.parseFloat(document.getElementById('inflation-rate').value, 10) / 100;
@@ -40,7 +40,7 @@ document.getElementById('begin-demo').addEventListener('click', () => {
 
     formData.append('election-data-spreadsheet', spreadsheet.files[0]);
     formData.append('num_winners', numWinners);
-    formData.append('office', officeSelection);
+    // formData.append('office', officeSelection);
 
     axios.post(API_ENDPOINT, formData, {
             headers: {
@@ -50,12 +50,13 @@ document.getElementById('begin-demo').addEventListener('click', () => {
         .then((response) => {
             demoStarted = true;
             document.getElementById('input-election-data').setAttribute('disabled', '');
-            document.getElementById('office-selector').setAttribute('disabled', '');
+            // document.getElementById('office-selector').setAttribute('disabled', '');
 
             const payload = response.data;
             totalVotes = payload.total_votes;
             v_w = payload.v_w;
             v_l = payload.v_l;
+            const office_chosen = payload.office_chosen;
 
             const bravo_sample_size = calculate_bravo_sample_size(totalVotes, riskLimit, v_w, v_l);
 
@@ -63,7 +64,7 @@ document.getElementById('begin-demo').addEventListener('click', () => {
 
             removeElement('begin-demo');
 
-            createSampleSizeDOM(bravo_sample_size, super_simple_sample_size);
+            createSampleSizeDOM(office_chosen, bravo_sample_size, super_simple_sample_size);
         })
         .catch((error) => {
             generateErrorAlert('sample-size-container', 'Unable to parse Open Election data for the selected house. Please try another house or upload another dataset.')
@@ -101,11 +102,15 @@ function handleSliderChange() {
     updateSampleSizeDOM(bravo_sample_size, super_simple_sample_size);
 }
 
-function createSampleSizeDOM(bravo_sample_size, super_simple_sample_size) {
+function createSampleSizeDOM(office_chosen, bravo_sample_size, super_simple_sample_size) {
     // const sampleSizeHeader = document.createElement('h2');
     // sampleSizeHeader.classList.add('bold-title');
     // sampleSizeHeader.innerHTML = 'Initial sample size of ballots to audit';
     // document.getElementById('sample-size-container').appendChild(sampleSizeHeader);
+
+    const sampleSizeHeader = document.createElement('h4');
+    sampleSizeHeader.innerHTML = `Office chosen for calculations: ${office_chosen}`;
+    document.getElementById('sample-size-container').appendChild(sampleSizeHeader);
 
     const adjustRiskLimitMsg = document.createElement('div');
     adjustRiskLimitMsg.classList.add('alert', 'alert-primary');

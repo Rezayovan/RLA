@@ -208,14 +208,7 @@ def get_sample_sizes():
         'OpenElection data not uploaded.', 500
 
     form_data = request.form
-
-    # risk_limit = float(form_data['risk_limit']) / 100
     num_winners = int(form_data['num_winners'])
-    office = form_data['office']
-
-    # print(risk_limit)
-    print(num_winners)
-
     file_data = request.files['election-data-spreadsheet']
 
     # Check if file is valid and if the extension is allowed
@@ -227,31 +220,30 @@ def get_sample_sizes():
         v_w = 0
         v_l = 0
         total_votes = 0
-        parsed_data = None
 
         try:
             file_data.save(data_path)
 
             # TODO: need some way to determine if we are processing OpenElection data and not a random CSV
-            parsed_data = parse_election_data_csv(data_path, office)
-
-            total_votes = parsed_data[1][office]
+            vote_dict, total_votes, office = parse_election_data_csv(data_path)
 
             # Convert dictionary of candidate/num_votes to list of num_votes
             votes_array = []
-            for value in parsed_data[0].values():
+            for value in vote_dict.values():
                 votes_array.append(value)
 
             v_w, v_l = get_vw_and_vl(votes_array, num_winners)
         except Exception as e:
             # Delete saved CSV on error
             delete_file(data_path)
+            print(e)
             return "An error occurred while parsing the OpenElection data.", 500
 
         res = {
             'v_w': v_w,
             'v_l': v_l,
-            'total_votes': total_votes
+            'total_votes': total_votes,
+            'office_chosen': office
         }
 
         # Delete saved CSV
@@ -259,38 +251,6 @@ def get_sample_sizes():
         return jsonify(res)
     else:
         return 'Invalid file uploaded. Please upload a spreadsheet in CSV format.', 500
-
-
-
-# @app.route('/upload_open_election_data', methods=['POST'])
-# def upload_open_election_data():
-#     # Determine type of audit
-#     # Determine input type (e.g. CSV vs form input)
-
-#     # User submitted OpenElection data
-#     if 'election-data-spreadsheet' in request.files:
-#         file_data = request.files['election-data-spreadsheet']
-#         # Check if file is valid and if the extension is allowed
-#         if file_data and allowed_file(file_data.filename):
-#             filename = secure_filename(file_data.filename)
-#             data_path = str(Path(app.config['UPLOAD_FOLDER']).joinpath(filename))
-
-#             try:
-#                 file_data.save(data_path)
-#                 # TODO: need some way to determine if we are processing OpenElection data and not a random CSV
-#                 res = parse_election_data_csv(data_path, 'State House')
-#             except Exception as e:
-#                 # Delete saved CSV on error
-#                 delete_file(data_path)
-#                 raise e
-
-#             # Delete saved CSV
-#             delete_file(data_path)
-#             return jsonify(res)
-#         else:
-#             return f'Invalid file uploaded. Please upload a spreadsheet in CSV format.', 500
-
-#     return 'Hello world!'
 
 def allowed_file(filename):
     return '.' in filename and Path(filename).suffix.lower() == 'csv'
