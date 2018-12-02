@@ -76,14 +76,20 @@ document.getElementById('risk-limit').addEventListener('input', function() {
 function createSampleSizeDOM(bravo_sample_size) {
     // const sampleSizeHeader = document.createElement('h2');
     // sampleSizeHeader.classList.add('bold-title');
-    // sampleSizeHeader.innerHTML = 'Sample size demo';
+    // sampleSizeHeader.innerHTML = 'Initial sample size of ballots to audit';
     // document.getElementById('sample-size-container').appendChild(sampleSizeHeader);
 
-    const bravoSampleSizeElt = document.createElement('h4');
-    bravoSampleSizeElt.innerHTML = `<b>BRAVO:</b> <span id='bravo-sample-size'>${bravo_sample_size}</span>`;
+    const adjustRiskLimitMsg = document.createElement('div');
+    adjustRiskLimitMsg.classList.add('alert', 'alert-primary');
+    adjustRiskLimitMsg.role = 'alert';
+    adjustRiskLimitMsg.innerHTML = 'Try adjusting the risk limit to see its effect on sample size!';
+    document.getElementById('sample-size-container').appendChild(adjustRiskLimitMsg);
+
+    const bravoSampleSizeElt = document.createElement('h5');
+    bravoSampleSizeElt.innerHTML = `<b>BRAVO:</b> <span id='bravo-sample-size'>${bravo_sample_size.toLocaleString()}</span>`;
     document.getElementById('sample-size-container').appendChild(bravoSampleSizeElt);
 }
 
 function updateSampleSizeDOM(bravo_sample_size) {
-    document.getElementById('bravo-sample-size').innerHTML = `${bravo_sample_size}`;
+    document.getElementById('bravo-sample-size').innerHTML = `${bravo_sample_size.toLocaleString()}`;
 }
