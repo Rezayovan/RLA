@@ -38,5 +38,6 @@ export function calculate_super_simple_sample_size(num_ballots, risk_limit, v_w,
         result = 0;
         console.log("Super-simple sample size could not be calculated due to an error:", e);
     }
+
     return result;
 }

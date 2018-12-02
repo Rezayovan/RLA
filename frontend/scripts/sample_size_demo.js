@@ -104,7 +104,6 @@ function handleSliderChange() {
 
 function createSampleSizeDOM(office_chosen, bravo_sample_size, super_simple_sample_size) {
     // const sampleSizeHeader = document.createElement('h2');
-    // sampleSizeHeader.classList.add('bold-title');
     // sampleSizeHeader.innerHTML = 'Initial sample size of ballots to audit';
     // document.getElementById('sample-size-container').appendChild(sampleSizeHeader);
 
