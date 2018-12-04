@@ -78,28 +78,68 @@ class BallotComparison:
  
         return ballot_votes, CVR_votes
 
+    def hand_recount(self):
+        # Stop audit and ask user to hand recount everything
+        return -1
 
     def run_audit(self):
         num_candidates = len(votes_array)
         sample_size = self.sample_size()
+        # Calculate max number of max one vote overstatements allowed before a hand recount
+        max_overstatements = self.diluted_margin * self.tolerance * self.num_ballots
         # Overstatement is +1, understatement is -1
         overstatements = [0 for candidate in len(self.votes_array)]
         for _ in sample_size:
+            # list of candidate numbers that cvr and human have listed as a vote
             ballot_votes, CVR_votes = self.get_ballot_and_CVR()
             # Ballot is an overvote and CVR shows valid vote. Mark everything in CVR as an overstatement.
             if len(ballot_votes) > num_winners and len(CVR_votes) <= num_winners:
                 for candidate in CVR_votes:
                     overstatements[candidate] += 1
+            # CVR is an overvote but Ballot is valid, list all candidates on ballot as an understatement
             elif len(ballot_votes) <= num_winners and len(CVR_votes) > num_winners:
                 for candidate in ballot_votes:
                     overstatements[candidate] -= 1
+            # CVR and Human both show overvote, dont do anything
             elif len(ballot_votes) > num_winners and len(CVR_votes) > num_winners:
                 continue
+            # Guaranteed neither CVR or Human are overvoted ballots
             else:
                 num_mismatches = 0
                 for candidate in num_candidates:
                     in_CVR = candidate in CVR_votes
                     in_ballot = candidate in ballot_votes
-                    if in_ballot and in_CVR:
-                        del ballot_votes[candidate]
-                        del CVR_votes[candidate]
+                    if not in_ballot and in_CVR:
+                        num_mismatches += 1
+                        # check if number of errors is greater than 1 on a single ballot
+                        if num_mismatches > 1:
+                            hand_recount()
+                        # an overstatement is found
+                        overstatements[candidate] += 1
+                        # if candidate is a winner
+                        if candidate < self.num_winners
+                            if overstatements[candidate] > max_overstatements
+                                hand_recount()
+                    if in_ballot and not in_CVR:
+                        num_mismatches += 1
+                        # check if number of errors is greater than 1 on a single ballot
+                        if num_mismatches > 1:
+                            hand_recount()
+                        # an understatement is found
+                        overstatements[candidate] -= 1
+                    
+                    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
