@@ -7,8 +7,7 @@ from secrets import token_urlsafe
 import json
 
 from utilities.csv_parser import parse_election_data_csv
-from utilities.sample_size_calculation import get_vw_and_vl
-from utilities.helpers import delete_file, all_keys_present_in_dict
+from utilities.helpers import delete_file, all_keys_present_in_dict, get_vw_and_vl
 
 from audits.Bravo import Bravo
 
@@ -60,7 +59,7 @@ def perform_audit():
         num_ballots_cast = int(form_data['num_ballots_cast'])
         num_winners = int(form_data['num_winners'])
         risk_limit = float(form_data['risk_limit']) / 100
-        random_seed = int(form_data['random_seed'])
+        random_seed = float(form_data['random_seed'])
         max_tests = int(form_data['max_tests'])
 
         # votes_array num_ballots num_winners risk_limit seed max_tests
@@ -104,9 +103,24 @@ def perform_audit():
         params_list = [candidate_data, num_ballots_cast, num_winners, risk_limit, inflation_rate, tolerance, random_seed, max_tests]
 
         print(params_list)
-        return "super simple cooking!", 200
+        return "super simple is cooking!", 200
     elif audit_type == 'cast':
-        pass
+        form_params = ['num_winners', 'risk_limit', 'random_seed', 'threshold', 'batch_size', 'num_batches']
+        if not all_keys_present_in_dict(form_params, form_data):
+            return 'Not all required CAST parameters were provided.', 500
+
+        # Parse candidate name and vote JSON data
+        num_winners = int(form_data['num_winners'])
+        risk_limit = float(form_data['risk_limit']) / 100
+        random_seed = int(form_data['random_seed'])
+        threshold = float(form_data['threshold']) / 100
+        batch_size = int(form_data['batch_size'])
+        num_batches = int(form_data['num_batches'])
+
+        params_list = [num_winners, risk_limit, threshold, random_seed, batch_size, num_batches]
+
+        print(params_list)
+        return "cast rocks bro!", 200
     elif audit_type == 'negexp':
         pass
     else:
@@ -150,8 +164,8 @@ def send_ballot_votes():
 
         ballot_votes_json = json.loads(form_data['latest_ballot_votes'])
         ballot_votes_list = [int(vote) for vote in ballot_votes_json]
-        cve_votes_json = json.loads(form_data['latest_cve_votes'])
-        cve_votes_list = [int(vote) for vote in cve_votes_json]
+        cvr_votes_json = json.loads(form_data['latest_cvr_votes'])
+        cvr_votes_list = [int(vote) for vote in cvr_votes_json]
 
         return "YOO SUPER SIMPLE!", 200
         # TODO: finish

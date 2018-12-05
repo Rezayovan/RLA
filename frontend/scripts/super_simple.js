@@ -5,11 +5,11 @@ import {
     getCandidateNames,
     getCandidateVotes,
     clearValidationErrors,
-    fillTestData,
+    // fillTestData,
     generateErrorAlert,
     activateAuditStatusCheckInterval,
     disableInputsAndButtons,
-    setupNextAudit
+    setupAuditDOM
 } from './shared_logic.js';
 
 const AUDIT_TYPE = 'super_simple';
@@ -52,13 +52,13 @@ function beginSuperSimpleAudit() {
     // Obtain data from form
     const reportedCandidateVotes = getCandidateVotes();
 
-    const totalNumBallotsCast = document.getElementById('total-ballots-cast').value;
-    const numWinners = document.getElementById('num-winners').value;
-    const riskLimit = document.getElementById('risk-limit').value;
-    const inflationRate = document.getElementById('inflation-rate').value;
-    const tolerance = document.getElementById('tolerance').value;
+    const totalNumBallotsCast = parseInt(document.getElementById('total-ballots-cast').value, 10);
+    const numWinners = parseInt(document.getElementById('num-winners').value, 10);
+    const riskLimit = parseFloat(document.getElementById('risk-limit').value);
+    const inflationRate = parseFloat(document.getElementById('inflation-rate').value);
+    const tolerance = parseFloat(document.getElementById('tolerance').value);
     const randomSeed = document.getElementById('random-seed').value;
-    const maxTests = document.getElementById('max-tests').value;
+    const maxTests = parseInt(document.getElementById('max-tests').value, 10);
 
     // Too few candidates
     if (reportedCandidateVotes.length < 2) {
@@ -68,8 +68,8 @@ function beginSuperSimpleAudit() {
 
     // Too many winners
     // TODO: is num_winners == number of candidates OK?
-    if (numWinners > reportedCandidateVotes.length) {
-        const errorMsg = `Too many winners inputted. Please lower the number of winners to proceed.`;
+    if (numWinners <= 0 || numWinners > reportedCandidateVotes.length) {
+        const errorMsg = 'Invalid number of winners. Number of winners must be greater than 0 and less than the total number of candidates.';
         return generateErrorAlert('audit-info', errorMsg);
     }
 
@@ -89,13 +89,18 @@ function beginSuperSimpleAudit() {
         return generateErrorAlert('audit-info', errorMsg);
     }
 
-    if (inflationRate < 100 || tolerance >= 200) {
-        const errorMsg = 'Tolerance must be between 100% and 199%.';
+    if (inflationRate < 100 || inflationRate >= 200) {
+        const errorMsg = 'Inflation rate must be between 100% and 199%.';
         return generateErrorAlert('audit-info', errorMsg);
     }
 
-    if (tolerance <= 0 || tolerance > 100) {
+    if (tolerance <= 0 || tolerance >= 100) {
         const errorMsg = 'Tolerance must be between 1% and 100%.';
+        return generateErrorAlert('audit-info', errorMsg);
+    }
+
+    if (maxTests < 1) {
+        const errorMsg = 'Please enter a non-negative maximum number of tests.';
         return generateErrorAlert('audit-info', errorMsg);
     }
 
@@ -142,7 +147,7 @@ function beginSuperSimpleAudit() {
 // Clean up UI to remove certain buttons and disable input boxes to not mess with audit
 function transitionInterfaceToInProgress(sampleSize, firstSequence) {
     disableInputsAndButtons();
-    setupNextAudit(sampleSize);
+    setupAuditDOM(sampleSize);
 
     // Display ballot checkboxes
     const candidateNames = getCandidateNames();
@@ -154,7 +159,7 @@ function transitionInterfaceToInProgress(sampleSize, firstSequence) {
     newRow.classList.add('col-md-auto', 'mb-3');
     newBallot.appendChild(newRow);
 
-    let rowContent = `<h6>Draw ballot <b id='ballot-sequence-num'>#${firstSequence}</b> and record selections</h6>`;
+    let rowContent = `<h6>Draw ballot <b>#<span id='ballot-sequence-num'>${firstSequence}</span></b> and record selections</h6>`;
 
     for (let i = 0; i < candidateNames.length; ++i) {
         rowContent += `\
@@ -167,27 +172,27 @@ function transitionInterfaceToInProgress(sampleSize, firstSequence) {
     newRow.innerHTML = rowContent;
     document.getElementById('ballot-container').appendChild(newBallot);
 
-    // Display CVE checkboxes
-    const newCVE = document.createElement('div');
-    newCVE.className = 'form-row';
-    newCVE.id = 'cve-to-record';
+    // Display CVR checkboxes
+    const newCVR = document.createElement('div');
+    newCVR.className = 'form-row';
+    newCVR.id = 'CVR-to-record';
 
-    const newCVERow = document.createElement('div');
-    newCVERow.classList.add('col-md-auto', 'mb-3');
-    newCVE.appendChild(newCVERow);
+    const newCVRRow = document.createElement('div');
+    newCVRRow.classList.add('col-md-auto', 'mb-3');
+    newCVR.appendChild(newCVRRow);
 
-    let CVERowContent = `<h6>Draw CVE for ballot <b id='cve-sequence-num'>#${firstSequence}</b> and record selections</h6>`;
+    let CVRRowContent = `<h6>Draw CVR for ballot <b id='CVR-sequence-num'>#${firstSequence}</b> and record selections</h6>`;
 
     for (let i = 0; i < candidateNames.length; ++i) {
-        CVERowContent += `\
+        CVRRowContent += `\
         <div class="form-check form-check-inline">\
-            <input class="form-check-input" type="checkbox" name="CVESeqInlineRadio-${i}" id="CVESeqInlineRadio-${i}" value="${candidateNames[i]}">\
-            <label class="form-check-label" for="CVESeqInlineRadio-${i}">${candidateNames[i]}</label>\
+            <input class="form-check-input" type="checkbox" name="CVRSeqInlineRadio-${i}" id="CVRSeqInlineRadio-${i}" value="${candidateNames[i]}">\
+            <label class="form-check-label" for="CVRSeqInlineRadio-${i}">${candidateNames[i]}</label>\
         </div>`;
     }
 
-    newCVERow.innerHTML = CVERowContent;
-    document.getElementById('ballot-container').appendChild(newCVE);
+    newCVRRow.innerHTML = CVRRowContent;
+    document.getElementById('ballot-container').appendChild(newCVR);
 
     // Add continue button
     const continueButton = document.createElement('button');
@@ -223,22 +228,22 @@ function getNextBallotToAudit() {
     }
     console.log('Ballot vote data:', ballotVotes);
 
-    const cveVotes = [];
+    const CVRVotes = [];
     for (let i = 0; i < latestBallotVoteCheckBoxes.length; ++i) {
         if (latestBallotVoteCheckBoxes[i].checked) {
-            cveVotes.push(i);
+            CVRVotes.push(i);
         }
     }
-    console.log('CVE vote data:', cveVotes);
+    console.log('CVR vote data:', CVRVotes);
 
     const API_ENDPOINT = `${API_ROOT}/send_ballot_votes`
     const formData = new FormData();
 
-    const totalNumBallotsCast = document.getElementById('total-ballots-cast').value;
+    const totalNumBallotsCast = parseInt(document.getElementById('total-ballots-cast').value, 10);
 
     formData.append('audit_type', AUDIT_TYPE);
     formData.append('latest_ballot_votes', JSON.stringify(ballotVotes));
-    formData.append('latest_cve_votes', JSON.stringify(cveVotes));
+    formData.append('latest_CVR_votes', JSON.stringify(CVRVotes));
     formData.append('num_ballots_cast', totalNumBallotsCast);
     formData.append('session_id', session_id);
 
@@ -295,7 +300,7 @@ function continueAudit(ballotNumToAudit) {
 // =========================
 // FOR TESTING PURPOSES ONLY
 
-document.onload = fillTestData();
+// document.onload = fillTestData();
 
 // FOR TESTING PURPOSES ONLY
 // =========================

@@ -19,7 +19,7 @@ export function calculate_bravo_sample_size(num_ballots, risk_limit, v_w, v_l) {
         }
         catch (e) {
             asn = 0;
-            console.log("BRAVO sample size could not be calculated due to an error:", e);
+            console.error("BRAVO sample size could not be calculated due to an error:", e);
         }
     }
     return asn
@@ -36,7 +36,7 @@ export function calculate_super_simple_sample_size(num_ballots, risk_limit, v_w,
     }
     catch (e) {
         result = 0;
-        console.log("Super-simple sample size could not be calculated due to an error:", e);
+        console.error("Super-simple sample size could not be calculated due to an error:", e);
     }
 
     return result;
