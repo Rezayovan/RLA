@@ -1,16 +1,16 @@
 import random
 import math
 import numpy as np
-from shared_objects.BaseAudit import BaseAudit
-from shared_objects.Candidates import Candidates
-from shared_objects.Hypotheses import Hypotheses
+from .shared_objects.BaseAudit import BaseAudit
+from .shared_objects.Candidates import Candidates
+from .shared_objects.Hypotheses import Hypotheses
 
 class Cast(BaseAudit):
 
-	def __init__(self, num_candidates, num_winners, num_stages, batch_size, num_batches, risk_tolerance, threshold, random_seed):
+	def __init__(self, initial_cvr_data, num_candidates, num_winners, num_stages, batch_size, num_batches, risk_tolerance, threshold, random_seed):
 		super().__init__()
 		self.num_candidates = num_candidates
-		assert 1. <= num_winners <= num_candidates
+		assert 1. <= num_winners <= len(num_candidates)
 		self.num_winners = num_winners
 		self.num_stages = num_stages
 		self.batch_size = batch_size
@@ -18,10 +18,11 @@ class Cast(BaseAudit):
 		self.num_unaudited = num_batches
 		self.threshold = threshold
 		self.random_seed = random_seed
+		print(num_batches)
 		self.unaudited = np.arange(num_batches)
 		self.alpha = self.calc_alpha_s(risk_tolerance)
 		self.reported_batch_info, self.audited_batch_info, self.winners, self.losers = self.init_info()
-		self.cvr_batches = cvr_batches
+		self.cvr_batches = initial_cvr_data
 
 
 	def calc_alpha_s(self, risk_tolerance):

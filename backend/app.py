@@ -10,7 +10,7 @@ from utilities.csv_parser import parse_election_data_csv
 from utilities.helpers import delete_file, all_keys_present_in_dict, get_vw_and_vl
 
 from audits.Bravo import Bravo
-
+from audits.Cast import Cast
 app = Flask(__name__)
 
 # Stretch goal: add support for XLS files
@@ -46,7 +46,7 @@ def perform_audit():
         return 'Audit type not specified.', 500
 
     audit_type = form_data['audit_type']
-
+    print(audit_type)
     # Perform BRAVO audit
     if audit_type == 'bravo':
         form_params = ['candidate_votes', 'num_ballots_cast', 'num_winners', 'risk_limit', 'random_seed']
@@ -105,7 +105,15 @@ def perform_audit():
         print(params_list)
         return "super simple is cooking!", 200
     elif audit_type == 'cast':
-        form_params = ['initial_cvr_data', 'num_winners', 'risk_limit', 'random_seed', 'threshold', 'batch_size', 'num_batches', 'num_stages']
+        form_params = ['initial_cvr_data',
+                        'num_winners',
+                        'risk_limit',
+                        'random_seed',
+                        'threshold',
+                        'batch_size',
+                        'num_batches',
+                        'num_stages',
+                        'num_candidates']
         if not all_keys_present_in_dict(form_params, form_data):
             return 'Not all required CAST parameters were provided.', 500
 
@@ -119,8 +127,13 @@ def perform_audit():
         batch_size = int(form_data['batch_size'])
         num_batches = int(form_data['num_batches'])
         num_stages = int(form_data['num_stages'])
-
+        num_candidates = int(form_data['num_candidates'])
         params_list = [initial_cvr_data, num_winners, risk_limit, threshold, random_seed, batch_size, num_batches, num_stages]
+
+        cast_object = Cast(*params_list)
+        cast_thread = Thread(target=cast_object.run_audit)
+        cast_thread.start()
+
         return "cast rocks bro!", 200
     elif audit_type == 'negexp':
         pass
@@ -129,6 +142,7 @@ def perform_audit():
 
 @app.route('/send_ballot_votes', methods=['POST'])
 def send_ballot_votes():
+    global CURRENT_RUNNING_AUDITS
     form_data = request.form
 
     if 'audit_type' not in form_data:
@@ -141,7 +155,6 @@ def send_ballot_votes():
     audit_type = form_data['audit_type']
 
     if audit_type == 'bravo':
-        global CURRENT_RUNNING_AUDITS
         bravo = CURRENT_RUNNING_AUDITS[session_id]
         if bravo.IS_DONE:
             # return status code 204
@@ -171,7 +184,6 @@ def send_ballot_votes():
         return "YOO SUPER SIMPLE!", 200
         # TODO: finish
     elif audit_type == 'cast':
-        global CURRENT_RUNNING_AUDITS
         cast = CURRENT_RUNNING_AUDITS[session_id]
         if cast.IS_DONE:
             # return status code 204
