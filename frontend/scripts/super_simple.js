@@ -218,7 +218,7 @@ function getNextBallotToAudit() {
     if (ballotVoteNodes.length == 0) {
         return console.error('ballotVoteNodes is empty in the Audit section. I am sad.');
     }
-    const latestBallotVoteCheckBoxes = ballotVoteNodes[ballotVoteNodes.length - 1].getElementsByTagName('input');
+    const latestBallotVoteCheckBoxes = ballotVoteNodes.getElementsByTagName('input');
 
     const ballotVotes = [];
     for (let i = 0; i < latestBallotVoteCheckBoxes.length; ++i) {
@@ -228,9 +228,15 @@ function getNextBallotToAudit() {
     }
     console.log('Ballot vote data:', ballotVotes);
 
+    const cvrVoteNodes = voteNodes[0];
+    if (cvrVoteNodes.length == 0) {
+        return console.error('cvrVoteNodes is empty in the Audit section. I am sad.');
+    }
+    const latestCVRVoteNodesCheckBoxes = cvrVoteNodes.getElementsByTagName('input');
+
     const CVRVotes = [];
-    for (let i = 0; i < latestBallotVoteCheckBoxes.length; ++i) {
-        if (latestBallotVoteCheckBoxes[i].checked) {
+    for (let i = 0; i < latestCVRVoteNodesCheckBoxes.length; ++i) {
+        if (latestCVRVoteNodesCheckBoxes[i].checked) {
             CVRVotes.push(i);
         }
     }

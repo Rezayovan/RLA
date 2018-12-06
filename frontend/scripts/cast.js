@@ -8,7 +8,6 @@ import {
     generateErrorAlert,
     activateAuditStatusCheckInterval,
     disableInputsAndButtons,
-    setupAuditDOM,
     removeElement
 } from './shared_logic.js';
 
@@ -298,9 +297,13 @@ function populateAuditContainer(initialBatchToAudit) {
     auditTitleElt.innerHTML = 'Audit';
     document.getElementById('audit-container').appendChild(auditTitleElt);
 
+    const containerDiv = document.createElement('div');
+    containerDiv.id = 'ballot-container';
+    document.getElementById('audit-container').appendChild(containerDiv);
+
     const CVRToInputElt = document.createElement('h6');
     CVRToInputElt.innerHTML = `Please input the votes per candidate for batch <b>#<span id="batch-to-audit">${initialBatchToAudit}</span></b>.`;
-    document.getElementById('audit-container').appendChild(CVRToInputElt);
+    containerDiv.appendChild(CVRToInputElt);
 
     // Add candidate inputs
     const formRowDiv = document.createElement('div');
@@ -317,7 +320,7 @@ function populateAuditContainer(initialBatchToAudit) {
         ++candidateNum;
     }
 
-    document.getElementById('audit-container').appendChild(formRowDiv);
+    containerDiv.appendChild(formRowDiv);
 
     // Add continue button
     const continueBtn = document.createElement('button');
@@ -325,7 +328,7 @@ function populateAuditContainer(initialBatchToAudit) {
     continueBtn.type = 'button';
     continueBtn.id = 'continue-audit';
     continueBtn.innerHTML = 'Continue audit';
-    document.getElementById('audit-container').appendChild(continueBtn);
+    containerDiv.appendChild(continueBtn);
 
     document.getElementById('continue-audit').addEventListener('click', () => {
         getNextBallotToAudit();
