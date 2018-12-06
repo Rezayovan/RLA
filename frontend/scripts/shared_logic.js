@@ -70,15 +70,15 @@ export function generateErrorAlert(idToAppendTo, errorMessage) {
     document.getElementById(idToAppendTo).appendChild(errorDiv);
 }
 
-export function disableInputsAndButtons() {
+export function disableInputsAndButtons(containerToDisable) {
     // Disable text inputs
-    const auditInputs = document.querySelectorAll('#audit-info input');
+    const auditInputs = document.querySelectorAll(`#${containerToDisable} input`);
     for (const input of auditInputs) {
         input.setAttribute('disabled', '');
     }
 
     // Disable buttons
-    const auditBtns = document.querySelectorAll('#audit-info button');
+    const auditBtns = document.querySelectorAll(`#${containerToDisable} button`);
     for (const button of auditBtns) {
         button.setAttribute('disabled', '');
     }
