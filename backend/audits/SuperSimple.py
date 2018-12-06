@@ -1,6 +1,6 @@
 from math import log, ceil
 import random
-from shared_objects.Candidates import Candidates
+from .shared_objects.Candidates import Candidates
 
 class SuperSimple:
     def __init__(self, votes_array, num_ballots, num_winners, risk_limit, seed, inflation_rate, tolerance):
