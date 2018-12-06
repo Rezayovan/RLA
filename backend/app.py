@@ -120,6 +120,7 @@ def perform_audit():
         # Parse candidate name and vote JSON data
         initial_cvr_data = json.loads(form_data['initial_cvr_data'])
         print(initial_cvr_data)
+        print(initial_cvr_data)
         num_winners = int(form_data['num_winners'])
         risk_limit = float(form_data['risk_limit']) / 100
         random_seed = int(form_data['random_seed'])
@@ -197,13 +198,13 @@ def send_ballot_votes():
             # return status code 204
             return 'Cast audit complete!', 204
 
-        form_params = ['latest_ballot_votes', 'num_ballots_cast']
+        form_params = ['batch_votes']
         if not all_keys_present_in_dict(form_params, form_data):
+            print("error 500")
             return 'Not all required CAST parameters were provided.', 500
 
-        ballot_votes_json = json.loads(form_data['latest_ballot_votes'])
-        ballot_votes_list = [int(vote) for vote in ballot_votes_json]
-        cast.append_votes_buffer(ballot_votes_list)
+        batch = form_data['batch_votes']
+        cast.append_votes_buffer(batch)
 
         sequence = cast.get_sequence_number()
         res = {'sequence_number_to_draw': sequence}

@@ -4,6 +4,7 @@ import numpy as np
 from .shared_objects.BaseAudit import BaseAudit
 from .shared_objects.Candidates import Candidates
 from .shared_objects.Hypotheses import Hypotheses
+import json
 
 class Cast(BaseAudit):
 
@@ -57,7 +58,7 @@ class Cast(BaseAudit):
         '''
         Get batch info
         '''
-        return self.get_votes()
+        return json.loads(self.get_votes())
 
     def get_batch_first(self):
         '''
@@ -118,9 +119,11 @@ class Cast(BaseAudit):
             else:
                 t_ps.append(self.threshold)
                 squigglie_u_ps.append(u_p - self.threshold)
-        print("tps: %s" % t_ps)
         T = sum(t_ps)
         squigglie_u_ps = np.asarray(squigglie_u_ps)
+        print("T ", T)
+        print("TUnderscoreP ", t_ps)
+        print("squiggly ",squigglie_u_ps)
         return T, squigglie_u_ps
 
     '''
