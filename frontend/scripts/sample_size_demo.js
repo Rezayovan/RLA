@@ -4,9 +4,10 @@ import {
     removeElement,
     clearValidationErrors
 } from './shared_logic.js';
+
 import {
     calculate_bravo_sample_size, calculate_super_simple_sample_size
-} from './sample_size_calculations.js'
+} from './calculate_sample_size.js';
 
 let demoStarted = false;
 
@@ -20,11 +21,10 @@ document.getElementById('begin-demo').addEventListener('click', () => {
     const API_ENDPOINT = `${API_ROOT}/get_sample_sizes_for_open_election_data`
 
     const spreadsheet = document.getElementById('input-election-data');
-    // const officeSelection = document.getElementById('office-selector').value;
     const numWinners = 1;
-    const riskLimit = Number.parseFloat(document.getElementById('risk-limit').value, 10) / 100;
-    const inflationRate = Number.parseFloat(document.getElementById('inflation-rate').value, 10) / 100;
-    const tolerance = Number.parseFloat(document.getElementById('tolerance').value, 10) / 100;
+    let riskLimit = parseInt(document.getElementById('risk-limit').value, 10);
+    let inflationRate = parseInt(document.getElementById('inflation-rate').value, 10);
+    let tolerance = parseInt(document.getElementById('tolerance').value, 10);
 
     if (!spreadsheet.files[0]) {
         const errorMsg = `Please upload a CSV of Open Election data to run the demo.`;
@@ -36,11 +36,26 @@ document.getElementById('begin-demo').addEventListener('click', () => {
         return generateErrorAlert('demo-container', errorMsg);
     }
 
+    if (inflationRate < 100 || inflationRate >= 200) {
+        const errorMsg = 'Inflation rate must be between 100% and 199%.';
+        return generateErrorAlert('demo-container', errorMsg);
+    }
+
+    if (tolerance <= 0 || tolerance >= 100) {
+        const errorMsg = 'Tolerance must be between 1% and 100%.';
+        return generateErrorAlert('demo-container', errorMsg);
+    }
+
+    riskLimit = Number.parseFloat(riskLimit, 10) / 100;
+    inflationRate = Number.parseFloat(inflationRate, 10) / 100;
+    tolerance = Number.parseFloat(tolerance, 10) / 100;
+
+    document.getElementById('begin-demo').setAttribute('disabled', '');
+
     const formData = new FormData();
 
     formData.append('election-data-spreadsheet', spreadsheet.files[0]);
     formData.append('num_winners', numWinners);
-    // formData.append('office', officeSelection);
 
     axios.post(API_ENDPOINT, formData, {
             headers: {
@@ -49,8 +64,8 @@ document.getElementById('begin-demo').addEventListener('click', () => {
         })
         .then((response) => {
             demoStarted = true;
+            removeElement('begin-demo');
             document.getElementById('input-election-data').setAttribute('disabled', '');
-            // document.getElementById('office-selector').setAttribute('disabled', '');
 
             const payload = response.data;
             totalVotes = payload.total_votes;
@@ -61,8 +76,6 @@ document.getElementById('begin-demo').addEventListener('click', () => {
             const bravo_sample_size = calculate_bravo_sample_size(totalVotes, riskLimit, v_w, v_l);
 
             const super_simple_sample_size = calculate_super_simple_sample_size(totalVotes, riskLimit, v_w, v_l, inflationRate, tolerance);
-
-            removeElement('begin-demo');
 
             createSampleSizeDOM(office_chosen, bravo_sample_size, super_simple_sample_size);
         })
