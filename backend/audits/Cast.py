@@ -172,7 +172,7 @@ class Cast(BaseAudit):
             t_s = self.calc_t_s(batches_to_audit)
             if t_s < self.threshold:
                 print('Audit complete')
-                return
+                return 204
 
         print('Audit failed full hand recount needed')
         return
