@@ -332,7 +332,14 @@ function getNextBallotToAudit() {
     clearValidationErrors();
 
     const inputNodes = document.querySelectorAll('#audit-inputs .candidate-input');
-    const batchVotes = getBatchInputs(inputNodes, 'audit-container');
+    let batchVotes;
+
+    try {
+        batchVotes = getBatchInputs(inputNodes, 'audit-container');
+    } catch (e) {
+        return console.log("Batch invalid.");
+    }
+
 
     // Clear the values for the next batch
     for (const node of inputNodes) {
@@ -347,6 +354,8 @@ function getNextBallotToAudit() {
     formData.append('session_id', session_id);
     formData.append('batch_votes', JSON.stringify(batchVotes));
 
+    console.log(batchVotes);
+
     // Make API call
     axios.post(API_ENDPOINT, formData, {
             headers: {
@@ -354,8 +363,10 @@ function getNextBallotToAudit() {
             }
         })
         .then((response) => {
+            const sequenceNumberToDraw = response.data.sequence_number_to_draw;
 
-            // handle response
+            document.getElementById('batch-to-audit').innerHTML = sequenceNumberToDraw;
+
             return console.log(response);
         })
         .catch((error) => {

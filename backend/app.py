@@ -214,8 +214,6 @@ def send_ballot_votes():
     else:
         return f'{audit_type} is an invalid audit type!', 500
 
-
-
 @app.route('/check_audit_status', methods=['POST'])
 def check_audit_status():
     form_data = request.form
