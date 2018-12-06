@@ -272,11 +272,11 @@ function beginCast() {
             disableInputsAndButtons('cvr-container');
 
             // Set session
+            session_id = response.data.session_id;
 
-            // TODO: replace this with API results
-            const initialBatchToAudit = 1;
+            const sequenceNumberToDraw = response.data.sequence_number_to_draw;
 
-            populateAuditContainer(initialBatchToAudit);
+            populateAuditContainer(sequenceNumberToDraw);
 
             // handle response
             return console.log(response);
