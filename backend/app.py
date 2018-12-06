@@ -113,7 +113,7 @@ def perform_audit():
         res = {
             'sequence_number_to_draw': first_sequence,
             'session_id': session_id,
-            'estimated_sample_size': sample_size
+            'estimated_sample_size': math.ceil(sample_size)
         }
         return jsonify(res)
     elif audit_type == 'cast':
