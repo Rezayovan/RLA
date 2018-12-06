@@ -193,17 +193,15 @@ def send_ballot_votes():
         res = {'sequence_number_to_draw': sequence}
         return jsonify(res)
     elif audit_type == 'super_simple':
-        form_params = ['latest_ballot_votes', 'num_ballots_cast']
+        form_params = ['paper_record_and_cvr', 'num_ballots_cast']
         if not all_keys_present_in_dict(form_params, form_data):
             return 'Not all required BRAVO parameters were provided.', 500
 
-        ballot_votes_json = json.loads(form_data['latest_ballot_votes'])
-        ballot_votes_list = [int(vote) for vote in ballot_votes_json]
-        cvr_votes_json = json.loads(form_data['latest_cvr_votes'])
-        cvr_votes_list = [int(vote) for vote in cvr_votes_json]
+        candidate_data_json = json.loads(form_data['paper_record_and_cvr'])
+        candidate_data = [candidate_data_json['paper_record'], candidate_data_json['cvr']]
 
+        # TODO: FINISH
         return "YOO SUPER SIMPLE!", 200
-        # TODO: finish
     elif audit_type == 'cast':
         cast = CURRENT_RUNNING_AUDITS[session_id]
         if cast.IS_DONE:
