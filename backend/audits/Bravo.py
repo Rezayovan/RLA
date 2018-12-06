@@ -3,8 +3,8 @@
 import random
 import math
 import numpy as np
+from .aduits.shared_objects.arrange_candidates import arrange_candidates
 from .audits.shared_objects.BaseAudit import BaseAudit
-from .audits.shared_objects.Candidates import Candidates
 from .audits.shared_objects.Hypotheses import Hypotheses
 
 class Bravo(BaseAudit):
@@ -39,7 +39,7 @@ class Bravo(BaseAudit):
             self.max_tests = min(max_tests, sum(votes_array))
         self.num_candidates = len(votes_array)
 
-        self.candidates = self.arrange_candidates()
+        self.candidates = arrange_candidates(votes_array, num_winners)
         self.margins = self.get_margins()
         self.hypotheses = None
 
@@ -84,22 +84,6 @@ class Bravo(BaseAudit):
                 print("Sample size could not be calculated due to an error:", e)
 
         return asn
-
-
-    def arrange_candidates(self):
-        """
-        From `votes_array`, we can find the winners as the `num_winners` candidates
-        (indices) with the most votes. The losers are the rest of the candidates.
-        """
-        sorted_candidates = sorted(enumerate(self.votes_array), \
-                key=lambda t: t[1], reverse=True)
-
-        # Indices of winners in the votes array
-        winners = set(t[0] for t in sorted_candidates[:self.num_winners])
-        # Indices of losers in the votes array
-        losers = set(t[0] for t in sorted_candidates[self.num_winners:])
-
-        return Candidates(winners, losers)
 
     def get_margins(self):
         """
