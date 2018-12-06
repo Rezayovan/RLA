@@ -128,13 +128,21 @@ def perform_audit():
         num_batches = int(form_data['num_batches'])
         num_stages = int(form_data['num_stages'])
         num_candidates = int(form_data['num_candidates'])
-        params_list = [initial_cvr_data, num_winners, risk_limit, threshold, random_seed, batch_size, num_batches, num_stages]
+        params_list = [initial_cvr_data, num_candidates, num_winners, num_stages, batch_size, num_batches, risk_limit, threshold, random_seed]
 
         cast_object = Cast(*params_list)
         cast_thread = Thread(target=cast_object.run_audit)
         cast_thread.start()
 
-        return "cast rocks bro!", 200
+        session_id = token_urlsafe(32)
+        CURRENT_RUNNING_AUDITS[session_id] = cast_object
+
+        first_sequence = cast_object.get_sequence_number()
+        res = {
+            'sequence_number_to_draw': first_sequence,
+            'session_id': session_id
+        }
+        return jsonify(res)
     elif audit_type == 'negexp':
         pass
     else:
