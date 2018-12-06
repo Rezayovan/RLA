@@ -11,6 +11,7 @@ from utilities.helpers import delete_file, all_keys_present_in_dict, get_vw_and_
 
 from audits.Bravo import Bravo
 from audits.Cast import Cast
+from audits.SuperSimple import SuperSimple
 app = Flask(__name__)
 
 # Stretch goal: add support for XLS files
@@ -100,10 +101,21 @@ def perform_audit():
         random_seed = int(form_data['random_seed'])
         max_tests = int(form_data['max_tests'])
 
-        params_list = [candidate_data, num_ballots_cast, num_winners, risk_limit, inflation_rate, tolerance, random_seed, max_tests]
-
-        print(params_list)
-        return "super simple is cooking!", 200
+        # votes_array, num_ballots, num_winners, risk_limit, seed, inflation_rate, tolerance
+        params_list = [candidate_data, num_ballots_cast, num_winners, risk_limit, random_seed,  inflation_rate, tolerance]
+        ss_obj = SuperSimple(*params_list)
+        sample_size = ss_obj.sample_size()
+        session_id = token_urlsafe(32)
+        CURRENT_RUNNING_AUDITS[session_id] = cast_object
+        ss_thread = Thread(target=ss_obj.run_audit)
+        ss_thread.start()
+        first_sequence = cast_object.get_sequence_number()
+        res = {
+            'sequence_number_to_draw': first_sequence,
+            'session_id': session_id,
+            'estimated_sample_size': sample_size
+        }
+        return jsonify(res)
     elif audit_type == 'cast':
         form_params = ['initial_cvr_data',
                         'num_winners',
