@@ -106,10 +106,10 @@ def perform_audit():
         ss_obj = SuperSimple(*params_list)
         sample_size = ss_obj.sample_size()
         session_id = token_urlsafe(32)
-        CURRENT_RUNNING_AUDITS[session_id] = cast_object
+        CURRENT_RUNNING_AUDITS[session_id] = ss_obj
         ss_thread = Thread(target=ss_obj.run_audit)
         ss_thread.start()
-        first_sequence = cast_object.get_sequence_number()
+        first_sequence = ss_obj.get_sequence_number()
         res = {
             'sequence_number_to_draw': first_sequence,
             'session_id': session_id,

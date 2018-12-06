@@ -1,10 +1,12 @@
 from math import log, ceil
 import random
 from .shared_objects.Candidates import Candidates
+from .shared_objects.BaseAudit import BaseAudit
 
-class SuperSimple:
+class SuperSimple(BaseAudit):
     def __init__(self, votes_array, num_ballots, num_winners, risk_limit, seed, inflation_rate, tolerance):
         print("constructor")
+        super().__init__()
         self.votes_array = votes_array
         self.num_ballots = num_ballots
         self.num_winners = num_winners
@@ -17,6 +19,8 @@ class SuperSimple:
         self.num_candidates = len(votes_array)
 
         # TODO seed random
+        self.random_gen = random.Random()
+        self.random_gen.seed(int(seed))
 
         self.multiplier = self.multiplier()
         self.diluted_margin = self.diluted_margin()
@@ -53,18 +57,13 @@ class SuperSimple:
     def sample_size(self):
         return self.multiplier/self.diluted_margin
 
-    def get_votes(self):
+    def get_votes_wrapper(self):
         """
         Returns ballot votes and corresponding CVR votes for given ballot number.
         """
         # TODO: Reza or Jad
+        print(self.get_votes())
         return [0], [1]
-
-    def get_sequence_number(self):
-        """Returns random sequence number to draw ballot from."""
-        num_ballots = self.num_ballots
-        ballot_to_draw = self.random_gen.randint(1, num_ballots)
-        return ballot_to_draw
 
     def get_ballot_and_CVR(self):
         """ Step 2 of the BRAVO algorithm.
@@ -78,7 +77,7 @@ class SuperSimple:
         Note: 'random' should be seeded before this function is called.
         """
         num_winners = self.num_winners
-        ballot_votes, CVR_votes = self.get_votes()
+        ballot_votes, CVR_votes = self.get_votes_wrapper()
         # TODO: handle under- and overvotes
 
         return ballot_votes, CVR_votes
