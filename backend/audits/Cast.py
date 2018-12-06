@@ -139,7 +139,7 @@ class Cast(BaseAudit):
             count = count + 1
 
         base = (self.num_unaudited - count) / self.num_unaudited
-        n = math.log(base, self.alpha)
+        n = math.log(self.alpha, base)
         n = math.ceil(n)
         return n
 
@@ -172,10 +172,13 @@ class Cast(BaseAudit):
             t_s = self.calc_t_s(batches_to_audit)
             if t_s < self.threshold:
                 print('Audit complete')
-                return 204
+                self.IS_DONE_MESSAGE = "Audit completed: the results stand."
+                self.IS_DONE_FLAG = "success"
+                return
 
-        print('Audit failed full hand recount needed')
-        return
+        print('Audit failed. Full hand recount needed')
+        self.IS_DONE_MESSAGE = "Audit cannot verify the election results. Perform a full hand-recount of the ballots."
+        self.IS_DONE_FLAG = "danger"
 
 # num_candidates, num_winners, num_stages, batch_size
 # num_batches, risk_tolerance, threshold, random_seed

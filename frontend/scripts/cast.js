@@ -105,7 +105,11 @@ function handleContinueToCVR() {
         return generateErrorAlert('audit-info', errorMsg);
     }
 
-    // TODO: is this too limiting?
+    if (numStages > batchSize) {
+        const errorMsg = 'Please ensure that the number of stages is less than the batch size.';
+        return generateErrorAlert('audit-info', errorMsg);
+    }
+
     if (threshold * numBatches >= 100) {
         const errorMsg = 'Threshold of escalation multiplied by the number of batches must be less than 100.';
         return generateErrorAlert('audit-info', errorMsg);
@@ -340,11 +344,13 @@ function getNextBallotToAudit() {
         return console.log("Batch invalid.");
     }
 
-
     // Clear the values for the next batch
     for (const node of inputNodes) {
         node.value = '';
     }
+
+    // Cannot continue until next ballot to audit is returned from the back-end API
+    document.getElementById('continue-audit').setAttribute('disabled', '');
 
     // Setup API call
     const API_ENDPOINT = `${API_ROOT}/send_ballot_votes`
@@ -363,9 +369,25 @@ function getNextBallotToAudit() {
             }
         })
         .then((response) => {
+
+            // Begin status checker to poll for the completion status every 3 seconds
+            if (!auditStatusCheckIntervalBegun) {
+                auditStatusCheckIntervalBegun = true;
+                activateAuditStatusCheckInterval(3000, session_id);
+            }
+
+            if (response.status === 204) {
+                // Let timer interval handle UI change.
+                console.log("Audit complete.");
+                return;
+            }
+
             const sequenceNumberToDraw = response.data.sequence_number_to_draw;
 
             document.getElementById('batch-to-audit').innerHTML = sequenceNumberToDraw;
+
+            // Re-enable the button
+            document.getElementById('continue-audit').removeAttribute('disabled');
 
             return console.log(response);
         })
