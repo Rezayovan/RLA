@@ -1,4 +1,4 @@
-from math import log
+from math import log, ceil
 import random
 from Bravo_OOP import Candidates
 
@@ -11,12 +11,16 @@ class BallotComparison:
         self.seed = seed
         self.inflation_rate = inflation_rate
         self.tolerance = tolerance
+        self.kaplan_p_value = 1.0
+        self.ballots_audited = 1
+        self.num_candidates = len(votes_array)
 
         # TODO seed random
 
         self.multiplier = self.multiplier()
         self.diluted_margin = self.diluted_margin()
 
+        # TODO how to split candidates into winners and losers
         self.candidates = self.arrange_candidates()
 
     def arrange_candidates(self):
@@ -82,14 +86,32 @@ class BallotComparison:
         # Stop audit and ask user to hand recount everything
         return -1
 
+    def update_p_value(self):
+        # Update kaplan p-value (not used unless ballot moves past first state)
+        # list of candidate numbers that cvr and human have listed as a vote
+        ballot_votes, CVR_votes = self.get_ballot_and_CVR()
+        macro = 0
+        temp = 0
+        for candidate in self.num_candidates:
+            in_CVR = candidate in CVR_votes
+            in_ballot = candidate in ballot_votes
+            if candidate in self.candidates.winners:
+                temp = in_CVR - in_ballot
+            else:
+                temp = in_ballot - in_CVR
+            macro += temp/ballots_audited
+        # update p-value
+        kaplan_p_value *= (1 - 1/total_error_bound)/(1 - (macro/(2 * self.inflation_rate / self.ballots_audited)))
+
     def run_audit(self):
-        num_candidates = len(votes_array)
         sample_size = self.sample_size()
+        total_error_bound = 2 * self.inflation_rate / self.diluted_margin
         # Calculate max number of max one vote overstatements allowed before a hand recount
-        max_overstatements = self.diluted_margin * self.tolerance * self.num_ballots
+        max_overstatements = ceil(self.diluted_margin * self.tolerance * self.num_ballots)
         # Overstatement is +1, understatement is -1
         overstatements = [0 for candidate in len(self.votes_array)]
-        for _ in sample_size:
+        while self.ballots_audited <= sample_size:
+            update_p_value()
             # list of candidate numbers that cvr and human have listed as a vote
             ballot_votes, CVR_votes = self.get_ballot_and_CVR()
             # Ballot is an overvote and CVR shows valid vote. Mark everything in CVR as an overstatement.
@@ -109,6 +131,7 @@ class BallotComparison:
                 for candidate in num_candidates:
                     in_CVR = candidate in CVR_votes
                     in_ballot = candidate in ballot_votes
+
                     if not in_ballot and in_CVR:
                         num_mismatches += 1
                         # check if number of errors is greater than 1 on a single ballot
@@ -117,8 +140,9 @@ class BallotComparison:
                         # an overstatement is found
                         overstatements[candidate] += 1
                         # if candidate is a winner
-                        if candidate < self.num_winners
-                            if overstatements[candidate] > max_overstatements
+                        # TODO fix line 124 to actually check
+                        if candidate in self.candidates.winners:
+                            if overstatements[candidate] > max_overstatements:
                                 hand_recount()
                     if in_ballot and not in_CVR:
                         num_mismatches += 1
@@ -127,6 +151,19 @@ class BallotComparison:
                             hand_recount()
                         # an understatement is found
                         overstatements[candidate] -= 1
+            self.ballots_audited += 1
+
+        # If at this point, no overstatement is above max_overstatements
+        # continue hand recount using Kaplan P-Value, stop if p-value
+        while(self.ballots_audited < self.num_ballots):
+            update_p_value()
+            if self.kaplan_p_value <= self.risk_limit:
+                break
+            self.ballots_audited += 1
+        # Audit is finished
+
+            
+
                     
                     
 
