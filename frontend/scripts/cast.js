@@ -19,6 +19,7 @@ let auditStatusCheckIntervalBegun = false;
 let session_id = '';
 
 let numBatchesInputted = 1;
+let batchSize;
 
 let cvrDataInputs = [];
 
@@ -58,8 +59,9 @@ function handleContinueToCVR() {
     const threshold = parseFloat(document.getElementById('threshold').value);
     const randomSeed = document.getElementById('random-seed').value;
     const numStages = parseInt(document.getElementById('num-stages').value, 10);
-    const batchSize = parseInt(document.getElementById('batch-size').value, 10);
     const numBatches = parseInt(document.getElementById('num-batches').value, 10);
+
+    batchSize = parseInt(document.getElementById('batch-size').value, 10);
 
     // Validations
 
@@ -109,7 +111,7 @@ function handleContinueToCVR() {
         return generateErrorAlert('audit-info', errorMsg);
     }
 
-    disableInputsAndButtons();
+    disableInputsAndButtons('audit-info');
 
     loadBatchInputDOM(reportedCandidateNames, numBatches);
 }
@@ -158,7 +160,11 @@ function loadBatchInputDOM(reportedCandidateNames, numBatches) {
 }
 
 function setupNextBatch(numBatches) {
-    manageBatchInputs();
+    try {
+        manageInitialBatchInputs();
+    } catch (e) {
+        return console.log("Batch invalid.");
+    }
 
     document.getElementById('cvr-number-to-input').innerHTML = ++numBatchesInputted;
 
@@ -172,7 +178,7 @@ function setupNextBatch(numBatches) {
 
 function addAndSetupBeginAuditBtn() {
     const beginAuditBtn = document.createElement('button');
-    beginAuditBtn.classList.add('btn', 'btn-success');
+    beginAuditBtn.classList.add('btn', 'btn-primary');
     beginAuditBtn.type = 'button';
     beginAuditBtn.id = 'begin-cast';
     beginAuditBtn.innerHTML = 'Begin audit';
@@ -186,22 +192,138 @@ function addAndSetupBeginAuditBtn() {
 // Get current values from inputs
 // Save values in data structure to send to API later on (2D array)
 // Clear inputs
-function manageBatchInputs() {
+function manageInitialBatchInputs() {
+    clearValidationErrors();
+
     const inputNodes = document.querySelectorAll('#cvr-inputs .candidate-input');
 
     const batchVotes = [];
     for (const node of inputNodes) {
-        batchVotes.push(parseInt(node.value, 10));
-        node.value = '';
+        if (!node.value) {
+            batchVotes.push(0);
+        } else {
+            const voteVal = parseInt(node.value, 10);
+
+            if (voteVal < 0) {
+                const errorMsg = 'Please enter non-negative votes.';
+                throw generateErrorAlert('cvr-container', errorMsg);
+            }
+
+            batchVotes.push(voteVal);
+        }
     }
 
-    // TODO: validation on batchVotes array
+    const batchVotesSum = batchVotes.reduce((a, b) => a + b, 0);
+    if (batchVotesSum > batchSize) {
+        const errorMsg = `The entered votes for batch #${numBatchesInputted} exceed the batch size. Please correct this to proceed.`;
+        throw generateErrorAlert('cvr-container', errorMsg);
+    }
+
+    // Clear the values for the next batch
+    for (const node of inputNodes) {
+        node.value = '';
+    }
 
     cvrDataInputs.push(batchVotes);
 }
 
 function beginCast() {
-    // do stuff
+    // Get final batch of votes before beginning audit
+    manageInitialBatchInputs();
+
+    const numWinners = parseInt(document.getElementById('num-winners').value, 10);
+    const riskLimit = parseFloat(document.getElementById('risk-limit').value);
+    const threshold = parseFloat(document.getElementById('threshold').value);
+    const randomSeed = document.getElementById('random-seed').value;
+    const numStages = parseInt(document.getElementById('num-stages').value, 10);
+    const batchSize = parseInt(document.getElementById('batch-size').value, 10);
+    const numBatches = parseInt(document.getElementById('num-batches').value, 10);
+
+    console.log(cvrDataInputs);
+
+    // Setup API call
+    const API_ENDPOINT = `${API_ROOT}/perform_audit`
+    const formData = new FormData();
+
+    formData.append('audit_type', AUDIT_TYPE);
+    formData.append('initial_cvr_data', JSON.stringify(cvrDataInputs));
+    formData.append('num_winners', numWinners);
+    formData.append('risk_limit', riskLimit);
+    formData.append('random_seed', randomSeed);
+    formData.append('threshold', threshold);
+    formData.append('batch_size', batchSize);
+    formData.append('num_batches', numBatches);
+    formData.append('num_stages', numStages);
+
+    // Make API call
+    axios.post(API_ENDPOINT, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        })
+        .then((response) => {
+            // Disable CVR container
+            disableInputsAndButtons('cvr-container');
+
+            // Set session
+
+            // TODO: replace this with API results
+            const initialBatchToAudit = 1;
+
+            populateAuditContainer(initialBatchToAudit);
+
+            // handle response
+            return console.log(response);
+        })
+        .catch((error) => {
+            return console.error(error);
+        });
+}
+
+function populateAuditContainer(initialBatchToAudit) {
+    const reportedCandidateNames = getCandidateNames();
+
+    const auditTitleElt = document.createElement('h3');
+    auditTitleElt.classList.add('mt-3');
+    auditTitleElt.innerHTML = 'Audit';
+    document.getElementById('audit-container').appendChild(auditTitleElt);
+
+    const CVRToInputElt = document.createElement('h6');
+    CVRToInputElt.innerHTML = `Please input the votes per candidate for batch <b>#<span id="batch-to-audit">${initialBatchToAudit}</span></b>.`;
+    document.getElementById('audit-container').appendChild(CVRToInputElt);
+
+    // Add candidate inputs
+    const formRowDiv = document.createElement('div');
+    formRowDiv.classList.add('form-row');
+    formRowDiv.id = 'cvr-inputs';
+
+    let candidateNum = 0;
+    for (const candidateName of reportedCandidateNames) {
+        formRowDiv.innerHTML += `\
+            <div class="col-md-2 col-lg-2 mb-3">\
+                <label for="candidate-${candidateNum}">${candidateName}</label>\
+                <input type="number" class="form-control candidate-input" id="candidate-${candidateNum}" min="0" placeholder="0" value="0">\
+            </div>`;
+        ++candidateNum;
+    }
+
+    document.getElementById('audit-container').appendChild(formRowDiv);
+
+    // Add continue button
+    const continueBtn = document.createElement('button');
+    continueBtn.classList.add('btn', 'btn-success');
+    continueBtn.type = 'button';
+    continueBtn.id = 'continue-audit';
+    continueBtn.innerHTML = 'Continue audit';
+    document.getElementById('audit-container').appendChild(continueBtn);
+
+    document.getElementById('continue-audit').addEventListener('click', () => {
+        handleContinueAudit();
+    });
+}
+
+function handleContinueAudit() {
+    // TODO
 }
 
 // =========================

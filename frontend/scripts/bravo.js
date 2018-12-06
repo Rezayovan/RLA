@@ -132,7 +132,7 @@ function beginBravoAudit() {
 
 // Clean up UI to remove certain buttons and disable input boxes to not mess with audit
 function transitionInterfaceToInProgress(sampleSize, firstSequence) {
-    disableInputsAndButtons();
+    disableInputsAndButtons('audit-info');
     setupAuditDOM(sampleSize);
 
     // Display checkboxes

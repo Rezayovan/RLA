@@ -105,21 +105,22 @@ def perform_audit():
         print(params_list)
         return "super simple is cooking!", 200
     elif audit_type == 'cast':
-        form_params = ['num_winners', 'risk_limit', 'random_seed', 'threshold', 'batch_size', 'num_batches']
+        form_params = ['initial_cvr_data', 'num_winners', 'risk_limit', 'random_seed', 'threshold', 'batch_size', 'num_batches', 'num_stages']
         if not all_keys_present_in_dict(form_params, form_data):
             return 'Not all required CAST parameters were provided.', 500
 
         # Parse candidate name and vote JSON data
+        initial_cvr_data = json.loads(form_data['initial_cvr_data'])
+        print(initial_cvr_data)
         num_winners = int(form_data['num_winners'])
         risk_limit = float(form_data['risk_limit']) / 100
         random_seed = int(form_data['random_seed'])
         threshold = float(form_data['threshold']) / 100
         batch_size = int(form_data['batch_size'])
         num_batches = int(form_data['num_batches'])
+        num_stages = int(form_data['num_stages'])
 
-        params_list = [num_winners, risk_limit, threshold, random_seed, batch_size, num_batches]
-
-        print(params_list)
+        params_list = [initial_cvr_data, num_winners, risk_limit, threshold, random_seed, batch_size, num_batches, num_stages]
         return "cast rocks bro!", 200
     elif audit_type == 'negexp':
         pass
