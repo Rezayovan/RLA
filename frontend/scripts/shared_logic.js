@@ -25,6 +25,25 @@ export function addCandidate(numCandidates, onlyNames) {
     document.getElementById('candidates-container').appendChild(newCandidate);
 }
 
+export function addCandidateAndTally(numCandidates) {
+    const newCandidate = document.createElement('div');
+    newCandidate.className = 'form-row';
+    newCandidate.innerHTML = `\
+    <div class="col-md-4 mb-3">\
+        <label for="candidate${numCandidates}">Candidate ${numCandidates} name</label>\
+        <input type="text" class="form-control candidate-name" id="candidate${numCandidates}" placeholder="Name">\
+    </div>
+    <div class="col-md-4 mb-3">\
+        <label for="candidate${numCandidates}-votes">Candidate ${numCandidates} votes</label>\
+        <input type="number" class="form-control candidate-vote" id="candidate${numCandidates}-votes" placeholder="0" min="0">\
+    </div>\
+    <div class="col-md-4 mb-3">\
+        <label for="candidate${numCandidates}-sample-tally">Candidate ${numCandidates} sample tally</label>\
+        <input type="number" class="form-control sample-tally" id="candidate${numCandidates}-sample-tally" placeholder="0" min="0">\
+    </div>`;
+    document.getElementById('candidates-container').appendChild(newCandidate);
+}
+
 export function removeCandidate() {
     const candidates = document.querySelectorAll('#candidates-container .form-row');
     const lastCandidate = candidates[candidates.length - 1];
@@ -34,7 +53,7 @@ export function removeCandidate() {
 }
 
 export function getCandidateNames() {
-    const candidateNameNodes = document.querySelectorAll('#candidates-container input[type="text"]');
+    const candidateNameNodes = document.querySelectorAll('#candidates-container .candidate-name');
     const candidateNames = [];
     for (const node of candidateNameNodes) {
         candidateNames.push(node.value);
@@ -43,13 +62,21 @@ export function getCandidateNames() {
 }
 
 export function getCandidateVotes() {
-    const candidateVoteNodes = document.querySelectorAll('#candidates-container input[type="number"]');
+    const candidateVoteNodes = document.querySelectorAll('#candidates-container .candidate-vote');
     const candidateVotes = [];
-    // TODO: do some sort of validation to check if candidate name or votes are invalid. done on backend?
     for (const node of candidateVoteNodes) {
         candidateVotes.push(parseInt(node.value, 10));
     }
     return candidateVotes;
+}
+
+export function getCandidateSampleTallies() {
+    const candidateSampleTallyNodes = document.querySelectorAll('#candidates-container .sample-tally');
+    const candidateSampleTallies = [];
+    for (const node of candidateSampleTallyNodes) {
+        candidateSampleTallies.push(parseInt(node.value, 10));
+    }
+    return candidateSampleTallies;
 }
 
 export function clearValidationErrors() {

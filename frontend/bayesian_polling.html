@@ -8,7 +8,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>BRAVO RLA</title>
+    <title>Bayesian Polling RLA</title>
     <meta name="description" content="Risk limiting audits">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -24,7 +24,7 @@
     <script defer src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script defer src="scripts/navbar_helpers.js" type="module"></script>
     <script defer src="scripts/shared_logic.js" type="module"></script>
-    <script defer src="scripts/bravo.js" type="module"></script>
+    <script defer src="scripts/bayesian_polling.js" type="module"></script>
 
     <link rel="stylesheet" href="assets/styles/index.css">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
@@ -49,8 +49,8 @@
                 <li class="nav-item">
                     <a class="nav-link" href="sample_size_demo.html">Sample Size Demo</a>
                 </li>
-                <li class="nav-item active">
-                    <a class="nav-link" href="#">BRAVO</a>
+                <li class="nav-item">
+                    <a class="nav-link" href="bravo.html">BRAVO</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="super_simple.html">Super-Simple</a>
@@ -58,15 +58,15 @@
                 <li class="nav-item">
                     <a class="nav-link" href="cast.html">CAST</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="bayesian_polling.html">Bayesian Polling</a>
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">Bayesian Polling</a>
                 </li>
             </ul>
         </div>
     </nav>
 
     <div class="container">
-        <h1>BRAVO Audit</h1>
+        <h1>Bayesian Polling Audit</h1>
 
         <form enctype="multipart/form-data">
             <div class="form-group" id="form-container">
@@ -84,6 +84,7 @@
                         </div>
                     </div>
 
+                    <!-- Explain what tally is -->
                     <h3 class="mt-3">Reported Votes</h3>
                     <div id="candidates-container">
                         <div class="form-row">
@@ -95,6 +96,10 @@
                                 <label for="candidate1-votes">Candidate 1 votes</label>
                                 <input type="number" class="form-control candidate-vote" id="candidate1-votes" placeholder="0" value="0" min="0">
                             </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="candidate1-votes">Candidate 1 sample tally</label>
+                                <input type="number" class="form-control sample-tally" id="candidate1-sample-tally" placeholder="0" value="0" min="0">
+                            </div>
                         </div>
                         <div class="form-row">
                             <div class="col-md-4 mb-3">
@@ -104,6 +109,10 @@
                             <div class="col-md-4 mb-3">
                                 <label for="candidate2-votes">Candidate 2 votes</label>
                                 <input type="number" class="form-control candidate-vote" id="candidate2-votes" placeholder="0" value="0" min="0">
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                    <label for="candidate1-votes">Candidate 2 sample tally</label>
+                                    <input type="number" class="form-control sample-tally" id="candidate2-sample-tally" placeholder="0" value="0" min="0">
                             </div>
                         </div>
                     </div>
@@ -134,13 +143,7 @@
                             <!-- TODO: Warn people to not use an online die roller. -->
                         </div>
                     </div>
-                    <div class="form-row">
-                        <div class="col-md-6 col-lg-4 mb-3">
-                            <label for="max-tests">Max number of tests to run</label>
-                            <input type="number" class="form-control" id="max-tests" min="0" placeholder="20" value="20">
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-success" id="begin-bravo">Begin audit</button>
+                    <button type="button" class="btn btn-success" id="begin-bayesian">Begin audit</button>
                 </div>
 
                 <div id="audit-container"></div>
