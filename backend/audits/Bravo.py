@@ -3,9 +3,9 @@
 import random
 import math
 import numpy as np
-from .shared_objects.BaseAudit import BaseAudit
-from .shared_objects.Candidates import Candidates
-from .shared_objects.Hypotheses import Hypotheses
+from .audits.shared_objects.BaseAudit import BaseAudit
+from .audits.shared_objects.Candidates import Candidates
+from .audits.shared_objects.Hypotheses import Hypotheses
 
 class Bravo(BaseAudit):
     """ Ballot-polling audit in Python
@@ -22,6 +22,7 @@ class Bravo(BaseAudit):
         self.votes_array = votes_array
         assert num_ballots >= sum(votes_array)
         self.num_ballots = num_ballots
+        assert num_winners < len(votes_array)
         self.num_winners = num_winners
         assert 0. < risk_limit <= 1.
         self.risk_limit = risk_limit
