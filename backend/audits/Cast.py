@@ -21,6 +21,8 @@ class Cast(BaseAudit):
 		self.unaudited = np.arange(num_batches)
 		self.alpha = self.calc_alpha_s(risk_tolerance)
 		self.reported_batch_info, self.audited_batch_info, self.winners, self.losers = self.init_info()
+		self.cvr_batches = cvr_batches
+
 
 	def calc_alpha_s(self, risk_tolerance):
 		diff = 1 - risk_tolerance
@@ -31,8 +33,9 @@ class Cast(BaseAudit):
 	def init_info(self):
 		total_votes = np.zeros(self.num_candidates)
 		reported_batch_info = []
-		for _ in range(self.num_batches):
-			batch_info = self.get_batch_info()
+		get_batch_generator = self.get_batch_first()
+		for _ in self.cvr_batches:
+			batch_info = next(get_batch_generator)
 			reported_batch_info.append(batch_info)
 			for idx, num_votes in enumerate(batch_info):
 				total_votes[idx] = total_votes[idx] + num_votes
@@ -48,7 +51,14 @@ class Cast(BaseAudit):
 		'''
 		Get batch info
 		'''
-		pass
+		return self.get_votes()
+
+	def get_batch_first(self):
+		'''
+		Get batch info for beginning of audit.
+		'''
+		for batch in self.cvr_batches:
+			yield batch
 
 	def calc_adj_margin(self, winner, loser):
 		reported_margin = 0

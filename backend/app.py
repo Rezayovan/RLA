@@ -106,7 +106,30 @@ def perform_audit():
         print(params_list)
         return "super simple cooking!", 200
     elif audit_type == 'cast':
-        pass
+        if not all_keys_present_in_dict(form_params, form_data):
+            return 'Not all required Cast parameters were provided.', 500
+
+        #parse cast params
+        params_list = []
+        cast_object = Cast(*params_list)
+
+        # run the thread
+        cast_thread = Thread(target=cast_object.run_audit)
+        cast_thread.start()
+
+        # Save object to retrieve audit status for a particular user
+        # in subsequent requests
+        session_id = token_urlsafe(32)
+        global CURRENT_RUNNING_AUDITS
+        CURRENT_RUNNING_AUDITS[session_id] = cast_object
+
+        first_sequence = cast_object.get_sequence_number()
+        res = {
+            'sequence_number_to_draw': first_sequence,
+            'session_id': session_id
+        }
+        return jsonify(res)
+
     elif audit_type == 'negexp':
         pass
     else:
@@ -156,11 +179,29 @@ def send_ballot_votes():
         return "YOO SUPER SIMPLE!", 200
         # TODO: finish
     elif audit_type == 'cast':
-        pass
+        global CURRENT_RUNNING_AUDITS
+        cast = CURRENT_RUNNING_AUDITS[session_id]
+        if cast.IS_DONE:
+            # return status code 204
+            return 'Cast audit complete!', 204
+
+        form_params = ['latest_ballot_votes', 'num_ballots_cast']
+        if not all_keys_present_in_dict(form_params, form_data):
+            return 'Not all required CAST parameters were provided.', 500
+
+        ballot_votes_json = json.loads(form_data['latest_ballot_votes'])
+        ballot_votes_list = [int(vote) for vote in ballot_votes_json]
+        cast.append_votes_buffer(ballot_votes_list)
+
+        sequence = cast.get_sequence_number()
+        res = {'sequence_number_to_draw': sequence}
+        return jsonify(res)
     elif audit_type == 'negexp':
         pass
     else:
         return f'{audit_type} is an invalid audit type!', 500
+
+
 
 @app.route('/check_audit_status', methods=['POST'])
 def check_audit_status():
