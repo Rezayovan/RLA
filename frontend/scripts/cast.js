@@ -119,7 +119,7 @@ function handleContinueToCVR() {
 function loadBatchInputDOM(reportedCandidateNames, numBatches) {
     const CVRTitleElt = document.createElement('h3');
     CVRTitleElt.classList.add('mt-3');
-    CVRTitleElt.innerHTML = 'Input Vote Data';
+    CVRTitleElt.innerHTML = 'Input Reported Vote Data';
     document.getElementById('cvr-container').appendChild(CVRTitleElt);
 
     const CVRToInputElt = document.createElement('h6');
@@ -178,7 +178,7 @@ function setupNextBatch(numBatches) {
 
 function addAndSetupBeginAuditBtn() {
     const beginAuditBtn = document.createElement('button');
-    beginAuditBtn.classList.add('btn', 'btn-primary');
+    beginAuditBtn.classList.add('btn', 'btn-success');
     beginAuditBtn.type = 'button';
     beginAuditBtn.id = 'begin-cast';
     beginAuditBtn.innerHTML = 'Begin audit';
@@ -189,14 +189,7 @@ function addAndSetupBeginAuditBtn() {
     });
 }
 
-// Get current values from inputs
-// Save values in data structure to send to API later on (2D array)
-// Clear inputs
-function manageInitialBatchInputs() {
-    clearValidationErrors();
-
-    const inputNodes = document.querySelectorAll('#cvr-inputs .candidate-input');
-
+function getBatchInputs(inputNodes, idForErrors) {
     const batchVotes = [];
     for (const node of inputNodes) {
         if (!node.value) {
@@ -206,7 +199,7 @@ function manageInitialBatchInputs() {
 
             if (voteVal < 0) {
                 const errorMsg = 'Please enter non-negative votes.';
-                throw generateErrorAlert('cvr-container', errorMsg);
+                throw generateErrorAlert(idForErrors, errorMsg);
             }
 
             batchVotes.push(voteVal);
@@ -216,8 +209,20 @@ function manageInitialBatchInputs() {
     const batchVotesSum = batchVotes.reduce((a, b) => a + b, 0);
     if (batchVotesSum > batchSize) {
         const errorMsg = `The entered votes for batch #${numBatchesInputted} exceed the batch size. Please correct this to proceed.`;
-        throw generateErrorAlert('cvr-container', errorMsg);
+        throw generateErrorAlert(idForErrors, errorMsg);
     }
+
+    return batchVotes;
+}
+
+// Get current values from inputs
+// Save values in data structure to send to API later on (2D array)
+// Clear inputs
+function manageInitialBatchInputs() {
+    clearValidationErrors();
+
+    const inputNodes = document.querySelectorAll('#cvr-inputs .candidate-input');
+    const batchVotes = getBatchInputs(inputNodes, 'cvr-container');
 
     // Clear the values for the next batch
     for (const node of inputNodes) {
@@ -295,7 +300,7 @@ function populateAuditContainer(initialBatchToAudit) {
     // Add candidate inputs
     const formRowDiv = document.createElement('div');
     formRowDiv.classList.add('form-row');
-    formRowDiv.id = 'cvr-inputs';
+    formRowDiv.id = 'audit-inputs';
 
     let candidateNum = 0;
     for (const candidateName of reportedCandidateNames) {
@@ -318,12 +323,43 @@ function populateAuditContainer(initialBatchToAudit) {
     document.getElementById('audit-container').appendChild(continueBtn);
 
     document.getElementById('continue-audit').addEventListener('click', () => {
-        handleContinueAudit();
+        getNextBallotToAudit();
     });
 }
 
-function handleContinueAudit() {
-    // TODO
+function getNextBallotToAudit() {
+    clearValidationErrors();
+
+    const inputNodes = document.querySelectorAll('#audit-inputs .candidate-input');
+    const batchVotes = getBatchInputs(inputNodes, 'audit-container');
+
+    // Clear the values for the next batch
+    for (const node of inputNodes) {
+        node.value = '';
+    }
+
+    // Setup API call
+    const API_ENDPOINT = `${API_ROOT}/send_ballot_votes`
+    const formData = new FormData();
+
+    formData.append('audit_type', AUDIT_TYPE);
+    formData.append('session_id', session_id);
+    formData.append('batch_votes', JSON.stringify(batchVotes));
+
+    // Make API call
+    axios.post(API_ENDPOINT, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        })
+        .then((response) => {
+
+            // handle response
+            return console.log(response);
+        })
+        .catch((error) => {
+            return console.error(error);
+        });
 }
 
 // =========================
