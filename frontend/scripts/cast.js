@@ -252,6 +252,7 @@ function beginCast() {
 
     formData.append('audit_type', AUDIT_TYPE);
     formData.append('initial_cvr_data', JSON.stringify(cvrDataInputs));
+    formData.append('num_candidates', numCandidates);
     formData.append('num_winners', numWinners);
     formData.append('risk_limit', riskLimit);
     formData.append('random_seed', randomSeed);
