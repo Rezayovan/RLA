@@ -247,9 +247,15 @@ function getNextBallotToAudit() {
 
     const totalNumBallotsCast = parseInt(document.getElementById('total-ballots-cast').value, 10);
 
+    const total_votes = {
+        'paper_record': ballotVotes,
+        'cvr': CVRVotes
+    };
+
+    console.log(total_votes);
+
     formData.append('audit_type', AUDIT_TYPE);
-    formData.append('latest_ballot_votes', JSON.stringify(ballotVotes));
-    formData.append('latest_CVR_votes', JSON.stringify(CVRVotes));
+    formData.append('paper_record_and_cvr', JSON.stringify(total_votes));
     formData.append('num_ballots_cast', totalNumBallotsCast);
     formData.append('session_id', session_id);
 

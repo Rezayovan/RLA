@@ -12,6 +12,7 @@ from utilities.helpers import delete_file, all_keys_present_in_dict, get_vw_and_
 from audits.Bravo import Bravo
 from audits.Cast import Cast
 from audits.SuperSimple import SuperSimple
+
 app = Flask(__name__)
 
 # Stretch goal: add support for XLS files
