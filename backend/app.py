@@ -101,7 +101,6 @@ def perform_audit():
         inflation_rate = float(form_data['inflation_rate']) / 100
         tolerance = float(form_data['tolerance']) / 100
         random_seed = int(form_data['random_seed'])
-        max_tests = int(form_data['max_tests'])
 
         # votes_array, num_ballots, num_winners, risk_limit, seed, inflation_rate, tolerance
         params_list = [candidate_data, num_ballots_cast, num_winners, risk_limit, random_seed,  inflation_rate, tolerance]
@@ -159,7 +158,7 @@ def perform_audit():
         }
         return jsonify(res)
     elif audit_type == 'bayesian_polling':
-        form_params = ['candidate_votes', 'num_ballots_cast', 'num_winners', 'risk_limit', 'random_seed']
+        form_params = ['candidate_votes', 'sample_tallies', 'num_ballots_cast', 'num_winners', 'risk_limit', 'random_seed', 'num_trials']
         if not all_keys_present_in_dict(form_params, form_data):
             return 'Not all required super-simple parameters were provided.', 500
         # Parse candidate name and vote and sample_tally JSON data

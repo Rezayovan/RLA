@@ -58,7 +58,6 @@ function beginSuperSimpleAudit() {
     const inflationRate = parseFloat(document.getElementById('inflation-rate').value);
     const tolerance = parseFloat(document.getElementById('tolerance').value);
     const randomSeed = document.getElementById('random-seed').value;
-    const maxTests = parseInt(document.getElementById('max-tests').value, 10);
 
     // Too few candidates
     if (reportedCandidateVotes.length < 2) {
@@ -99,11 +98,6 @@ function beginSuperSimpleAudit() {
         return generateErrorAlert('audit-info', errorMsg);
     }
 
-    if (maxTests < 1) {
-        const errorMsg = 'Please enter a non-negative maximum number of tests.';
-        return generateErrorAlert('audit-info', errorMsg);
-    }
-
     // At this point, data has been (partially) validated
 
     // Setup API call
@@ -118,7 +112,6 @@ function beginSuperSimpleAudit() {
     formData.append('inflation_rate', inflationRate);
     formData.append('tolerance', tolerance);
     formData.append('random_seed', randomSeed);
-    formData.append('max_tests', maxTests);
 
     // Make API call
     axios.post(API_ENDPOINT, formData, {
