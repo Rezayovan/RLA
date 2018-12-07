@@ -1,5 +1,6 @@
 from math import log, ceil
 import random
+from .shared_objects.arrange_candidates import arrange_candidates
 from .shared_objects.Candidates import Candidates
 from .shared_objects.BaseAudit import BaseAudit
 
@@ -18,33 +19,13 @@ class SuperSimple(BaseAudit):
         self.ballots_audited = 1
         self.num_candidates = len(votes_array)
 
-        # TODO seed random
         self.random_gen = random.Random()
         self.random_gen.seed(int(seed))
 
         self.multiplier = self.multiplier()
         self.diluted_margin = self.diluted_margin()
         self.total_error_bound = 2 * self.inflation_rate / self.diluted_margin
-        # TODO how to split candidates into winners and losers
-        self.candidates = self.arrange_candidates()
-
-    def arrange_candidates(self):
-        """
-        From `votes_array`, we can find the winners as the `num_winners` candidates
-        (indices) with the most votes. The losers are the rest of the candidates.
-        """
-        votes_array = self.votes_array
-        num_winners = self.num_winners
-
-        sorted_candidates = sorted(enumerate(votes_array), key=lambda t: t[1], reverse=True)
-
-        # Indices of winners in the votes array
-        winners = set(t[0] for t in sorted_candidates[:num_winners])
-        # Indices of losers in the votes array
-        losers = set(t[0] for t in sorted_candidates[num_winners:])
-
-        return Candidates(winners, losers)
-
+        self.candidates = arrange_candidates(votes_array, num_winners)
 
     def multiplier(self):
          return -log(self.risk_limit)/(1/(2*self.inflation_rate) + self.tolerance * log(1 - 1/(2*self.inflation_rate)))
@@ -61,7 +42,6 @@ class SuperSimple(BaseAudit):
         """
         Returns ballot votes and corresponding CVR votes for given ballot number.
         """
-        # TODO: Reza or Jad
         votes = self.get_votes()
         return votes[0], votes[1]
 
@@ -78,7 +58,6 @@ class SuperSimple(BaseAudit):
         """
         num_winners = self.num_winners
         ballot_votes, CVR_votes = self.get_votes_wrapper()
-        # TODO: handle under- and overvotes
 
         return ballot_votes, CVR_votes
 
