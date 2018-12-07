@@ -62,7 +62,7 @@ class SuperSimple(BaseAudit):
         Returns ballot votes and corresponding CVR votes for given ballot number.
         """
         # TODO: Reza or Jad
-        print(self.get_votes())
+        print("GETTING VOTES", self.get_votes())
         return [0], [1]
 
     def get_ballot_and_CVR(self):
