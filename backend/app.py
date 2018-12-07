@@ -165,18 +165,22 @@ def perform_audit():
         # Parse candidate name and vote and sample_tally JSON data
         candidate_data_json = json.loads(form_data['candidate_votes'])
         votes_array = [int(val) for val in candidate_data_json]
-        sample_tallies = [] # TODO @Jad Need help here 
+        sample_tallies_json = json.loads(form_data['sample_tallies'])
+        sample_tallies = [int(val) for val in sample_tallies_json]
         num_ballots = int(form_data['num_ballots_cast'])
         num_winners = int(form_data['num_winners'])
         risk_limit = float(form_data['risk_limit']) / 100
         random_seed = int(form_data['random_seed'])
-        params_list = [votes_array, sample_tallies, num_ballots, num_winners, risk_limit, seed]
+        num_trials = int(form_data['num_trials'])
+        params_list = [votes_array, num_ballots, num_winners, risk_limit, random_seed, sample_tallies, num_trials]
         baypoll_object = BayesianPolling(*params_list)
-        baypoll_thread = Thread(target=baypoll_object.run_audit)
-        cast_thread.start()
+        message, flag = baypoll_object.run_audit()
 
-        # TODO pass response to frontend
-
+        res = {
+            'completion_message': message,
+            'flag': flag
+        }
+        return jsonify(res)
     else:
         return f'{audit_type} is an invalid audit type!', 500
 

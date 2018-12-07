@@ -1,14 +1,12 @@
-# pylint: disable=E0402
-
 from .shared_objects.arrange_candidates import get_winners
-from .bptools.bptools import compute_win_probs
+from .bptool import compute_win_probs
 
 class BayesianPolling():
     """ Bayesian ballot-polling audit in Python
     A wrapper class around Ron Rivest's [2018-bptool](https://github.com/ron-rivest/2018-bptool).
     """
     def __init__(self, votes_array, num_ballots, num_winners,\
-            risk_limit, seed, sample_tallies):
+            risk_limit, seed, sample_tallies, num_trials):
         super().__init__()
         assert all(votes >= 0 for votes in votes_array)
         self.votes_array = votes_array
@@ -20,6 +18,7 @@ class BayesianPolling():
         assert 0. < risk_limit <= 1.
         self.risk_limit = risk_limit
         self.seed = seed
+        self.num_trials = num_trials
 
     def bayesian_polling_audit(self):
         """
@@ -29,8 +28,9 @@ class BayesianPolling():
         winning is greater than the significance level.
         """
         reported_winners = get_winners(self.votes_array, self.num_winners)
+
         bayesian_winners = compute_win_probs([self.sample_tallies],\
-                self.num_ballots, self.num_winners, self.seed)
+                self.num_ballots, self.seed, self.num_trials, "", self.num_winners)
         reported_set = {w for w in reported_winners}
         bayesian_set = {w.i for w in bayesian_winners}
         for projected, reported in zip(bayesian_winners, reported_winners):
@@ -45,8 +45,6 @@ class BayesianPolling():
         audit_result = self.bayesian_polling_audit()
 
         if audit_result:
-            self.IS_DONE_MESSAGE = "Audit completed: the results stand."
-            self.IS_DONE_FLAG = "success"
-        else:
-            self.IS_DONE_MESSAGE = "Failed to confirm the results. Sample a larger portion of the ballots. This may indicate that your reported winners are incorrect."
-            self.IS_DONE_FLAG = "danger"
+            return "Audit completed: the results stand.", "success"
+
+        return "Failed to confirm the results. Sample a larger portion of the ballots. This may indicate that your reported winners are incorrect.", "danger"
