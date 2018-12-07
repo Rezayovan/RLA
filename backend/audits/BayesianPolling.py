@@ -30,7 +30,7 @@ class BayesianPolling():
         reported_winners = get_winners(self.votes_array, self.num_winners)
 
         bayesian_winners = compute_win_probs([self.sample_tallies],\
-                self.num_ballots, self.seed, self.num_trials, "", self.num_winners)
+                [self.num_ballots], self.seed, self.num_trials, "", self.num_winners)
         reported_set = {w for w in reported_winners}
         bayesian_set = {w.i for w in bayesian_winners}
         for projected, reported in zip(bayesian_winners, reported_winners):
