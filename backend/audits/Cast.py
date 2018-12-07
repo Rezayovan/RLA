@@ -168,7 +168,7 @@ class Cast(BaseAudit):
         random.seed(a = self.random_seed)
 
         for i in range(self.num_stages):
-            self.STAGE_MESSAGE = "Starting stage {}".format(i)  
+            self.STAGE_MESSAGE = "Starting stage {}".format(i)
             T, squigglie_u_ps = self.calc_T()
             n = self.calc_n(T, squigglie_u_ps)
 
@@ -176,7 +176,7 @@ class Cast(BaseAudit):
                 print('More batches to audit then provided preform a full hand recount')
                 self.IS_DONE_MESSAGE = "Audit requires more batches than remaining. Perform a full hand-recount of the ballots."
                 self.IS_DONE_FLAG = "danger"
-                self.IS_DONE = True;
+                self.IS_DONE = True
 
             batches_to_audit = random.sample(list(self.unaudited), n)
             for batch_num in batches_to_audit:
