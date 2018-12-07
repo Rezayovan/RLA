@@ -4,9 +4,14 @@ import {
     removeElement,
     clearValidationErrors
 } from './shared_logic.js';
+
 import {
     calculate_bravo_sample_size, calculate_super_simple_sample_size
-} from './sample_size_calculations.js'
+} from './calculate_sample_size.js';
+
+const inflationRate = 1.1;
+const tolerance20 = 0.2;
+const tolerance50 = 0.5;
 
 let demoStarted = false;
 
@@ -20,11 +25,8 @@ document.getElementById('begin-demo').addEventListener('click', () => {
     const API_ENDPOINT = `${API_ROOT}/get_sample_sizes_for_open_election_data`
 
     const spreadsheet = document.getElementById('input-election-data');
-    // const officeSelection = document.getElementById('office-selector').value;
     const numWinners = 1;
-    const riskLimit = Number.parseFloat(document.getElementById('risk-limit').value, 10) / 100;
-    const inflationRate = Number.parseFloat(document.getElementById('inflation-rate').value, 10) / 100;
-    const tolerance = Number.parseFloat(document.getElementById('tolerance').value, 10) / 100;
+    let riskLimit = parseInt(document.getElementById('risk-limit').value, 10);
 
     if (!spreadsheet.files[0]) {
         const errorMsg = `Please upload a CSV of Open Election data to run the demo.`;
@@ -36,11 +38,14 @@ document.getElementById('begin-demo').addEventListener('click', () => {
         return generateErrorAlert('demo-container', errorMsg);
     }
 
+    riskLimit = Number.parseFloat(riskLimit) / 100;
+
+    document.getElementById('begin-demo').setAttribute('disabled', '');
+
     const formData = new FormData();
 
     formData.append('election-data-spreadsheet', spreadsheet.files[0]);
     formData.append('num_winners', numWinners);
-    // formData.append('office', officeSelection);
 
     axios.post(API_ENDPOINT, formData, {
             headers: {
@@ -49,8 +54,8 @@ document.getElementById('begin-demo').addEventListener('click', () => {
         })
         .then((response) => {
             demoStarted = true;
+            removeElement('begin-demo');
             document.getElementById('input-election-data').setAttribute('disabled', '');
-            // document.getElementById('office-selector').setAttribute('disabled', '');
 
             const payload = response.data;
             totalVotes = payload.total_votes;
@@ -60,11 +65,10 @@ document.getElementById('begin-demo').addEventListener('click', () => {
 
             const bravo_sample_size = calculate_bravo_sample_size(totalVotes, riskLimit, v_w, v_l);
 
-            const super_simple_sample_size = calculate_super_simple_sample_size(totalVotes, riskLimit, v_w, v_l, inflationRate, tolerance);
+            const super_simple_sample_size20 = calculate_super_simple_sample_size(totalVotes, riskLimit, v_w, v_l, inflationRate, tolerance20);
+            const super_simple_sample_size50 = calculate_super_simple_sample_size(totalVotes, riskLimit, v_w, v_l, inflationRate, tolerance50);
 
-            removeElement('begin-demo');
-
-            createSampleSizeDOM(office_chosen, bravo_sample_size, super_simple_sample_size);
+            createSampleSizeDOM(office_chosen, bravo_sample_size, super_simple_sample_size20, super_simple_sample_size50);
         })
         .catch((error) => {
             generateErrorAlert('sample-size-container', 'Unable to parse Open Election data for the selected house. Please try another house or upload another dataset.')
@@ -73,36 +77,26 @@ document.getElementById('begin-demo').addEventListener('click', () => {
 });
 
 document.getElementById('risk-limit').addEventListener('change', handleSliderChange);
-document.getElementById('inflation-rate').addEventListener('change', handleSliderChange);
-document.getElementById('tolerance').addEventListener('change', handleSliderChange);
 
 document.getElementById('risk-limit').addEventListener('input', function () {
     document.getElementById('riskLimitOutput').value = this.value;
 });
 
-document.getElementById('inflation-rate').addEventListener('input', function () {
-    document.getElementById('inflationRateOutput').value = this.value;
-});
-
-document.getElementById('tolerance').addEventListener('input', function () {
-    document.getElementById('toleranceOutput').value = this.value;
-});
-
 function handleSliderChange() {
     if (!demoStarted) return;
 
-    const riskLimit = Number.parseFloat(document.getElementById('risk-limit').value, 10) / 100;
-    const inflationRate = Number.parseFloat(document.getElementById('inflation-rate').value, 10) / 100;
-    const tolerance = Number.parseFloat(document.getElementById('tolerance').value, 10) / 100;
+    const riskLimit = Number.parseFloat(document.getElementById('risk-limit').value) / 100;
 
     const bravo_sample_size = calculate_bravo_sample_size(totalVotes, riskLimit, v_w, v_l);
 
-    const super_simple_sample_size = calculate_super_simple_sample_size(totalVotes, riskLimit, v_w, v_l, inflationRate, tolerance);
+    const super_simple_sample_size20 = calculate_super_simple_sample_size(totalVotes, riskLimit, v_w, v_l, inflationRate, tolerance20);
 
-    updateSampleSizeDOM(bravo_sample_size, super_simple_sample_size);
+    const super_simple_sample_size50 = calculate_super_simple_sample_size(totalVotes, riskLimit, v_w, v_l, inflationRate, tolerance50);
+
+    updateSampleSizeDOM(bravo_sample_size, super_simple_sample_size20, super_simple_sample_size50);
 }
 
-function createSampleSizeDOM(office_chosen, bravo_sample_size, super_simple_sample_size) {
+function createSampleSizeDOM(office_chosen, bravo_sample_size, super_simple_sample_size20, super_simple_sample_size50) {
     // const sampleSizeHeader = document.createElement('h2');
     // sampleSizeHeader.innerHTML = 'Initial sample size of ballots to audit';
     // document.getElementById('sample-size-container').appendChild(sampleSizeHeader);
@@ -121,12 +115,17 @@ function createSampleSizeDOM(office_chosen, bravo_sample_size, super_simple_samp
     bravoSampleSizeElt.innerHTML = `<b>BRAVO:</b> <span id='bravo-sample-size'>${bravo_sample_size.toLocaleString()}</span>`;
     document.getElementById('sample-size-container').appendChild(bravoSampleSizeElt);
 
-    const superSimpleSampleSizeElt = document.createElement('h4');
-    superSimpleSampleSizeElt.innerHTML = `<b>Super-Simple:</b> <span id='super-simple-sample-size'>${super_simple_sample_size.toLocaleString()}</span>`;
-    document.getElementById('sample-size-container').appendChild(superSimpleSampleSizeElt);
+    const superSimpleSampleSize20Elt = document.createElement('h4');
+    superSimpleSampleSize20Elt.innerHTML = `<b>Super-Simple (20% tolerance):</b> <span id='super-simple-sample-size-20'>${super_simple_sample_size20.toLocaleString()}</span>`;
+    document.getElementById('sample-size-container').appendChild(superSimpleSampleSize20Elt);
+
+    const superSimpleSampleSize50Elt = document.createElement('h4');
+    superSimpleSampleSize50Elt.innerHTML = `<b>Super-Simple (50% tolerance):</b> <span id='super-simple-sample-size-50'>${super_simple_sample_size50.toLocaleString()}</span>`;
+    document.getElementById('sample-size-container').appendChild(superSimpleSampleSize50Elt);
 }
 
-function updateSampleSizeDOM(bravo_sample_size, super_simple_sample_size) {
+function updateSampleSizeDOM(bravo_sample_size, super_simple_sample_size20, super_simple_sample_size50) {
     document.getElementById('bravo-sample-size').innerHTML = `${bravo_sample_size.toLocaleString()}`;
-    document.getElementById('super-simple-sample-size').innerHTML = `${super_simple_sample_size.toLocaleString()}`;
+    document.getElementById('super-simple-sample-size-20').innerHTML = `${super_simple_sample_size20.toLocaleString()}`;
+    document.getElementById('super-simple-sample-size-50').innerHTML = `${super_simple_sample_size50.toLocaleString()}`;
 }

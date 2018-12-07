@@ -9,7 +9,7 @@ import {
     generateErrorAlert,
     activateAuditStatusCheckInterval,
     disableInputsAndButtons,
-    setupNextAudit
+    setupAuditDOM
 } from './shared_logic.js';
 
 const AUDIT_TYPE = 'bravo';
@@ -30,7 +30,7 @@ window.addEventListener('unload', () => {
 
 document.getElementById('add-candidate').addEventListener('click', () => {
     numCandidates++;
-    addCandidate(numCandidates);
+    addCandidate(numCandidates, false);
 });
 
 document.getElementById('remove-candidate').addEventListener('click', () => {
@@ -52,11 +52,11 @@ function beginBravoAudit() {
     // Obtain data from form
     const reportedCandidateVotes = getCandidateVotes();
 
-    const totalNumBallotsCast = document.getElementById('total-ballots-cast').value;
-    const numWinners = document.getElementById('num-winners').value;
-    const riskLimit = document.getElementById('risk-limit').value;
+    const totalNumBallotsCast = parseInt(document.getElementById('total-ballots-cast').value, 10);
+    const numWinners = parseInt(document.getElementById('num-winners').value, 10);
+    const riskLimit = parseFloat(document.getElementById('risk-limit').value);
     const randomSeed = document.getElementById('random-seed').value;
-    const maxTests = document.getElementById('max-tests').value;
+    const maxTests = parseInt(document.getElementById('max-tests').value, 10);
 
     // Too few candidates
     if (reportedCandidateVotes.length < 2) {
@@ -66,8 +66,8 @@ function beginBravoAudit() {
 
     // Too many winners
     // TODO: is num_winners == number of candidates OK?
-    if (numWinners > reportedCandidateVotes.length) {
-        const errorMsg = `Too many winners inputted. Please lower the number of winners to proceed.`;
+    if (numWinners <= 0 || numWinners > reportedCandidateVotes.length) {
+        const errorMsg = 'Invalid number of winners. Number of winners must be greater than 0 and less than the total number of candidates.';
         return generateErrorAlert('audit-info', errorMsg);
     }
 
@@ -84,6 +84,11 @@ function beginBravoAudit() {
 
     if (riskLimit <= 0 || riskLimit > 100) {
         const errorMsg = 'Risk limit must be between 1% and 100%.';
+        return generateErrorAlert('audit-info', errorMsg);
+    }
+
+    if (maxTests < 1) {
+        const errorMsg = 'Please enter a non-negative maximum number of tests.';
         return generateErrorAlert('audit-info', errorMsg);
     }
 
@@ -127,8 +132,8 @@ function beginBravoAudit() {
 
 // Clean up UI to remove certain buttons and disable input boxes to not mess with audit
 function transitionInterfaceToInProgress(sampleSize, firstSequence) {
-    disableInputsAndButtons();
-    setupNextAudit(sampleSize);
+    disableInputsAndButtons('audit-info');
+    setupAuditDOM(sampleSize);
 
     // Display checkboxes
     const candidateNames = getCandidateNames();
@@ -140,7 +145,7 @@ function transitionInterfaceToInProgress(sampleSize, firstSequence) {
     newRow.classList.add('col-md-auto', 'mb-3');
     newBallot.appendChild(newRow);
 
-    let rowContent = `<h6>Draw ballot <b id='ballot-sequence-num'>#${firstSequence}</b> and record selections</h6>`;
+    let rowContent = `<h6>Draw ballot <b>#<span id='ballot-sequence-num'>${firstSequence}</span></b> and record selections</h6>`;
 
     for (let i = 0; i < candidateNames.length; ++i) {
         rowContent += `\
@@ -189,7 +194,7 @@ function getNextBallotToAudit() {
     const API_ENDPOINT = `${API_ROOT}/send_ballot_votes`
     const formData = new FormData();
 
-    const totalNumBallotsCast = document.getElementById('total-ballots-cast').value;
+    const totalNumBallotsCast = parseInt(document.getElementById('total-ballots-cast').value, 10);
 
     formData.append('audit_type', AUDIT_TYPE);
     formData.append('latest_ballot_votes', JSON.stringify(votes));
@@ -249,7 +254,7 @@ function continueAudit(ballotNumToAudit) {
 // =========================
 // FOR TESTING PURPOSES ONLY
 
-// document.onload = fillTestData();
+document.onload = fillTestData();
 
 // FOR TESTING PURPOSES ONLY
 // =========================

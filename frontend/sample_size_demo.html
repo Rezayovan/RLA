@@ -8,8 +8,8 @@
 
 <head>
     <meta charset="utf-8">
-    <title>BRAVO RLA</title>
-    <meta name="description" content="Test">
+    <title>Sample Size Demo</title>
+    <meta name="description" content="Risk limiting audits">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
@@ -33,7 +33,7 @@
 
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href="index.html">
             <img src="/assets/img/michigan.svg" height="30" class="d-inline-block align-center" alt="Michigan logo">
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
@@ -55,10 +55,10 @@
                     <a class="nav-link" href="super_simple.html">Super-Simple</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">CAST</a>
+                    <a class="nav-link" href="cast.html">CAST</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">NEGEXP</a>
+                    <a class="nav-link" href="bayesian_polling.html">Bayesian Polling</a>
                 </li>
             </ul>
         </div>
@@ -91,7 +91,7 @@
                         </div>
                     </div>
 
-                    <div class="form-row">
+                    <!-- <div class="form-row">
                         <div class="col-md-6 mb-3">
                             <label for="inflation-rate">Inflation rate</label>
                             <input type="range" class="form-control-range" id="inflation-rate" min="100" max="199"
@@ -103,10 +103,14 @@
                     <div class="form-row">
                         <div class="col-md-6 mb-3">
                             <label for="tolerance">Tolerance</label>
-                            <input type="range" class="form-control-range" id="tolerance" min="1" max="100" value="50">
+                            <input type="range" class="form-control-range" id="tolerance" min="1" max="99" value="50">
                             <span><output name="toleranceOutputName" id="toleranceOutput">50</output>%</span>
+                            <br>
+                            <small>
+                                Note: certain tolerance values may lead to negative sample sizes due to a discontinuity in the super-simple sample size calculation function.
+                            </small>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
 
             </form>
