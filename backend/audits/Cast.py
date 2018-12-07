@@ -30,6 +30,7 @@ class Cast(BaseAudit):
         # this is for getting a random sequence number
         # TODO: NEED TO CHANGE OR ELSE WILL FORGET WHY ITS HERE
         self.num_ballots = self.num_batches
+        self.STAGE_MESSAGE = ""
 
 
     def calc_alpha_s(self, risk_tolerance):
@@ -135,10 +136,14 @@ class Cast(BaseAudit):
         sum = 0
         count = 0
         while sum < (1 - T):
-            sum = sum + sorted_squigglie_u_ps[count]
+            sum = sum + squigglie_u_ps[sorted_squigglie_u_ps[count]]
             count = count + 1
 
         base = (self.num_unaudited - count) / self.num_unaudited
+        print(self.num_unaudited)
+        print(count)
+        print(base)
+        print(self.alpha)
         n = math.log(self.alpha, base)
         n = math.ceil(n)
         return n
@@ -163,8 +168,16 @@ class Cast(BaseAudit):
         random.seed(a = self.random_seed)
 
         for i in range(self.num_stages):
+            self.STAGE_MESSAGE = "Starting stage {}".format(i)  
             T, squigglie_u_ps = self.calc_T()
             n = self.calc_n(T, squigglie_u_ps)
+
+            if(len(self.unaudited) < n):
+                print('More batches to audit then provided preform a full hand recount')
+                self.IS_DONE_MESSAGE = "Audit requires more batches than remaining. Perform a full hand-recount of the ballots."
+                self.IS_DONE_FLAG = "danger"
+                self.IS_DONE = True;
+
             batches_to_audit = random.sample(list(self.unaudited), n)
             for batch_num in batches_to_audit:
                 np.delete(self.unaudited, batch_num)
