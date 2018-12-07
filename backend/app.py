@@ -195,19 +195,21 @@ def send_ballot_votes():
         return jsonify(res)
     elif audit_type == 'super_simple':
         print(form_data)
-        form_params = ['latest_CVR_votes', 'num_ballots_cast', 'latest_ballot_votes']
+        form_params = ['paper_record_and_cvr', 'num_ballots_cast']
         if not all_keys_present_in_dict(form_params, form_data):
             return 'Not all required SuperSimple parameters were provided.', 500
 
-        ballot_votes_json = json.loads(form_data['latest_ballot_votes'])
-        ballot_votes_list = [int(vote) for vote in ballot_votes_json]
-        cvr_votes_json = json.loads(form_data['latest_CVR_votes'])
-        cvr_votes_list = [int(vote) for vote in cvr_votes_json]
-        CURRENT_RUNNING_AUDITS[session_id].append_votes_buffer([cvr_votes_list, ballot_votes_list])
+        paper_record_and_cvr = json.loads(form_data['paper_record_and_cvr'])
+        ballot_votes = [int(vote) for vote in paper_record_and_cvr['paper_record']]
+        cvr_votes = [int(vote) for vote in paper_record_and_cvr['cvr']]
+
+        CURRENT_RUNNING_AUDITS[session_id].append_votes_buffer([ballot_votes, cvr_votes])
         supersimple = CURRENT_RUNNING_AUDITS[session_id]
+
         sequence = supersimple.get_sequence_number()
         res = {'sequence_number_to_draw': sequence}
-        return jsonify(res)        # TODO: finish
+
+        return jsonify(res)
     elif audit_type == 'cast':
         cast = CURRENT_RUNNING_AUDITS[session_id]
         if cast.IS_DONE:

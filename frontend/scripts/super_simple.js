@@ -175,7 +175,7 @@ function transitionInterfaceToInProgress(sampleSize, firstSequence) {
     // Display CVR checkboxes
     const newCVR = document.createElement('div');
     newCVR.className = 'form-row';
-    newCVR.id = 'CVR-to-record';
+    newCVR.id = 'cvr-to-record';
 
     const newCVRRow = document.createElement('div');
     newCVRRow.classList.add('col-md-auto', 'mb-3');
@@ -228,7 +228,7 @@ function getNextBallotToAudit() {
     }
     console.log('Ballot vote data:', ballotVotes);
 
-    const cvrVoteNodes = voteNodes[0];
+    const cvrVoteNodes = voteNodes[1];
     if (cvrVoteNodes.length == 0) {
         return console.error('cvrVoteNodes is empty in the Audit section. I am sad.');
     }
@@ -294,15 +294,23 @@ function getNextBallotToAudit() {
 
 // Tell the user which ballot to cast and record.
 function continueAudit(ballotNumToAudit) {
-    const voteNodes = document.querySelectorAll('#ballot-container .form-row');
-    if (voteNodes.length == 0) {
-        return console.error('voteNodes is empty in the Audit section. I am sad.');
-    }
-    const latestVoteCheckBoxes = voteNodes[voteNodes.length - 1].getElementsByTagName('input');
+    const ballotVoteNode = document.getElementById('ballot-to-record');
+    const latestBallotVoteCheckBoxes = ballotVoteNode.getElementsByTagName('input');
 
-    for (let i = 0; i < latestVoteCheckBoxes.length; ++i) {
-        if (latestVoteCheckBoxes[i].checked) {
-            latestVoteCheckBoxes[i].checked = false;
+    // Reset check boxes
+    for (let i = 0; i < latestBallotVoteCheckBoxes.length; ++i) {
+        if (latestBallotVoteCheckBoxes[i].checked) {
+            latestBallotVoteCheckBoxes[i].checked = false;
+        }
+    }
+
+    const cvrVoteNode = document.getElementById('cvr-to-record');
+    const latestCvrVoteCheckBoxes = cvrVoteNode.getElementsByTagName('input');
+
+    // Reset check boxes
+    for (let i = 0; i < latestCvrVoteCheckBoxes.length; ++i) {
+        if (latestCvrVoteCheckBoxes[i].checked) {
+            latestCvrVoteCheckBoxes[i].checked = false;
         }
     }
 
