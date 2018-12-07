@@ -29,15 +29,22 @@ class BayesianPolling():
         """
         reported_winners = get_winners(self.votes_array, self.num_winners)
 
-        bayesian_winners = compute_win_probs([self.sample_tallies],\
-                [self.num_ballots], self.seed, self.num_trials, "", self.num_winners)
-        reported_set = {w for w in reported_winners}
-        bayesian_set = {w.i for w in bayesian_winners}
-        for projected, reported in zip(bayesian_winners, reported_winners):
-            if not(len(bayesian_winners) == len(reported_winners)\
-                    and (projected.i in reported_set)\
-                    and (reported in bayesian_set)\
-                    and (projected.p >= 1 - self.risk_limit)):
+        bayesian_win_probs = compute_win_probs([self.sample_tallies],\
+                                             [self.num_ballots],\
+                                             self.seed,\
+                                             self.num_trials,\
+                                             self.votes_array,\
+                                             self.num_winners)
+        bayesian_win_probs.sort(key=lambda t: t[1], reverse=True)
+        bayesian_winners = bayesian_win_probs[:self.num_winners]
+        reported_set = {(w+1) for w in reported_winners}
+        
+        if not len(bayesian_winners) == len(reported_winners):
+            return False
+        for projected in bayesian_winners:
+            if not projected[0] in reported_set:
+                return False
+            if not projected[1] >= 1 - self.risk_limit:
                 return False
         return True
 
