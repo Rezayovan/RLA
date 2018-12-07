@@ -92,15 +92,19 @@ class SuperSimple(BaseAudit):
         # list of candidate numbers that cvr and human have listed as a vote
         ballot_votes, CVR_votes = self.get_ballot_and_CVR()
         macro = 0
+        maxwinner = 0
+        maxloser = 0
         temp = 0
         for candidate in range(self.num_candidates):
             in_CVR = candidate in CVR_votes
             in_ballot = candidate in ballot_votes
             if candidate in self.candidates.winners:
                 temp = in_CVR - in_ballot
+                maxwinner = max(temp, maxwinner)
             else:
                 temp = in_ballot - in_CVR
-            macro += temp/self.ballots_audited
+                maxloser = max(temp, maxloser)
+        macro = (maxwinner + maxloser)/self.ballots_audited
         # update p-value
         self.kaplan_p_value *= (1 - 1/self.total_error_bound)/(1 - (macro/(2 * self.inflation_rate / self.ballots_audited)))
 
