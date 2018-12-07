@@ -2,7 +2,7 @@
 Splits the inputted votes_array (list of candidates and their
 respective votes) into a Candidate object with winners and losers.
 """
-from Candidates import Candidates
+from .Candidates import Candidates
 
 def arrange_candidates(votes_array, num_winners):
     """

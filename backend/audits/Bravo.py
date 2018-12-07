@@ -1,9 +1,9 @@
 import random
 import math
 import numpy as np
-from .aduits.shared_objects.arrange_candidates import arrange_candidates
-from .audits.shared_objects.BaseAudit import BaseAudit
-from .audits.shared_objects.Hypotheses import Hypotheses
+from .shared_objects.arrange_candidates import arrange_candidates
+from .shared_objects.BaseAudit import BaseAudit
+from .shared_objects.Hypotheses import Hypotheses
 
 class Bravo(BaseAudit):
     """ Ballot-polling audit in Python
