@@ -1,5 +1,5 @@
 from .shared_objects.arrange_candidates import get_winners
-from .bptool import compute_win_probs
+from .bptool.bptool import compute_win_probs
 
 class BayesianPolling():
     """ Bayesian ballot-polling audit in Python
