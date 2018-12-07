@@ -1,5 +1,3 @@
-# pylint: disable=E0402
-
 import random
 import math
 import numpy as np
