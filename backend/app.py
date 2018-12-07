@@ -12,6 +12,7 @@ from utilities.helpers import delete_file, all_keys_present_in_dict, get_vw_and_
 from audits.Bravo import Bravo
 from audits.Cast import Cast
 from audits.SuperSimple import SuperSimple
+from audits.BayesianPolling import BayesianPolling
 
 app = Flask(__name__)
 
@@ -157,8 +158,29 @@ def perform_audit():
             'session_id': session_id
         }
         return jsonify(res)
-    elif audit_type == 'negexp':
-        pass
+    elif audit_type == 'bayesian_polling':
+        form_params = ['candidate_votes', 'num_ballots_cast', 'num_winners', 'risk_limit', 'random_seed']
+        if not all_keys_present_in_dict(form_params, form_data):
+            return 'Not all required super-simple parameters were provided.', 500
+        # Parse candidate name and vote and sample_tally JSON data
+        candidate_data_json = json.loads(form_data['candidate_votes'])
+        votes_array = [int(val) for val in candidate_data_json]
+        sample_tallies_json = json.loads(form_data['sample_tallies'])
+        sample_tallies = [int(val) for val in sample_tallies_json]
+        num_ballots = int(form_data['num_ballots_cast'])
+        num_winners = int(form_data['num_winners'])
+        risk_limit = float(form_data['risk_limit']) / 100
+        random_seed = int(form_data['random_seed'])
+        num_trials = int(form_data['num_trials'])
+        params_list = [votes_array, num_ballots, num_winners, risk_limit, random_seed, sample_tallies, num_trials]
+        baypoll_object = BayesianPolling(*params_list)
+        message, flag = baypoll_object.run_audit()
+
+        res = {
+            'completion_message': message,
+            'flag': flag
+        }
+        return jsonify(res)
     else:
         return f'{audit_type} is an invalid audit type!', 500
 
