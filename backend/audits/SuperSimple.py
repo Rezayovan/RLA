@@ -62,8 +62,8 @@ class SuperSimple(BaseAudit):
         Returns ballot votes and corresponding CVR votes for given ballot number.
         """
         # TODO: Reza or Jad
-        print("GETTING VOTES", self.get_votes())
-        return [0], [1]
+        votes = self.get_votes()
+        return votes[0], votes[1]
 
     def get_ballot_and_CVR(self):
         """ Step 2 of the BRAVO algorithm.
