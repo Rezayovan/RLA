@@ -14,6 +14,8 @@ const AUDIT_TYPE = 'bayesian_polling';
 
 let numCandidates = 2; // default to 2 candidates
 
+let auditBegun = false;
+
 document.getElementById('add-candidate').addEventListener('click', () => {
     numCandidates++;
     addCandidateAndTally(numCandidates);
@@ -113,10 +115,13 @@ function beginBayesianAudit() {
 }
 
 function finishAudit(message, flag) {
-    const auditTitleElt = document.createElement('h3');
-    auditTitleElt.classList.add('mt-3');
-    auditTitleElt.innerHTML = 'Audit';
-    document.getElementById('audit-container').appendChild(auditTitleElt);
+    if (!auditBegun) {
+        const auditTitleElt = document.createElement('h3');
+        auditTitleElt.classList.add('mt-3');
+        auditTitleElt.innerHTML = 'Audit';
+        document.getElementById('audit-container').appendChild(auditTitleElt);
+        auditBegun = true;
+    }
 
     transitionToAuditComplete(message, flag);
 }
