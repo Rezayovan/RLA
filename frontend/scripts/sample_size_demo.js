@@ -77,7 +77,8 @@ document.getElementById('begin-demo').addEventListener('click', () => {
             createSampleSizeDOM(office_chosen, bravo_sample_size, super_simple_sample_size20, super_simple_sample_size50);
         })
         .catch((error) => {
-            generateErrorAlert('sample-size-container', 'Unable to parse Open Election data for the selected house. Please try another house or upload another dataset.')
+            const errorMsg = 'Unable to parse OpenElection data. Please try again or upload another dataset.';
+            generateErrorAlert('sample-size-container', errorMsg);
             return console.error(error);
         });
 });
