@@ -1,0 +1,110 @@
+<!--
+    Serve the static web pages with this command:
+    python3 -m http.server 8000 --bind 127.0.0.1
+-->
+
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>About</title>
+    <meta name="description" content="Risk-limiting audits">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
+        crossorigin="anonymous">
+    <script defer src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+    <script defer src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh3IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+
+    <script defer src="scripts/navbar_helpers.js" type="module"></script>
+
+    <link rel="stylesheet" href="assets/styles/index.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
+
+    <script defer src="https://use.fontawesome.com/releases/v5.5.0/js/brands.js" integrity="sha384-S2C955KPLo8/zc2J7kJTG38hvFV+SnzXM6hwfEUhGHw5wPo6uXbnbjSJgw3clO4G"
+        crossorigin="anonymous"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.5.0/js/fontawesome.js" integrity="sha384-bNOdVeWbABef8Lh4uZ8c3lJXVlHdf8W5hh1OpJ4dGyqIEhMmcnJrosjQ36Kniaqm"
+        crossorigin="anonymous"></script>
+
+    <link rel="icon" href="assets/img/favicon.png">
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">
+            <img src="/assets/img/michigan.svg" height="30" class="d-inline-block align-center" alt="Michigan logo">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav"
+            aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="index.html">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="bravo.html">Ballot-Polling</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="super_simple.html">Ballot-Comparison</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="cast.html">Canvass</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="bayesian_polling.html">Bayesian Ballot-Polling</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="sample_size_demo.html">Sample Size Demo</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="#">About</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h3>
+            This web app was built as part of the University of Michigan computer science course <a href="https://www.eecs.umich.edu/courses/eecs498.009/"
+                target="_blank" rel="noopener noreferrer">EECS 498</a> to help election official conduct risk-limiting
+            audits.
+        </h3>
+
+        <br>
+
+        <h5>Jad Chaar
+            <a href="https://github.com/jadchaar" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-github"></i>
+            </a>
+        </h5>
+        <h5>Ethan Madison
+            <a href="https://github.com/ethanmad" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-github"></i>
+            </a>
+        </h5>
+        <h5>Sidharth Sawhney
+            <a href="https://github.com/sidsaw" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-github"></i>
+            </a>
+        </h5>
+        <h5>Jonson Jin</h5>
+        <h5>Reza Yovan
+            <a href="https://github.com/Rezayovan" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-github"></i>
+            </a>
+        </h5>
+
+        <br>
+
+        <h3>We hope that you enjoy using the tool! Happy elections auditing!</h3>
+    </div>
+</body>
+
+</html>
