@@ -186,7 +186,7 @@ class Cast(BaseAudit):
             for batch_num in batches_to_audit:
                 np.delete(self.unaudited, batch_num)
                 self.audited_batch_info[batch_num] = self.get_batch_info()
-            
+
             t_s = self.calc_t_s(batches_to_audit)
 
             if t_s < self.threshold:

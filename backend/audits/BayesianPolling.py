@@ -38,7 +38,7 @@ class BayesianPolling():
         bayesian_win_probs.sort(key=lambda t: t[1], reverse=True)
         bayesian_winners = bayesian_win_probs[:self.num_winners]
         reported_set = {(w+1) for w in reported_winners}
-        
+
         if not len(bayesian_winners) == len(reported_winners):
             return False
         for projected in bayesian_winners:
