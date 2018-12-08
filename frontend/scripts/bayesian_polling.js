@@ -34,10 +34,17 @@ document.getElementById('begin-bayesian').addEventListener('click', () => {
     beginBayesianAudit();
 });
 
-function beginBayesianAudit() {
-
+function clearBayesianErrors() {
     // Remove error div if it exists
     clearValidationErrors();
+    const auditAlert = document.getElementById('audit-complete-alert');
+    if (auditAlert) {
+        removeElement('audit-complete-alert');
+    }
+}
+
+function beginBayesianAudit() {
+    clearBayesianErrors();
 
     // Obtain data from form
     const reportedCandidateVotes = getCandidateVotes();
@@ -63,6 +70,12 @@ function beginBayesianAudit() {
     const reportedCandidateVotesSum = reportedCandidateVotes.reduce((a, b) => a + b, 0);
     if (reportedCandidateVotesSum > totalNumBallotsCast) {
         const errorMsg = `Reported candidate votes (${reportedCandidateVotesSum}) are greater than the total number of votes (${totalNumBallotsCast}). Please correct this and try again.`;
+        return generateErrorAlert('audit-info', errorMsg);
+    }
+
+    const reportedTalliesSum = sampleTallies.reduce((a, b) => a + b, 0);
+    if (reportedTalliesSum > totalNumBallotsCast) {
+        const errorMsg = `Reported sample tallies votes (${reportedTalliesSum}) are greater than the total number of votes (${totalNumBallotsCast}). Something is probably wrong, and this audit won't help. Try another audit, or hand count all ballots.`;
         return generateErrorAlert('audit-info', errorMsg);
     }
 
