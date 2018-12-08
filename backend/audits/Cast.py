@@ -184,19 +184,28 @@ class Cast(BaseAudit):
             T, squigglie_u_ps = self.calc_T()
             n = self.calc_n(T, squigglie_u_ps)
             print("Number of batches to audit: ", n)
+
+            end = False
             if(len(self.unaudited) < n):
+                # fills sequence_order list w/ dummy values
+                # so frontend can check if audit completed
+                self._CV.acquire()
+                self.sequence_order = [1, 1, 1, 1, 1]
+                self._CV.notify()
+                self._CV.release()
+                # end of bs code
                 print('More batches to audit then provided preform a full hand recount')
                 self.IS_DONE_MESSAGE = "Audit requires more batches than remaining. Perform a full hand-recount of the ballots."
                 self.IS_DONE_FLAG = "danger"
                 self.IS_DONE = True
                 return
-
             batches_to_audit = random.sample(list(self.unaudited), n)
             print(batches_to_audit)
             self._CV.acquire()
             self.sequence_order = batches_to_audit
             self._CV.notify()
             self._CV.release()
+
             print("Batches to audit", batches_to_audit)
             self.unaudited = self.unaudited - n
             for batch_num in batches_to_audit:
