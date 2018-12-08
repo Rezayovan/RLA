@@ -97,7 +97,10 @@ class Cast(BaseAudit):
             max_u_p = []
             for idw, winner in enumerate(self.winners):
                 for idl, loser in enumerate(self.losers):
-                    u_p = (self.reported_batch_info[batch_num][winner] - self.reported_batch_info[batch_num][loser] + self.batch_size) / adj_margins[idw][idl]
+                    if(adj_margins[idw][idl] == 0):
+                        u_p = 0
+                    else:
+                        u_p = (self.reported_batch_info[batch_num][winner] - self.reported_batch_info[batch_num][loser] + self.batch_size) / adj_margins[idw][idl]
                     max_u_p.append(u_p)
             u_ps[batch_num] = np.amax(max_u_p)
         return u_ps
