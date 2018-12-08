@@ -30,8 +30,19 @@ class Cast(BaseAudit):
         # this is for getting a random sequence number
         # TODO: NEED TO CHANGE OR ELSE WILL FORGET WHY ITS HERE
         self.num_ballots = self.num_batches
+        self.sequence_order = []
         self.STAGE_MESSAGE = ""
 
+    def get_sequence_number(self):
+        print("hereheheheh")
+        self._CV.acquire()
+        while not len(self.sequence_order):
+            print("waiting")
+            self._CV.wait()
+        sequence_number = self.sequence_order.pop(0)
+        self._CV.release()
+        print("sequence number", sequence_number)
+        return sequence_number
 
     def calc_alpha_s(self, risk_tolerance):
         diff = 1 - risk_tolerance
@@ -181,6 +192,11 @@ class Cast(BaseAudit):
                 return
 
             batches_to_audit = random.sample(list(self.unaudited), n)
+            print(batches_to_audit)
+            self._CV.acquire()
+            self.sequence_order = batches_to_audit
+            self._CV.notify()
+            self._CV.release()
             print("Batches to audit", batches_to_audit)
             self.unaudited = self.unaudited - n
             for batch_num in batches_to_audit:

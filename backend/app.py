@@ -152,8 +152,10 @@ def perform_audit():
         CURRENT_RUNNING_AUDITS[session_id] = cast_object
 
         first_sequence = cast_object.get_sequence_number()
+        print("herehehe")
+        print("first_sequence", first_sequence)
         res = {
-            'sequence_number_to_draw': first_sequence,
+            'sequence_number_to_draw': int(first_sequence),
             'session_id': session_id
         }
         return jsonify(res)
@@ -246,7 +248,7 @@ def send_ballot_votes():
         cast.append_votes_buffer(batch)
 
         sequence = cast.get_sequence_number()
-        res = {'sequence_number_to_draw': sequence}
+        res = {'sequence_number_to_draw': int(sequence)}
         return jsonify(res)
     elif audit_type == 'negexp':
         pass
