@@ -157,7 +157,10 @@ class SuperSimple(BaseAudit):
                 break
             self.ballots_audited += 1
         # Audit is finished
-        return self.audit_success()
+        if self.ballots_audited < self.num_ballots:
+            return self.audit_success()
+        else:
+            return self.hand_recount()
 
 if __name__ == "__main__":
     #     def __init__(self, votes_array, num_ballots, num_winners, risk_limit, seed, inflation_rate, tolerance):
