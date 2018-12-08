@@ -19,6 +19,12 @@ let totalVotes;
 let v_w;
 let v_l;
 
+document.getElementById('input-election-data').addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file) return;
+    document.getElementById('input-election-data-label').innerHTML = file.name;
+});
+
 document.getElementById('begin-demo').addEventListener('click', () => {
     clearValidationErrors();
 
