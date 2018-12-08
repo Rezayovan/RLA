@@ -185,7 +185,6 @@ class Cast(BaseAudit):
             n = self.calc_n(T, squigglie_u_ps)
             print("Number of batches to audit: ", n)
 
-            end = False
             if(len(self.unaudited) < n):
                 # fills sequence_order list w/ dummy values
                 # so frontend can check if audit completed
