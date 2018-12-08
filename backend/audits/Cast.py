@@ -174,7 +174,7 @@ class Cast(BaseAudit):
                     reported = self.reported_batch_info[batch_num][w] - self.reported_batch_info[batch_num][l]
                     audited = self.audited_batch_info[batch_num][w] - self.audited_batch_info[batch_num][l]
                     e_wlp.append((reported - audited)/ adj_margins)
-        return np.amin(e_wlp)
+        return np.amax(e_wlp)
 
     def run_audit(self):
         random.seed(a = self.random_seed)
@@ -208,9 +208,11 @@ class Cast(BaseAudit):
             print("Batches to audit", batches_to_audit)
             self.unaudited = self.unaudited - n
             for batch_num in batches_to_audit:
+                print(self.unaudited)
                 np.delete(self.unaudited, batch_num)
                 self.audited_batch_info[batch_num] = self.get_batch_info()
 
+            print("Got all info")
             t_s = self.calc_t_s(batches_to_audit)
 
             if t_s < self.threshold:
