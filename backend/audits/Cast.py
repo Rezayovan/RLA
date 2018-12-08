@@ -175,6 +175,7 @@ class Cast(BaseAudit):
                 self.IS_DONE_MESSAGE = "Audit requires more batches than remaining. Perform a full hand-recount of the ballots."
                 self.IS_DONE_FLAG = "danger"
                 self.IS_DONE = True
+                return
 
             batches_to_audit = random.sample(list(self.unaudited), n)
             print("Batches to audit", batches_to_audit)
@@ -196,6 +197,7 @@ class Cast(BaseAudit):
         self.IS_DONE_MESSAGE = "Audit cannot verify the election results. Perform a full hand-recount of the ballots."
         self.IS_DONE_FLAG = "danger"
         self.IS_DONE = True
+        return
 
 # num_candidates, num_winners, num_stages, batch_size
 # num_batches, risk_tolerance, threshold, random_seed
