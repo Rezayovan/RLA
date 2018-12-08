@@ -135,6 +135,7 @@ export function transitionToAuditComplete(message, flag) {
     const auditCompleteDiv = document.createElement('div');
     auditCompleteDiv.classList.add('alert', `alert-${flag}`, 'mt-3');
     auditCompleteDiv.role = 'alert';
+    auditCompleteDiv.id = 'audit-complete-alert';
     auditCompleteDiv.innerHTML = message;
 
     const element = document.getElementById('ballot-container');

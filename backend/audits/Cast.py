@@ -187,11 +187,13 @@ class Cast(BaseAudit):
                 print('Audit complete')
                 self.IS_DONE_MESSAGE = "Audit completed: the results stand."
                 self.IS_DONE_FLAG = "success"
+                self.IS_DONE = True
                 return
 
         print('Audit failed. Full hand recount needed')
         self.IS_DONE_MESSAGE = "Audit cannot verify the election results. Perform a full hand-recount of the ballots."
         self.IS_DONE_FLAG = "danger"
+        self.IS_DONE = True
 
 # num_candidates, num_winners, num_stages, batch_size
 # num_batches, risk_tolerance, threshold, random_seed

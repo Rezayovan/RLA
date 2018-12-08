@@ -7,7 +7,8 @@ import {
     generateErrorAlert,
     fillTestData,
     getCandidateSampleTallies,
-    transitionToAuditComplete
+    transitionToAuditComplete,
+    removeElement
 } from './shared_logic.js';
 
 const AUDIT_TYPE = 'bayesian_polling';
@@ -123,6 +124,9 @@ function finishAudit(message, flag) {
         auditBegun = true;
     }
 
+    if (auditBegun) {
+        removeElement('audit-complete-alert');
+    }
     transitionToAuditComplete(message, flag);
 }
 
