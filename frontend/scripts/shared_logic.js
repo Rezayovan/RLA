@@ -165,9 +165,8 @@ export function activateAuditStatusCheckInterval(interval, session_id) {
                 if (payload.audit_complete) {
                     transitionToAuditComplete(payload.completion_message, payload.flag);
                     clearInterval(auditStatusCheckInterval);
-                    console.log('Audit completed successfully.');
                 }
-                return console.log(response);
+                // return console.log(response);
             })
             .catch((error) => {
                 return console.error(error);

@@ -124,7 +124,12 @@ function beginSuperSimpleAudit() {
 
             const firstSequence = response.data.sequence_number_to_draw;
             session_id = response.data.session_id;
-            console.log("Session ID:", session_id);
+
+            // Begin status checker to poll for the completion status every 3 seconds
+            if (!auditStatusCheckIntervalBegun) {
+                auditStatusCheckIntervalBegun = true;
+                activateAuditStatusCheckInterval(3000, session_id);
+            }
 
             // On success clean up the UI and transition it to in-progress audit state
             transitionInterfaceToInProgress(estSampleSize, firstSequence);
@@ -259,16 +264,9 @@ function getNextBallotToAudit() {
         }
     })
     .then((response) => {
-        // Begin status checker to poll for the completion status every 3 seconds
-        if (!auditStatusCheckIntervalBegun) {
-            auditStatusCheckIntervalBegun = true;
-            activateAuditStatusCheckInterval(3000, session_id);
-        }
-
         if (response.status === 204) {
             // Let timer interval handle UI change.
-            console.log("Audit complete.");
-            return;
+            return console.log("Audit complete.");
         }
 
         const next_sequence = response.data.sequence_number_to_draw;

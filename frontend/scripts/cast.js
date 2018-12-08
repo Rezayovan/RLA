@@ -277,6 +277,12 @@ function beginCast() {
             // Set session
             session_id = response.data.session_id;
 
+            // Begin status checker to poll for the completion status every 3 seconds
+            if (!auditStatusCheckIntervalBegun) {
+                auditStatusCheckIntervalBegun = true;
+                activateAuditStatusCheckInterval(3000, session_id);
+            }
+
             const sequenceNumberToDraw = response.data.sequence_number_to_draw;
 
             populateAuditContainer(sequenceNumberToDraw);
@@ -372,17 +378,9 @@ function getNextBallotToAudit() {
             }
         })
         .then((response) => {
-
-            // Begin status checker to poll for the completion status every 3 seconds
-            if (!auditStatusCheckIntervalBegun) {
-                auditStatusCheckIntervalBegun = true;
-                activateAuditStatusCheckInterval(3000, session_id);
-            }
-
             if (response.status === 204) {
                 // Let timer interval handle UI change.
-                console.log("Audit complete.");
-                return;
+                return console.log("Audit complete.");
             }
 
             const sequenceNumberToDraw = response.data.sequence_number_to_draw;
