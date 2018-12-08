@@ -93,8 +93,6 @@ class Cast(BaseAudit):
             for idl, loser in enumerate(self.losers):
                 adj_margins[idw][idl] = self.calc_adj_margin(winner, loser)
 
-        print("adj margins %s" % adj_margins)
-
         for batch_num in self.unaudited:
             max_u_p = []
             for idw, winner in enumerate(self.winners):
@@ -102,7 +100,6 @@ class Cast(BaseAudit):
                     u_p = (self.reported_batch_info[batch_num][winner] - self.reported_batch_info[batch_num][loser] + self.batch_size) / adj_margins[idw][idl]
                     max_u_p.append(u_p)
             u_ps[batch_num] = np.amax(max_u_p)
-        print("u_ups %s" % u_ps)
         return u_ps
 
 
@@ -122,9 +119,10 @@ class Cast(BaseAudit):
                 squigglie_u_ps.append(u_p - self.threshold)
         T = sum(t_ps)
         squigglie_u_ps = np.asarray(squigglie_u_ps)
-        print("T ", T)
-        print("TUnderscoreP ", t_ps)
-        print("squiggly ",squigglie_u_ps)
+        print("T", T)
+        print("t_ps", t_ps)
+        print("u_ps", u_ps)
+        print("squigglie_u_ps", squigglie_u_ps)
         return T, squigglie_u_ps
 
     '''
@@ -140,12 +138,12 @@ class Cast(BaseAudit):
             count = count + 1
 
         base = (self.num_unaudited - count) / self.num_unaudited
-        print(self.num_unaudited)
-        print(count)
-        print(base)
-        print(self.alpha)
         n = math.log(self.alpha, base)
         n = math.ceil(n)
+        print("count", count)
+        print("N_s", self.num_unaudited)
+        print("Base", base)
+        print("alpha_s", self.alpha)
         return n
 
     def calc_t_s(self, batches_to_audit):
@@ -171,7 +169,7 @@ class Cast(BaseAudit):
             self.STAGE_MESSAGE = "Starting stage {}".format(i)
             T, squigglie_u_ps = self.calc_T()
             n = self.calc_n(T, squigglie_u_ps)
-
+            print("Number of batches to audit: ", n)
             if(len(self.unaudited) < n):
                 print('More batches to audit then provided preform a full hand recount')
                 self.IS_DONE_MESSAGE = "Audit requires more batches than remaining. Perform a full hand-recount of the ballots."
@@ -179,10 +177,14 @@ class Cast(BaseAudit):
                 self.IS_DONE = True
 
             batches_to_audit = random.sample(list(self.unaudited), n)
+            print("Batches to audit", batches_to_audit)
+            self.unaudited = self.unaudited - n
             for batch_num in batches_to_audit:
                 np.delete(self.unaudited, batch_num)
                 self.audited_batch_info[batch_num] = self.get_batch_info()
+            
             t_s = self.calc_t_s(batches_to_audit)
+
             if t_s < self.threshold:
                 print('Audit complete')
                 self.IS_DONE_MESSAGE = "Audit completed: the results stand."
