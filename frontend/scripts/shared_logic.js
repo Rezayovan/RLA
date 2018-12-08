@@ -1,4 +1,5 @@
 export const  API_ROOT = 'http://127.0.0.1:5000';
+export const STATUS_CHECK_INTERVAL = 1500;
 
 export function removeElement(elementID) {
     const element = document.getElementById(elementID);

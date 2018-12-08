@@ -1,5 +1,6 @@
 import {
     API_ROOT,
+    STATUS_CHECK_INTERVAL,
     addCandidate,
     removeCandidate,
     getCandidateNames,
@@ -128,7 +129,7 @@ function beginSuperSimpleAudit() {
             // Begin status checker to poll for the completion status every 3 seconds
             if (!auditStatusCheckIntervalBegun) {
                 auditStatusCheckIntervalBegun = true;
-                activateAuditStatusCheckInterval(3000, session_id);
+                activateAuditStatusCheckInterval(STATUS_CHECK_INTERVAL, session_id);
             }
 
             // On success clean up the UI and transition it to in-progress audit state

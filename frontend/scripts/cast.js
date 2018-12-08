@@ -1,5 +1,6 @@
 import {
     API_ROOT,
+    STATUS_CHECK_INTERVAL,
     addCandidate,
     removeCandidate,
     getCandidateNames,
@@ -277,10 +278,10 @@ function beginCast() {
             // Set session
             session_id = response.data.session_id;
 
-            // Begin status checker to poll for the completion status every 3 seconds
+            // Begin status checker to poll for the completion status every STATUS_CHECK_INTERVAL seconds
             if (!auditStatusCheckIntervalBegun) {
                 auditStatusCheckIntervalBegun = true;
-                activateAuditStatusCheckInterval(3000, session_id);
+                activateAuditStatusCheckInterval(STATUS_CHECK_INTERVAL, session_id);
             }
 
             const sequenceNumberToDraw = response.data.sequence_number_to_draw;
