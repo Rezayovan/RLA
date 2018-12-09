@@ -6,7 +6,7 @@ import {
     getCandidateNames,
     getCandidateVotes,
     clearValidationErrors,
-    // fillTestData,
+    fillTestData,
     generateErrorAlert,
     activateAuditStatusCheckInterval,
     disableInputsAndButtons,
@@ -253,7 +253,7 @@ function continueAudit(ballotNumToAudit) {
 // =========================
 // FOR TESTING PURPOSES ONLY
 
-// document.onload = fillTestData();
+document.onload = fillTestData();
 
 // FOR TESTING PURPOSES ONLY
 // =========================
