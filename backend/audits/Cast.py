@@ -36,13 +36,12 @@ class Cast(BaseAudit):
 
     def get_sequence_number(self):
         self._CV.acquire()
-        while not len(self.sequence_order):
+        while not self.sequence_order:
             self._CV.wait()
         sequence_number = self.sequence_order.pop(0)
         self._CV.release()
         print("sequence number", sequence_number)
-        print("len of sequence list", len(self.sequence_order))
-        return sequence_number
+        return sequence_number+1
 
     def calc_alpha_s(self, risk_tolerance):
         diff = 1 - risk_tolerance
@@ -174,6 +173,7 @@ class Cast(BaseAudit):
                     reported = self.reported_batch_info[batch_num][w] - self.reported_batch_info[batch_num][l]
                     audited = self.audited_batch_info[batch_num][w] - self.audited_batch_info[batch_num][l]
                     e_wlp.append((reported - audited)/ adj_margins)
+        print(e_wlp)
         return np.amax(e_wlp)
 
     def run_audit(self):
