@@ -35,12 +35,12 @@ class Cast(BaseAudit):
 
     def get_sequence_number(self):
         self._CV.acquire()
-        while not len(self.sequence_order):
+        while not self.sequence_order:
             self._CV.wait()
         sequence_number = self.sequence_order.pop(0)
         self._CV.release()
         print("sequence number", sequence_number)
-        return sequence_number
+        return sequence_number+1
 
     def calc_alpha_s(self, risk_tolerance):
         diff = 1 - risk_tolerance
