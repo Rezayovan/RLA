@@ -206,10 +206,10 @@ class Cast(BaseAudit):
             self._CV.release()
 
             print("Batches to audit", batches_to_audit)
-            self.unaudited = self.unaudited - n
+            self.num_unaudited = self.num_unaudited - n
             for batch_num in batches_to_audit:
-                print(self.unaudited)
-                np.delete(self.unaudited, batch_num)
+                print("batch_nun", batch_num)
+                self.unaudited = np.delete(self.unaudited, batch_num)
                 self.audited_batch_info[batch_num] = self.get_batch_info()
 
             print("Got all info")
