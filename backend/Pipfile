@@ -8,7 +8,7 @@ flask = "*"
 pylint = "*"
 flask-cors = "*"
 numpy = "*"
-gunicorn = "*"
+waitress = "*"
 
 [dev-packages]
 

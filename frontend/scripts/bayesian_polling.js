@@ -68,8 +68,8 @@ function beginBayesianAudit() {
     }
 
     const reportedCandidateVotesSum = reportedCandidateVotes.reduce((a, b) => a + b, 0);
-    if (reportedCandidateVotesSum > totalNumBallotsCast) {
-        const errorMsg = `Reported candidate votes (${reportedCandidateVotesSum}) are greater than the total number of votes (${totalNumBallotsCast}). Please correct this and try again.`;
+    if (reportedCandidateVotesSum > totalNumBallotsCast * numWinners) {
+        const errorMsg = `Reported candidate votes (${reportedCandidateVotesSum}) are greater than the total number of votes multiplied by the number of winners (${totalNumBallotsCast * numWinners}). Please correct this and try again.`;
         return generateErrorAlert('audit-info', errorMsg);
     }
 

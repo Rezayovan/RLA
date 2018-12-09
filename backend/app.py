@@ -1,3 +1,8 @@
+'''
+Serve with waitress: waitress-serve --port=5000 app:app
+Serve with waitress in background (detached from SSH): screen -dm waitress-serve --port=5000 app:app
+'''
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from pathlib import Path
@@ -259,12 +264,14 @@ def check_audit_status():
     form_data = request.form
 
     if 'session_id' not in form_data:
+        print('Session ID not specified. Unable to retrieve audit status.')
         return 'Session ID not specified. Unable to retrieve audit status.', 500
 
     session_id = form_data['session_id']
 
     global CURRENT_RUNNING_AUDITS
     if session_id not in CURRENT_RUNNING_AUDITS:
+        print(f'Session ID invalid. No running audit can be found for th session ID: {session_id}.')
         return f'Session ID invalid. No running audit can be found for th session ID: {session_id}.', 500
     current_audit = CURRENT_RUNNING_AUDITS[session_id]
 
