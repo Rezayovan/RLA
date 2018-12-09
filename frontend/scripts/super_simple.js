@@ -180,7 +180,7 @@ function transitionInterfaceToInProgress(sampleSize, firstSequence) {
     newCVRRow.classList.add('col-md-auto', 'mb-3');
     newCVR.appendChild(newCVRRow);
 
-    let CVRRowContent = `<h6>Draw CVR for ballot <b id='CVR-sequence-num'>#${firstSequence}</b> and record selections</h6>`;
+    let CVRRowContent = `<h6>Draw CVR for ballot <b>#<span id='CVR-sequence-num'>${firstSequence}</span></b> and record selections</h6>`;
 
     for (let i = 0; i < candidateNames.length; ++i) {
         CVRRowContent += `\
@@ -307,6 +307,7 @@ function continueAudit(ballotNumToAudit) {
     }
 
     document.getElementById('ballot-sequence-num').innerHTML = ballotNumToAudit;
+    document.getElementById('CVR-sequence-num').innerHTML = ballotNumToAudit;
 }
 
 // =========================
