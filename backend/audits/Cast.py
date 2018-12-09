@@ -172,6 +172,7 @@ class Cast(BaseAudit):
                     reported = self.reported_batch_info[batch_num][w] - self.reported_batch_info[batch_num][l]
                     audited = self.audited_batch_info[batch_num][w] - self.audited_batch_info[batch_num][l]
                     e_wlp.append((reported - audited)/ adj_margins)
+        print(e_wlp)
         return np.amax(e_wlp)
 
     def run_audit(self):
