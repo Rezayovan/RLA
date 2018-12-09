@@ -152,7 +152,6 @@ def perform_audit():
         CURRENT_RUNNING_AUDITS[session_id] = cast_object
 
         first_sequence = cast_object.get_sequence_number()
-        print("herehehe")
         print("first_sequence", first_sequence)
         res = {
             'sequence_number_to_draw': int(first_sequence),

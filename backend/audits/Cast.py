@@ -34,10 +34,8 @@ class Cast(BaseAudit):
         self.STAGE_MESSAGE = ""
 
     def get_sequence_number(self):
-        print("hereheheheh")
         self._CV.acquire()
         while not len(self.sequence_order):
-            print("waiting")
             self._CV.wait()
         sequence_number = self.sequence_order.pop(0)
         self._CV.release()
@@ -207,10 +205,12 @@ class Cast(BaseAudit):
 
             print("Batches to audit", batches_to_audit)
             self.num_unaudited = self.num_unaudited - n
+            self.unaudited = self.unaudited.tolist()
             for batch_num in batches_to_audit:
                 print("batch_nun", batch_num)
-                self.unaudited = np.delete(self.unaudited, batch_num)
+                self.unaudited.remove(batch_num)
                 self.audited_batch_info[batch_num] = self.get_batch_info()
+            self.unaudited = np.asarray(self.unaudited)
 
             print("Got all info")
             t_s = self.calc_t_s(batches_to_audit)

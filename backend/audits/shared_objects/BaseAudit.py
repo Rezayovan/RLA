@@ -20,7 +20,6 @@ class BaseAudit:
     def append_votes_buffer(self, vote):
         cv = self._CV
         buffer = self._VOTES_BUFFER
-        print("appending botes bithces")
         cv.acquire()
         buffer.put(vote)
         cv.notify()
@@ -31,7 +30,6 @@ class BaseAudit:
         buffer = self._VOTES_BUFFER
 
         cv.acquire()
-        print("getting vote")
         while buffer.empty():
             print("wait condition")
             cv.wait()
