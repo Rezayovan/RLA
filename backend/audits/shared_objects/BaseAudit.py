@@ -27,9 +27,9 @@ class BaseAudit:
 
     def get_votes(self):
         cv = self._CV
-        buffer = self._VOTES_BUFFER
 
         cv.acquire()
+        buffer = self._VOTES_BUFFER
         while buffer.empty():
             print("wait condition")
             cv.wait()

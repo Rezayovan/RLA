@@ -5,6 +5,7 @@ from .shared_objects.BaseAudit import BaseAudit
 from .shared_objects.Candidates import Candidates
 from .shared_objects.Hypotheses import Hypotheses
 import json
+import copy
 
 class Cast(BaseAudit):
 
@@ -40,6 +41,7 @@ class Cast(BaseAudit):
         sequence_number = self.sequence_order.pop(0)
         self._CV.release()
         print("sequence number", sequence_number)
+        print("len of sequence list", len(self.sequence_order))
         return sequence_number
 
     def calc_alpha_s(self, risk_tolerance):
@@ -206,14 +208,16 @@ class Cast(BaseAudit):
             print("Batches to audit", batches_to_audit)
             self.num_unaudited = self.num_unaudited - n
             self.unaudited = self.unaudited.tolist()
-            for batch_num in batches_to_audit:
+            self.batches_to_audit = random.sample(list(self.unaudited), n)
+            for batch_num in self.batches_to_audit:
                 print("batch_nun", batch_num)
+                print("batch list", self.batches_to_audit)
                 self.unaudited.remove(batch_num)
                 self.audited_batch_info[batch_num] = self.get_batch_info()
             self.unaudited = np.asarray(self.unaudited)
 
             print("Got all info")
-            t_s = self.calc_t_s(batches_to_audit)
+            t_s = self.calc_t_s(self.batches_to_audit)
 
             if t_s < self.threshold:
                 print('Audit complete')
