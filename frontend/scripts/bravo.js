@@ -160,6 +160,9 @@ function transitionInterfaceToInProgress(sampleSize, firstSequence) {
 
     // Display checkboxes
     const candidateNames = getCandidateNames();
+
+    console.log("Candidate names:", candidateNames);
+
     const newBallot = document.createElement('div');
     newBallot.className = 'form-row';
     newBallot.id = 'ballot-to-record';

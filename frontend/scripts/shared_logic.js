@@ -25,13 +25,13 @@ export function addCandidate(numCandidates, onlyNames) {
     newCandidate.innerHTML = `\
     <div class="col-md-4 mb-3">\
         <label for="candidate${numCandidates}">Candidate ${numCandidates} name</label>\
-        <input type="text" class="form-control" id="candidate${numCandidates}" value='Candidate ${numCandidates}'>\
+        <input type="text" class="form-control candidate-name" id="candidate${numCandidates}" value='Candidate ${numCandidates}'>\
     </div>`;
     if (!onlyNames) {
         newCandidate.innerHTML += `\
         <div class="col-md-4 mb-3">\
             <label for="candidate${numCandidates}-votes">Candidate ${numCandidates} votes</label>\
-            <input type="number" class="form-control" id="candidate${numCandidates}-votes" min="0">\
+            <input type="number" class="form-control candidate-vote" id="candidate${numCandidates}-votes" min="0">\
         </div>`;
     }
     document.getElementById('candidates-container').appendChild(newCandidate);
