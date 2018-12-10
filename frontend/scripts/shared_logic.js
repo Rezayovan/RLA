@@ -14,7 +14,7 @@ export function addCandidate(numCandidates, onlyNames) {
     newCandidate.innerHTML = `\
     <div class="col-md-4 mb-3">\
         <label for="candidate${numCandidates}">Candidate ${numCandidates} name</label>\
-        <input type="text" class="form-control" id="candidate${numCandidates}" placeholder="Name">\
+        <input type="text" class="form-control" id="candidate${numCandidates}" placeholder="Name" value='Candidate ${numCandidates}'>\
     </div>`;
     if (!onlyNames) {
         newCandidate.innerHTML += `\
