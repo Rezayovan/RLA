@@ -177,67 +177,70 @@ class Cast(BaseAudit):
         return np.amax(e_wlp)
 
     def run_audit(self):
-        random.seed(a = self.random_seed)
+        try:
+            random.seed(a = self.random_seed)
 
-        for i in range(self.num_stages):
-            self.STAGE_MESSAGE = "Starting stage {}".format(i)
-            T, squigglie_u_ps = self.calc_T()
-            n = self.calc_n(T, squigglie_u_ps)
-            print("Number of batches to audit: ", n)
+            for i in range(self.num_stages):
+                self.STAGE_MESSAGE = "Starting stage {}".format(i)
+                T, squigglie_u_ps = self.calc_T()
+                n = self.calc_n(T, squigglie_u_ps)
+                print("Number of batches to audit: ", n)
 
-            if(len(self.unaudited) < n):
-                # fills sequence_order list w/ dummy values
-                # so frontend can check if audit completed
+                if(len(self.unaudited) < n):
+                    # fills sequence_order list w/ dummy values
+                    # so frontend can check if audit completed
+                    self._CV.acquire()
+                    self.sequence_order = [1, 1, 1, 1, 1]
+                    self._CV.notify()
+                    self._CV.release()
+                    # end of bs code
+                    print('More batches to audit then provided preform a full hand recount')
+                    self.IS_DONE_MESSAGE = "Audit requires more batches than remaining. Perform a full hand-recount of the ballots."
+                    self.IS_DONE_FLAG = "danger"
+                    self.IS_DONE = True
+                    return
+                batches_to_audit = random.sample(list(self.unaudited), n)
+                print(batches_to_audit)
                 self._CV.acquire()
-                self.sequence_order = [1, 1, 1, 1, 1]
+                self.sequence_order = batches_to_audit
                 self._CV.notify()
                 self._CV.release()
-                # end of bs code
-                print('More batches to audit then provided preform a full hand recount')
-                self.IS_DONE_MESSAGE = "Audit requires more batches than remaining. Perform a full hand-recount of the ballots."
-                self.IS_DONE_FLAG = "danger"
-                self.IS_DONE = True
-                return
-            batches_to_audit = random.sample(list(self.unaudited), n)
-            print(batches_to_audit)
-            self._CV.acquire()
-            self.sequence_order = batches_to_audit
-            self._CV.notify()
-            self._CV.release()
 
-            adj_margins = np.zeros([len(self.winners), len(self.losers)])
+                adj_margins = np.zeros([len(self.winners), len(self.losers)])
 
-            for idw, winner in enumerate(self.winners):
-                for idl, loser in enumerate(self.losers):
-                    adj_margins[idw][idl] = self.calc_adj_margin(winner, loser)
+                for idw, winner in enumerate(self.winners):
+                    for idl, loser in enumerate(self.losers):
+                        adj_margins[idw][idl] = self.calc_adj_margin(winner, loser)
 
-            print("Batches to audit", batches_to_audit)
-            self.num_unaudited = self.num_unaudited - n
-            self.unaudited = self.unaudited.tolist()
-            self.batches_to_audit = random.sample(list(self.unaudited), n)
-            for batch_num in self.batches_to_audit:
-                print("batch_nun", batch_num)
-                print("batch list", self.batches_to_audit)
-                self.unaudited.remove(batch_num)
-                self.audited_batch_info[batch_num] = self.get_batch_info()
-            self.unaudited = np.asarray(self.unaudited)
+                print("Batches to audit", batches_to_audit)
+                self.num_unaudited = self.num_unaudited - n
+                self.unaudited = self.unaudited.tolist()
+                self.batches_to_audit = random.sample(list(self.unaudited), n)
+                for batch_num in self.batches_to_audit:
+                    print("batch_nun", batch_num)
+                    print("batch list", self.batches_to_audit)
+                    self.unaudited.remove(batch_num)
+                    self.audited_batch_info[batch_num] = self.get_batch_info()
+                self.unaudited = np.asarray(self.unaudited)
 
-            print("Got all info")
-            t_s = self.calc_t_s(self.batches_to_audit, adj_margins)
-            print("t_s", t_s)
+                print("Got all info")
+                t_s = self.calc_t_s(self.batches_to_audit, adj_margins)
+                print("t_s", t_s)
 
-            if t_s < self.threshold:
-                print('Audit complete')
-                self.IS_DONE_MESSAGE = "Audit completed: the results stand."
-                self.IS_DONE_FLAG = "success"
-                self.IS_DONE = True
-                return
+                if t_s < self.threshold:
+                    print('Audit complete')
+                    self.IS_DONE_MESSAGE = "Audit completed: the results stand."
+                    self.IS_DONE_FLAG = "success"
+                    self.IS_DONE = True
+                    return
 
-        print('Audit failed. Full hand recount needed')
-        self.IS_DONE_MESSAGE = "Audit cannot verify the election results. Perform a full hand-recount of the ballots."
-        self.IS_DONE_FLAG = "danger"
-        self.IS_DONE = True
-        return
+            print('Audit failed. Full hand recount needed')
+            self.IS_DONE_MESSAGE = "Audit cannot verify the election results. Perform a full hand-recount of the ballots."
+            self.IS_DONE_FLAG = "danger"
+            self.IS_DONE = True
+            return
+        except:
+            return "Exception Raised"
 
 # num_candidates, num_winners, num_stages, batch_size
 # num_batches, risk_tolerance, threshold, random_seed

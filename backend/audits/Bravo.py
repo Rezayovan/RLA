@@ -143,26 +143,29 @@ class Bravo(BaseAudit):
         """
         Runs the algorithm given in "BRAVO" (2012) §7.
         """
-        num_winners = len(self.candidates.winners)
-        num_losers = len(self.candidates.losers)
-        num_candidates = self.num_candidates
-        max_tests = self.max_tests
+        try:
+            num_winners = len(self.candidates.winners)
+            num_losers = len(self.candidates.losers)
+            num_candidates = self.num_candidates
+            max_tests = self.max_tests
 
-        num_null_hypotheses = num_winners * num_losers
-        self.hypotheses = Hypotheses(np.ones([num_candidates, num_candidates]))
+            num_null_hypotheses = num_winners * num_losers
+            self.hypotheses = Hypotheses(np.ones([num_candidates, num_candidates]))
 
 
-        for _ in range(max_tests): # Step 6
-            ballot_votes = self.get_ballot()
-            assert all(0 <= vote < num_candidates for vote in ballot_votes)
-            assert isinstance(ballot_votes, list)
-            for vote in ballot_votes:
-                self.update_audit_stats(vote)
-            # Step 6
-            if self.hypotheses.reject_count >= num_null_hypotheses:
-                return True
+            for _ in range(max_tests): # Step 6
+                ballot_votes = self.get_ballot()
+                assert all(0 <= vote < num_candidates for vote in ballot_votes)
+                assert isinstance(ballot_votes, list)
+                for vote in ballot_votes:
+                    self.update_audit_stats(vote)
+                # Step 6
+                if self.hypotheses.reject_count >= num_null_hypotheses:
+                    return True
 
-        return False
+            return False
+        except:
+            return "Exception Raised"
 
     def bravo(self):
         """BRAVO Ballot-Polling Audit Implementation

@@ -49,9 +49,12 @@ class BayesianPolling():
         return True
 
     def run_audit(self):
-        audit_result = self.bayesian_polling_audit()
+        try:
+            audit_result = self.bayesian_polling_audit()
 
-        if audit_result:
-            return "Audit completed: the results stand.", "success"
+            if audit_result:
+                return "Audit completed: the results stand.", "success"
 
-        return "Failed to confirm the results. Sample a larger portion of the ballots. This may indicate that your reported winners are incorrect.", "danger"
+            return "Failed to confirm the results. Sample a larger portion of the ballots. This may indicate that your reported winners are incorrect.", "danger"
+        except:
+            return "Exception raised"
