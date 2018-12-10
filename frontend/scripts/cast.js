@@ -9,7 +9,8 @@ import {
     generateErrorAlert,
     activateAuditStatusCheckInterval,
     disableInputsAndButtons,
-    removeElement
+    removeElement,
+    ensureAllInputsFilled
 } from './shared_logic.js';
 
 const AUDIT_TYPE = 'cast';
@@ -48,11 +49,18 @@ document.getElementById('remove-candidate').addEventListener('click', () => {
 });
 
 document.getElementById('continue-to-cvr').addEventListener('click', () => {
-    clearValidationErrors();
     handleContinueToCVR();
 });
 
 function handleContinueToCVR() {
+    clearValidationErrors();
+
+    try {
+        ensureAllInputsFilled();
+    } catch (e) {
+        return;
+    }
+
     const reportedCandidateNames = getCandidateNames();
 
     const numWinners = parseInt(document.getElementById('num-winners').value, 10);
@@ -140,7 +148,7 @@ function loadBatchInputDOM(reportedCandidateNames, numBatches) {
         formRowDiv.innerHTML += `\
             <div class="col-md-2 col-lg-2 mb-3">\
                 <label for="candidate-${candidateNum}">${candidateName}</label>\
-                <input type="number" class="form-control candidate-input" id="candidate-${candidateNum}" min="0" placeholder="0" value="0">\
+                <input type="number" class="form-control candidate-input" id="candidate-${candidateNum}" min="0" value="0">\
             </div>`;
         ++candidateNum;
     }
@@ -323,7 +331,7 @@ function populateAuditContainer(initialBatchToAudit) {
         formRowDiv.innerHTML += `\
             <div class="col-md-2 col-lg-2 mb-3">\
                 <label for="candidate-${candidateNum}">${candidateName}</label>\
-                <input type="number" class="form-control candidate-input" id="candidate-${candidateNum}" min="0" placeholder="0" value="0">\
+                <input type="number" class="form-control candidate-input" id="candidate-${candidateNum}" min="0" value="0">\
             </div>`;
         ++candidateNum;
     }

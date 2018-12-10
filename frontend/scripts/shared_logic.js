@@ -1,6 +1,17 @@
 export const  API_ROOT = 'http://127.0.0.1:5000';
 export const STATUS_CHECK_INTERVAL = 1500;
 
+export function ensureAllInputsFilled() {
+    // If one input is blank, throw an error.
+    const inputNodes = document.querySelectorAll('#audit-info input');
+    for (const node of inputNodes) {
+        if (!node.value) {
+            const errorMsg = `One or more of the above input fields is blank. Please ensure that all inputs are filled before proceeeding.`;
+            throw generateErrorAlert('audit-info', errorMsg);
+        }
+    }
+}
+
 export function removeElement(elementID) {
     const element = document.getElementById(elementID);
     if (element) {
@@ -14,13 +25,13 @@ export function addCandidate(numCandidates, onlyNames) {
     newCandidate.innerHTML = `\
     <div class="col-md-4 mb-3">\
         <label for="candidate${numCandidates}">Candidate ${numCandidates} name</label>\
-        <input type="text" class="form-control" id="candidate${numCandidates}" placeholder="Name" value='Candidate ${numCandidates}'>\
+        <input type="text" class="form-control" id="candidate${numCandidates}" value='Candidate ${numCandidates}'>\
     </div>`;
     if (!onlyNames) {
         newCandidate.innerHTML += `\
         <div class="col-md-4 mb-3">\
             <label for="candidate${numCandidates}-votes">Candidate ${numCandidates} votes</label>\
-            <input type="number" class="form-control" id="candidate${numCandidates}-votes" placeholder="0" min="0">\
+            <input type="number" class="form-control" id="candidate${numCandidates}-votes" min="0">\
         </div>`;
     }
     document.getElementById('candidates-container').appendChild(newCandidate);
@@ -32,15 +43,15 @@ export function addCandidateAndTally(numCandidates) {
     newCandidate.innerHTML = `\
     <div class="col-md-4 mb-3">\
         <label for="candidate${numCandidates}">Candidate ${numCandidates} name</label>\
-        <input type="text" class="form-control candidate-name" id="candidate${numCandidates}" placeholder="Name">\
+        <input type="text" class="form-control candidate-name" id="candidate${numCandidates}">\
     </div>
     <div class="col-md-4 mb-3">\
         <label for="candidate${numCandidates}-votes">Candidate ${numCandidates} votes</label>\
-        <input type="number" class="form-control candidate-vote" id="candidate${numCandidates}-votes" placeholder="0" min="0">\
+        <input type="number" class="form-control candidate-vote" id="candidate${numCandidates}-votes" min="0">\
     </div>\
     <div class="col-md-4 mb-3">\
         <label for="candidate${numCandidates}-sample-tally">Candidate ${numCandidates} sample tally</label>\
-        <input type="number" class="form-control sample-tally" id="candidate${numCandidates}-sample-tally" placeholder="0" min="0">\
+        <input type="number" class="form-control sample-tally" id="candidate${numCandidates}-sample-tally" min="0">\
     </div>`;
     document.getElementById('candidates-container').appendChild(newCandidate);
 }
@@ -96,6 +107,20 @@ export function generateErrorAlert(idToAppendTo, errorMessage) {
     errorDiv.innerHTML = errorMessage;
 
     document.getElementById(idToAppendTo).appendChild(errorDiv);
+}
+
+export function enableInputsAndButtons(containerToDisable) {
+    // Enable text inputs
+    const auditInputs = document.querySelectorAll(`#${containerToDisable} input`);
+    for (const input of auditInputs) {
+        input.removeAttribute('disabled');
+    }
+
+    // Enable buttons
+    const auditBtns = document.querySelectorAll(`#${containerToDisable} button`);
+    for (const button of auditBtns) {
+        button.removeAttribute('disabled');
+    }
 }
 
 export function disableInputsAndButtons(containerToDisable) {

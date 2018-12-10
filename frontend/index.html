@@ -26,7 +26,7 @@
     <link rel="stylesheet" href="assets/styles/index.css">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,700" rel="stylesheet">
 
-    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico"/>
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 </head>
 
 <body>
@@ -68,65 +68,80 @@
     <div class="container">
         <h1>What is a risk-limiting audit?</h1>
         <p>
-        A risk limiting audit is a procedure that can be used to limit the chance of outside interference with an election.
-        This is done by preforming hand recounts of a small fraction of ballots after the election is over and using statistical
-        analysis to guarantee with certainty that the chance of manipulation of election results is less than or equal to the
-        risk-limit set by the auditor.
+            A risk limiting audit is a procedure that can be used to limit the chance of outside interference with an
+            election.
+            This is done by preforming hand recounts of a small fraction of ballots after the election is over and
+            using statistical
+            analysis to guarantee with certainty that the chance of manipulation of election results is less than or
+            equal to the
+            risk-limit set by the auditor.
         </p>
 
         <h1>Why are election audits important?</h1>
         <p>
-        Auditing is an easy way to protect the security and integrity of elections. It doesn't require
-        performing a full hand recount, or even very many ballots counted at all. Elections can still use
-        computerized counting and reporting processes: auditing ensures that the reported results match
-        the actual paper ballots cast with at least 1 - (risk limit) certainty.
+            Auditing is an easy way to protect the security and integrity of elections. It doesn't require
+            performing a full hand recount, or even very many ballots counted at all. Elections can still use
+            computerized counting and reporting processes: auditing ensures that the reported results match
+            the actual paper ballots cast with at least 1 - (risk limit) certainty.
         </p>
 
         <h1>Audit method overview</h1>
         <h4>Ballot-Polling Audit</h4>
         <p>
-        Ballot-Polling audits are a type of risk-limiting vote tabulation audit. This type of audit selects
-        individual ballots at random and counts them by hand until there is strong evidence the outcome is
-        correct or a full hand-recount is done. An advantage of ballot-polling audits is that they require
-        relatively small number of samples compared to other vote auditing methods.
-        Our ballot-polling audit implementation is based on <a href="https://www.usenix.org/conference/evtwote12/workshop-program/presentation/Lindeman" target="_blank" rel="noopener noreferrer" >
-            "BRAVO: Ballot-polling Risk-limiting Audits to Verify Outcomes"</a> by Mark Lindeman, Philip Stark, and Vincent Yates.
+            Ballot-Polling audits are a type of risk-limiting vote tabulation audit. This type of audit selects
+            individual ballots at random and counts them by hand until there is strong evidence the outcome is
+            correct or a full hand-recount is done. An advantage of ballot-polling audits is that they require
+            relatively small number of samples compared to other vote auditing methods.
+            Our ballot-polling audit implementation is based on <a href="https://www.usenix.org/conference/evtwote12/workshop-program/presentation/Lindeman"
+                target="_blank" rel="noopener noreferrer">
+                "BRAVO: Ballot-polling Risk-limiting Audits to Verify Outcomes"</a> by Mark Lindeman, Philip Stark, and
+            Vincent Yates.
         </p>
         <h4>Ballot-Comparison Audit</h4>
         <p>
-        Ballot-comparison audits derive simple rules to select a sample size to audit in one round to perform a
-        risk-limiting audit if ballot error is sufficiently low. In each round, a sample of drawn ballots are
-        compared with the original Cast Vote Record (CVR), if a sufficient amount of ballots agree with the CVR,
-        the audit can stop, else the audit may continue past the estimated sample size.  Our ballot-comparison
-        audit implementation is based on
-        <a href="https://www.usenix.org/legacy/events/evtwote10/tech/full_papers/Stark.pdf" target="_blank" rel="noopener noreferrer">"Super-Simple Simultaneous Single-Ballot Risk-Limiting Audits"</a>
-        by Philip Stark.
+            Ballot-comparison audits derive simple rules to select a sample size to audit in one round to perform a
+            risk-limiting audit if ballot error is sufficiently low. In each round, a sample of drawn ballots are
+            compared with the original Cast Vote Record (CVR), if a sufficient amount of ballots agree with the CVR,
+            the audit can stop, else the audit may continue past the estimated sample size. Our ballot-comparison
+            audit implementation is based on
+            <a href="https://www.usenix.org/legacy/events/evtwote10/tech/full_papers/Stark.pdf" target="_blank" rel="noopener noreferrer">"Super-Simple
+                Simultaneous Single-Ballot Risk-Limiting Audits"</a>
+            by Philip Stark.
         </p>
         <h4>Canvass Audit</h4>
         <p>
-        Canvass audits requires ballots to be distributed over batches and audits them within multiple stages.  This
-        allows an auditor to set values for number of stages, risk limits and threshold. The number of stages is used
-        to determine how many stages of auditing will be preformed before a full hand recount. The risk limit is used
-        by CAST to guarantee that the chance of requiring a full hand recount is 1- (risk limit). Threshold is the
-        tolerance for the percentage of incorrectly counted ballots within a batch. The audit will run per stage
-        taking in the hand counted votes for randomly chosen batches. If the hand counted votes differ from the reported
-        votes by more than the threshold, the audit will proceed to the next stage, or else the audit will be complete.
-        Our canvass audit implementation is based on "<a href="https://doi.org/10.1109/tifs.2009.2034210" target="_blank" rel="noopener noreferrer">CAST: Canvass Audits by Sampling and Testing</a>"
-        by Philip Stark.
+            Canvass audits requires ballots to be distributed over batches and audits them within multiple stages. This
+            allows an auditor to set values for number of stages, risk limits and threshold. The number of stages is
+            used
+            to determine how many stages of auditing will be preformed before a full hand recount. The risk limit is
+            used
+            by CAST to guarantee that the chance of requiring a full hand recount is 1- (risk limit). Threshold is the
+            tolerance for the percentage of incorrectly counted ballots within a batch. The audit will run per stage
+            taking in the hand counted votes for randomly chosen batches. If the hand counted votes differ from the
+            reported
+            votes by more than the threshold, the audit will proceed to the next stage, or else the audit will be
+            complete.
+            Our canvass audit implementation is based on "<a href="https://doi.org/10.1109/tifs.2009.2034210" target="_blank"
+                rel="noopener noreferrer">CAST: Canvass Audits by Sampling and Testing</a>"
+            by Philip Stark.
         </p>
         <h4>Bayesian Ballot-Polling</h4>
         <p>
-        Bayesian audits take in a sample tally of votes (hand-counted from paper ballots) and then run simulations
-        of the election seeded with the sample tallies.  The candidates are then each given a probability to win an
-        election using all of the simulation data.
-        This is a ballot-polling audit, so it doesn't require a CVR or batches. As compared to the other BPA method,
-        Bayesian ballot-polling "front-loads" the work, in that the user inputs hand-counted tallies before the audit
-        begins. If, based on the sample tallies entered, the projected winners match the reported winners (according
-        to reported vote totals) and have probability of at least 1 - (risk limit), the election results
-        are confirmed.
+            Bayesian audits take in a sample tally of votes (hand-counted from paper ballots) and then run simulations
+            of the election seeded with the sample tallies. The candidates are then each given a probability to win an
+            election using all of the simulation data.
+            This is a ballot-polling audit, so it doesn't require a CVR or batches. As compared to the other BPA
+            method,
+            Bayesian ballot-polling "front-loads" the work, in that the user inputs hand-counted tallies before the
+            audit
+            begins. If, based on the sample tallies entered, the projected winners match the reported winners
+            (according
+            to reported vote totals) and have probability of at least 1 - (risk limit), the election results
+            are confirmed.
 
-        Our Bayesian ballot-polling implementation uses <a href="https://github.com/ron-rivest/2018-bptool" target="_blank" rel="noopener noreferrer">Ron Rivest's bptool</a>.
-       </p>
+            Our Bayesian ballot-polling implementation uses <a href="https://github.com/ron-rivest/2018-bptool" target="_blank"
+                rel="noopener noreferrer">Ron Rivest's bptool</a>.
+        </p>
     </div>
 </body>
 

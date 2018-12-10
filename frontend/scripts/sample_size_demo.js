@@ -77,7 +77,7 @@ document.getElementById('begin-demo').addEventListener('click', () => {
             createSampleSizeDOM(office_chosen, bravo_sample_size, super_simple_sample_size20, super_simple_sample_size50);
         })
         .catch((error) => {
-            document.getElementById('input-election-data').setAttribute('disabled', '');
+            document.getElementById('input-election-data').removeAttribute('disabled');
             const errorMsg = 'Unable to parse OpenElection data. Please try again or upload another dataset.';
             generateErrorAlert('sample-size-container', errorMsg);
             return console.error(error);
