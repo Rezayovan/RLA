@@ -115,13 +115,15 @@
         </p>
         <h4>Bayesian Ballot-Polling</h4>
         <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis tincidunt risus ut aliquam consectetur.
-            Curabitur eleifend urna quam, ut tempor lorem rutrum quis. Suspendisse vitae odio eget magna gravida
-            laoreet. Etiam lorem velit, feugiat at feugiat non, pretium vitae nisi. Pellentesque vitae mi ac arcu
-            ultricies venenatis tristique viverra lacus. Vestibulum ante ipsum primis in faucibus orci luctus et
-            ultrices posuere cubilia Curae; Ut id gravida nisi. Fusce sed ullamcorper ligula. Suspendisse pretium
-            sagittis orci vitae viverra. Curabitur blandit semper elit non consectetur.
-        </p>
+        Bayesian audits take in a sample tally of votes (hand-counted from paper ballots) and then run simulations
+        of the election seeded with the sample tallies.  The candidates are then each given a probability to win an
+        election using all of the simulation data.
+        This is a ballot-polling audit, so it doesn't require a CVR or batches. As compared to the other BPA method,
+        Bayesian ballot-polling "front-loads" the work, in that the user inputs hand-counted tallies before the audit
+        begins. If, based on the sample tallies entered, the projected winners match the reported winners (according
+        to reported vote totals) and have probability of at least 1 - the specified risk limit, the election results
+        are confirmed.
+       </p>
     </div>
 </body>
 
