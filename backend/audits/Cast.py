@@ -168,11 +168,12 @@ class Cast(BaseAudit):
 
         e_wlp = []
         for batch_num in batches_to_audit:
-            for w in self.winners:
-                for l in self.losers:
+            for idw, w in enumerate(self.winners):
+                for idl, l in enumerate(self.losers):
+                    print("calc_t_s batch_num", batch_num)
                     reported = self.reported_batch_info[batch_num][w] - self.reported_batch_info[batch_num][l]
                     audited = self.audited_batch_info[batch_num][w] - self.audited_batch_info[batch_num][l]
-                    e_wlp.append((reported - audited)/ adj_margins)
+                    e_wlp.append((reported - audited)/ adj_margins[idw][idl])
         print(e_wlp)
         return np.amax(e_wlp)
 
@@ -218,6 +219,7 @@ class Cast(BaseAudit):
 
             print("Got all info")
             t_s = self.calc_t_s(self.batches_to_audit)
+            print("t_s", t_s)
 
             if t_s < self.threshold:
                 print('Audit complete')
