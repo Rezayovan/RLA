@@ -144,11 +144,15 @@ class Cast(BaseAudit):
     def calc_n(self, T, squigglie_u_ps):
         sorted_squigglie_u_ps = np.argsort(squigglie_u_ps)
         sorted_squigglie_u_ps = sorted_squigglie_u_ps[::-1]
+        print(squigglie_u_ps)
+        print(sorted_squigglie_u_ps)
         sum = 0
         count = 0
         while sum < (1 - T):
-            sum = sum + squigglie_u_ps[sorted_squigglie_u_ps[count]]
-            count = count + 1
+            if count > self.num_unaudited:
+                return count
+            sum += squigglie_u_ps[sorted_squigglie_u_ps[count]]
+            count += 1
 
         base = (self.num_unaudited - count) / self.num_unaudited
         n = math.log(self.alpha, base)
@@ -159,13 +163,7 @@ class Cast(BaseAudit):
         print("alpha_s", self.alpha)
         return n
 
-    def calc_t_s(self, batches_to_audit):
-        adj_margins = np.zeros([len(self.winners), len(self.losers)])
-
-        for idw, winner in enumerate(self.winners):
-            for idl, loser in enumerate(self.losers):
-                adj_margins[idw][idl] = self.calc_adj_margin(winner, loser)
-
+    def calc_t_s(self, batches_to_audit, adj_margins):
         e_wlp = []
         for batch_num in batches_to_audit:
             for idw, w in enumerate(self.winners):
@@ -173,6 +171,7 @@ class Cast(BaseAudit):
                     print("calc_t_s batch_num", batch_num)
                     reported = self.reported_batch_info[batch_num][w] - self.reported_batch_info[batch_num][l]
                     audited = self.audited_batch_info[batch_num][w] - self.audited_batch_info[batch_num][l]
+                    print(reported, audited)
                     e_wlp.append((reported - audited)/ adj_margins[idw][idl])
         print(e_wlp)
         return np.amax(e_wlp)
@@ -206,6 +205,12 @@ class Cast(BaseAudit):
             self._CV.notify()
             self._CV.release()
 
+            adj_margins = np.zeros([len(self.winners), len(self.losers)])
+
+            for idw, winner in enumerate(self.winners):
+                for idl, loser in enumerate(self.losers):
+                    adj_margins[idw][idl] = self.calc_adj_margin(winner, loser)
+
             print("Batches to audit", batches_to_audit)
             self.num_unaudited = self.num_unaudited - n
             self.unaudited = self.unaudited.tolist()
@@ -218,7 +223,7 @@ class Cast(BaseAudit):
             self.unaudited = np.asarray(self.unaudited)
 
             print("Got all info")
-            t_s = self.calc_t_s(self.batches_to_audit)
+            t_s = self.calc_t_s(self.batches_to_audit, adj_margins)
             print("t_s", t_s)
 
             if t_s < self.threshold:
