@@ -119,15 +119,15 @@ function createSampleSizeDOM(office_chosen, bravo_sample_size, super_simple_samp
     document.getElementById('sample-size-container').appendChild(adjustRiskLimitMsg);
 
     const bravoSampleSizeElt = document.createElement('h4');
-    bravoSampleSizeElt.innerHTML = `<b>BRAVO:</b> <span id='bravo-sample-size'>${bravo_sample_size.toLocaleString()}</span>`;
+    bravoSampleSizeElt.innerHTML = `<b>Ballot-Polling:</b> <span id='bravo-sample-size'>${bravo_sample_size.toLocaleString()}</span>`;
     document.getElementById('sample-size-container').appendChild(bravoSampleSizeElt);
 
     const superSimpleSampleSize20Elt = document.createElement('h4');
-    superSimpleSampleSize20Elt.innerHTML = `<b>Super-Simple (20% tolerance):</b> <span id='super-simple-sample-size-20'>${super_simple_sample_size20.toLocaleString()}</span>`;
+    superSimpleSampleSize20Elt.innerHTML = `<b>Ballot-Comparison (20% tolerance):</b> <span id='super-simple-sample-size-20'>${super_simple_sample_size20.toLocaleString()}</span>`;
     document.getElementById('sample-size-container').appendChild(superSimpleSampleSize20Elt);
 
     const superSimpleSampleSize50Elt = document.createElement('h4');
-    superSimpleSampleSize50Elt.innerHTML = `<b>Super-Simple (50% tolerance):</b> <span id='super-simple-sample-size-50'>${super_simple_sample_size50.toLocaleString()}</span>`;
+    superSimpleSampleSize50Elt.innerHTML = `<b>Ballot-Comparison (50% tolerance):</b> <span id='super-simple-sample-size-50'>${super_simple_sample_size50.toLocaleString()}</span>`;
     document.getElementById('sample-size-container').appendChild(superSimpleSampleSize50Elt);
 }
 

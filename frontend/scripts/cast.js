@@ -20,6 +20,7 @@ let session_id = '';
 
 let numBatchesInputted = 1;
 let batchSize;
+let numWinners;
 
 let cvrDataInputs = [];
 
@@ -211,7 +212,7 @@ function getBatchInputs(inputNodes, idForErrors) {
     }
 
     const batchVotesSum = batchVotes.reduce((a, b) => a + b, 0);
-    if (batchVotesSum > batchSize) {
+    if (batchVotesSum > batchSize * numWinners) {
         const errorMsg = `The entered votes for batch #${numBatchesInputted} exceed the batch size. Please correct this to proceed.`;
         throw generateErrorAlert(idForErrors, errorMsg);
     }
@@ -240,12 +241,12 @@ function beginCast() {
     // Get final batch of votes before beginning audit
     manageInitialBatchInputs();
 
-    const numWinners = parseInt(document.getElementById('num-winners').value, 10);
+    numWinners = parseInt(document.getElementById('num-winners').value, 10);
+    batchSize = parseInt(document.getElementById('batch-size').value, 10);
     const riskLimit = parseFloat(document.getElementById('risk-limit').value);
     const threshold = parseFloat(document.getElementById('threshold').value);
     const randomSeed = document.getElementById('random-seed').value;
     const numStages = parseInt(document.getElementById('num-stages').value, 10);
-    const batchSize = parseInt(document.getElementById('batch-size').value, 10);
     const numBatches = parseInt(document.getElementById('num-batches').value, 10);
 
     console.log(cvrDataInputs);
