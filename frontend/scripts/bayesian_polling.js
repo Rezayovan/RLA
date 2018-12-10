@@ -8,7 +8,8 @@ import {
     // fillTestData,
     getCandidateSampleTallies,
     transitionToAuditComplete,
-    removeElement
+    removeElement,
+    ensureAllInputsFilled
 } from './shared_logic.js';
 
 const AUDIT_TYPE = 'bayesian_polling';
@@ -46,6 +47,12 @@ function clearBayesianErrors() {
 function beginBayesianAudit() {
     clearBayesianErrors();
 
+    try {
+        ensureAllInputsFilled();
+    } catch (e) {
+        return;
+    }
+
     // Obtain data from form
     const reportedCandidateVotes = getCandidateVotes();
     const sampleTallies = getCandidateSampleTallies();
@@ -73,9 +80,24 @@ function beginBayesianAudit() {
         return generateErrorAlert('audit-info', errorMsg);
     }
 
+    if (reportedCandidateVotesSum <= 0) {
+        const errorMsg = `Please input non-negative and non-zero reported candidate votes.`;
+        return generateErrorAlert('audit-info', errorMsg);
+    }
+
+    if (totalNumBallotsCast <= 0) {
+        const errorMsg = `Please input non-negative and non-zero total number of ballots cast.`;
+        return generateErrorAlert('audit-info', errorMsg);
+    }
+
     const reportedTalliesSum = sampleTallies.reduce((a, b) => a + b, 0);
     if (reportedTalliesSum > totalNumBallotsCast) {
         const errorMsg = `Reported sample tallies votes (${reportedTalliesSum}) are greater than the total number of votes (${totalNumBallotsCast}). Something is probably wrong, and this audit won't help. Try another audit, or hand count all ballots.`;
+        return generateErrorAlert('audit-info', errorMsg);
+    }
+
+    if (reportedTalliesSum <= 0) {
+        const errorMsg = `Please input non-negative and non-zero reported sample tallies.`;
         return generateErrorAlert('audit-info', errorMsg);
     }
 

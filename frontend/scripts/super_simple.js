@@ -10,7 +10,8 @@ import {
     generateErrorAlert,
     activateAuditStatusCheckInterval,
     disableInputsAndButtons,
-    setupAuditDOM
+    setupAuditDOM,
+    ensureAllInputsFilled
 } from './shared_logic.js';
 
 const AUDIT_TYPE = 'super_simple';
@@ -50,6 +51,12 @@ function beginSuperSimpleAudit() {
     // Remove error div if it exists
     clearValidationErrors();
 
+    try {
+        ensureAllInputsFilled();
+    } catch (e) {
+        return;
+    }
+
     // Obtain data from form
     const reportedCandidateVotes = getCandidateVotes();
 
@@ -76,6 +83,16 @@ function beginSuperSimpleAudit() {
     const reportedCandidateVotesSum = reportedCandidateVotes.reduce((a, b) => a + b, 0);
     if (reportedCandidateVotesSum > totalNumBallotsCast * numWinners) {
         const errorMsg = `Reported candidate votes (${reportedCandidateVotesSum}) are greater than the total number of votes multiplied by the number of winners (${totalNumBallotsCast * numWinners}). Please correct this and try again.`;
+        return generateErrorAlert('audit-info', errorMsg);
+    }
+
+    if (reportedCandidateVotesSum <= 0) {
+        const errorMsg = `Please input non-negative and non-zero reported candidate votes.`;
+        return generateErrorAlert('audit-info', errorMsg);
+    }
+
+    if (totalNumBallotsCast <= 0) {
+        const errorMsg = `Please input non-negative and non-zero total number of ballots cast.`;
         return generateErrorAlert('audit-info', errorMsg);
     }
 

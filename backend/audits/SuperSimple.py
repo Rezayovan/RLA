@@ -32,6 +32,8 @@ class SuperSimple(BaseAudit):
     def diluted_margin(self):
         sorted_votes = sorted(self.votes_array, reverse=True)
         smallest_margin = sorted_votes[self.num_winners - 1] - sorted_votes[self.num_winners]
+        if smallest_margin == 0:
+            return self.hand_recount()
         return smallest_margin/self.num_ballots
 
     def sample_size(self):
@@ -95,6 +97,7 @@ class SuperSimple(BaseAudit):
 
     def run_audit(self):
         try:
+            print("98")
             sample_size = self.sample_size()
             if sample_size >= self.num_ballots:
                 return self.hand_recount()
