@@ -1,2 +1,2 @@
 all:
-	pandoc --filter pandoc-citeproc --template=mytemplate.tex -H header.tex format.yaml src.md -o out.pdf
+	pandoc --filter  pandoc-citeproc  -H header.tex format.yaml src.md -o out.pdf

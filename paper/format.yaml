@@ -1,5 +1,5 @@
 ---
 indent: true
 csl: ieee.csl
-bib: references.bib
+bibliography: references.bib
 ---
